@@ -1,5 +1,6 @@
 package fi.tuni.prog3.weatherapp;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 import java.io.FileReader;
 import java.io.IOException;
@@ -24,7 +25,7 @@ public class WeatherAPI implements iAPI {
             return key;
         } catch (IOException ex) {
             System.out.println("No apikeys.json file found.");
-            return "00000000000000000000000000000000";
+            return null;
         }
     }
     
@@ -39,26 +40,34 @@ public class WeatherAPI implements iAPI {
             return null;
         }
     }
+    
+    private static WeatherData makeWeatherObject(String json) {
+        Gson gson = new Gson();
+        WeatherData data = gson.fromJson(json, WeatherData.class);
+        return data;
+    }
 
     @Override
-    public String lookUpLocation(String loc) {
+    public WeatherData lookUpLocation(String loc) {
         try {
             String key = getAPIKey();
             String url = "https://api.openweathermap.org/data/2.5/weather"
                     + "?q=" + loc + "&appid=" + key;
-            return makeHTTPCall(url);
+            String json = makeHTTPCall(url);
+            return makeWeatherObject(json);
         } catch (IOException ex) {return null;}
     }
 
     @Override
-    public String getCurrentWeather(double lat, double lon) {
+    public WeatherData getCurrentWeather(double lat, double lon) {
         try {
             String key = getAPIKey();
-            String latStr = String.format(Locale.US,"%.2f", lat);
-            String lonStr = String.format(Locale.US,"%.2f", lon);
+            String latStr = String.format(Locale.US,"%.4f", lat);
+            String lonStr = String.format(Locale.US,"%.4f", lon);
             String url = "https://api.openweathermap.org/data/2.5/weather"
                     + "?lat=" + latStr + "&lon=" + lonStr + "&appid=" + key;
-            return makeHTTPCall(url);
+            String json = makeHTTPCall(url);
+            return makeWeatherObject(json);
         } catch (IOException ex) {return null;}
     }
 
@@ -66,8 +75,8 @@ public class WeatherAPI implements iAPI {
     public String getForecast(double lat, double lon) {
         try {
             String key = getAPIKey();
-            String latStr = String.format(Locale.US,"%.2f", lat);
-            String lonStr = String.format(Locale.US,"%.2f", lon);
+            String latStr = String.format(Locale.US,"%.4f", lat);
+            String lonStr = String.format(Locale.US,"%.4f", lon);
             String url = "https://api.openweathermap.org/data/2.5/forecast"
                     + "?lat=" + latStr + "&lon=" + lonStr + "&appid=" + key;
             return makeHTTPCall(url);

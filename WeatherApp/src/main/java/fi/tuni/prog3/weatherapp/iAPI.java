@@ -10,7 +10,7 @@ public interface iAPI {
      * @param loc Name of the location for which coordinates should be fetched.
      * @return String.
      */
-    public String lookUpLocation(String loc);
+    public WeatherData lookUpLocation(String loc);
 
     /**
      * Returns the current weather for the given coordinates.
@@ -18,7 +18,7 @@ public interface iAPI {
      * @param lon The longitude of the location.
      * @return String.
      */
-    public String getCurrentWeather(double lat, double lon);
+    public WeatherData getCurrentWeather(double lat, double lon);
 
     /**
      * Returns a forecast for the given coordinates.
