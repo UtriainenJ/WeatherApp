@@ -13,7 +13,7 @@ import okhttp3.Response;
  * @author jerri
  */
 public class WeatherAPI implements iAPI {
-    
+
     private static String getAPIKey() throws IOException {
         try {
             JsonParser parser = new JsonParser();
@@ -68,8 +68,17 @@ public class WeatherAPI implements iAPI {
 
     @Override
     public String getForecast(double lat, double lon) {
-        //https://pro.openweathermap.org/data/2.5/forecast/hourly?lat={lat}&lon={lon}&appid={API key}
-        
+        //
+        try {
+            String key = getAPIKey();
+            String latStr = String.format(Locale.US,"%.2f", lat);
+            String lonStr = String.format(Locale.US,"%.2f", lon);
+            String url = "https://api.openweathermap.org/data/2.5/forecast"
+                    + "?lat=" + latStr + "&lon=" + lonStr + "&appid=" + key;
+            String res = makeHTTPCall(url);
+            System.out.println(res);
+            return res;
+        } catch (IOException ex) {}
         return null;
     }
     
