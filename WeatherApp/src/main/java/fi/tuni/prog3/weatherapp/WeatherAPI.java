@@ -30,16 +30,14 @@ public class WeatherAPI implements iAPI {
     
     private static String makeHTTPCall(String url) throws IOException {
         OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder().url(url).build();
         try {
+            Request request = new Request.Builder().url(url).build();
             Response response = client.newCall(request).execute();
-            if (response.isSuccessful()) {
-                return response.body().string();
-            }
+            return response.isSuccessful() ? response.body().string() : null;
         } catch (IOException ex) {
             System.out.println("Error getting api response.");
+            return null;
         }
-        return null;
     }
 
     @Override
@@ -49,8 +47,7 @@ public class WeatherAPI implements iAPI {
             String url = "https://api.openweathermap.org/data/2.5/weather"
                     + "?q=" + loc + "&appid=" + key;
             return makeHTTPCall(url);
-        } catch (IOException ex) {}
-        return null;
+        } catch (IOException ex) {return null;}
     }
 
     @Override
@@ -62,24 +59,18 @@ public class WeatherAPI implements iAPI {
             String url = "https://api.openweathermap.org/data/2.5/weather"
                     + "?lat=" + latStr + "&lon=" + lonStr + "&appid=" + key;
             return makeHTTPCall(url);
-        } catch (IOException ex) {}
-        return null;
+        } catch (IOException ex) {return null;}
     }
 
     @Override
     public String getForecast(double lat, double lon) {
-        //
         try {
             String key = getAPIKey();
             String latStr = String.format(Locale.US,"%.2f", lat);
             String lonStr = String.format(Locale.US,"%.2f", lon);
             String url = "https://api.openweathermap.org/data/2.5/forecast"
                     + "?lat=" + latStr + "&lon=" + lonStr + "&appid=" + key;
-            String res = makeHTTPCall(url);
-            System.out.println(res);
-            return res;
-        } catch (IOException ex) {}
-        return null;
+            return makeHTTPCall(url);
+        } catch (IOException ex) {return null;}
     }
-    
 }
