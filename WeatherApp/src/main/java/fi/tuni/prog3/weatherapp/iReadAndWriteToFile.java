@@ -8,15 +8,14 @@ import java.io.IOException;
 public interface iReadAndWriteToFile {
 
     /**
-     * Reads JSON from the given file.
-     * @param fileName name of the file to read from.
-     * @return true if the read was successful, otherwise false.
+     * Reads JSON from file
+     * @return WeatherAPI object read from file
      * @throws IOException if the method e.g, cannot find the file.
      */
-    public String readFromFile(String fileName) throws IOException;
+    public WeatherAPI readFromFile() throws IOException;
 
     /**
-     * Write the student progress as JSON into the given file.
+     * Write the WeatherAPI data to file
      * @param api WeatherAPI object
      * @return true if the write was successful, otherwise false.
      * @throws IOException if the method e.g., cannot write to a file.

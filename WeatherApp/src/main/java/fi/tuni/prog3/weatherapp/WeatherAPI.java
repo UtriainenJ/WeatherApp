@@ -13,6 +13,57 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
+ * A WeatherAPI object is used to get weather info on cities.
+ * Preferred method of getting weather info is with getData(*cityname*).
+ * Cities looked up with getData(*cityname*) get saved in browsing history,
+ * and the last one looked up gets saved as the active city.
+ * 
+ * Browsing history can be deleted.
+ * You can add and remove cities from favourites.
+ * 
+ * Interpreting the given results:
+ * 
+ * WeatherData object data corresponds to this link's fields:
+ * https://openweathermap.org/current
+ * 
+ * Same with ForecastData:
+ * https://openweathermap.org/forecast5
+ * 
+ * with getData() pair you can use .getKey() to access the WeatherData object,
+ * and .getValue() to access the ForecastData object.
+ * 
+ * 
+ *  **Use example:**
+ * 
+ *  **loading WeatherAPI from file**
+ * 
+ * StorageSystem ss = new StorageSystem("temp.json");
+ * WeatherAPI api = ss.readFromFile();
+ * 
+ *  **getting location info by city name, this saves the city to history,**
+ *  **and sets the most recent one as active.**
+ * 
+ * Pair<WeatherData, ForecastData> nyc = api.getData("New York City");
+ * var hervanta = api.getData("Hervanta");
+ * 
+ * **calling getCurrentWeather() or getForecast() does not do saving to history.**
+ * **you can use coordinates or city name.**
+ * 
+ * WeatherData vaasaW = api.getCurrentWeather(63.096, 21.61577);
+ * WeatherData osloW = api.getCurrentWeather("Oslo");
+ * 
+ * ForecastData tampereF = api.getForecast("Tampere");
+ * ForecastData toijalaF = api.getForecast(61.166666, 23.86749653);
+ * 
+ *  **deleting browsing history:**
+ * api.clearBrowsingHistory();
+ * 
+ *  **adding and removing from favorites:**
+ * api.addToFavorites(nyc.getKey().getName());
+ * api.removeFromFavorites(hervanta.getKey().getName());
+ */
+
+/**
  *
  * @author jerri
  */
@@ -22,60 +73,24 @@ public class WeatherAPI implements iAPI {
     private List<String> locationFavorites;
     private List<String> locationHistory;
 
-    public WeatherAPI() {
+    public String getLocationActive() {
+        return locationActive;
+    }
+
+    public List<String> getLocationFavorites() {
+        return locationFavorites;
+    }
+
+    public List<String> getLocationHistory() {
+        return locationHistory;
+    }
+
+    public WeatherAPI() throws Exception {
         this.locationActive = null;
         this.locationFavorites = new ArrayList<>();
         this.locationHistory = new ArrayList<>();
     }
-    
-    private static String getAPIKey() throws IOException {
-        try {
-            JsonParser parser = new JsonParser();
-            FileReader reader = new FileReader("apikeys.json");
-            String key = parser.parse(reader).getAsJsonObject()
-                    .get("api-key").getAsString();
-            reader.close();
-            return key;
-        } catch (IOException ex) {
-            System.out.println("No apikeys.json file found.");
-            return null;
-        }
-    }
-    
-    private static String makeHTTPCall(String url) throws IOException {
-        OkHttpClient client = new OkHttpClient();
-        try {
-            Request request = new Request.Builder().url(url).build();
-            Response response = client.newCall(request).execute();
-            //System.out.println(response);
-            if (response.isSuccessful()) {
-                String res = response.body().string();
-                return res;
-            } else {
-                return null;
-            }
-        } catch (IOException ex) {
-            System.out.println("Error getting api response.");
-            return null;
-        }
-    }
-    
-    private static WeatherData makeWeatherObject(String json) {
-        Gson gson = new Gson();
-        WeatherData data = gson.fromJson(json, WeatherData.class);
-        return data;
-    }
-    
-    private static ForecastData makeForecastObject(String json) {
-        Gson gson = new Gson();
-        ForecastData data = gson.fromJson(json, ForecastData.class);
-        return data;
-    }
-    
-    private static boolean illegalLatOrLon(double lat, double lon) {
-        return lat < -90 || lat > 90 || lon < -90 || lon > 90;
-    }
-    
+        
     public void addToFavorites(String loc) {
         if(!locationFavorites.contains(loc)) {
             locationFavorites.add(loc);
@@ -87,11 +102,20 @@ public class WeatherAPI implements iAPI {
             locationFavorites.remove(loc);
         }
     }
-    
+ 
     public void clearBrowsingHistory() {
         this.locationHistory.clear();
     }
-
+        
+    public Pair<WeatherData, ForecastData> getData(String loc) {
+        WeatherData wd = getCurrentWeather(loc);
+        ForecastData fd = getForecast(loc);
+        Pair<WeatherData, ForecastData> WeatherEntry = new Pair<>(wd, fd);
+        locationActive = loc;
+        addToHistory(loc);
+        return WeatherEntry;
+    }
+    
     @Override
     public WeatherData getCurrentWeather(String loc) {
         try {
@@ -152,17 +176,58 @@ public class WeatherAPI implements iAPI {
             
         } catch (IOException ex) {return null;}
     }
-    
-    public Pair<WeatherData, ForecastData> getData(String loc) {
-        WeatherData wd = getCurrentWeather(loc);
-        ForecastData fd = getForecast(loc);
-        Pair<WeatherData, ForecastData> WeatherEntry = new Pair<>(wd, fd);
-        locationActive = loc;
-        locationHistory.add(loc);
-        return WeatherEntry;
+
+    private static String getAPIKey() throws IOException {
+        try {
+            JsonParser parser = new JsonParser();
+            FileReader reader = new FileReader("apikeys.json");
+            String key = parser.parse(reader).getAsJsonObject()
+                    .get("api-key").getAsString();
+            reader.close();
+            return key;
+        } catch (IOException ex) {
+            System.out.println("No apikeys.json file found.");
+            return null;
+        }
     }
     
-    public boolean writeToFile() throws Exception {
-        return new StorageSystem().writeToFile(this);
+    private static String makeHTTPCall(String url) throws IOException {
+        OkHttpClient client = new OkHttpClient();
+        try {
+            Request request = new Request.Builder().url(url).build();
+            Response response = client.newCall(request).execute();
+            //System.out.println(response);
+            if (response.isSuccessful()) {
+                String res = response.body().string();
+                return res;
+            } else {
+                return null;
+            }
+        } catch (IOException ex) {
+            System.out.println("Error getting api response.");
+            return null;
+        }
+    }
+    
+    private static WeatherData makeWeatherObject(String json) {
+        Gson gson = new Gson();
+        WeatherData data = gson.fromJson(json, WeatherData.class);
+        return data;
+    }
+    
+    private static ForecastData makeForecastObject(String json) {
+        Gson gson = new Gson();
+        ForecastData data = gson.fromJson(json, ForecastData.class);
+        return data;
+    }
+    
+    private static boolean illegalLatOrLon(double lat, double lon) {
+        return lat < -90 || lat > 90 || lon < -90 || lon > 90;
+    }
+    
+    private void addToHistory(String loc) {
+        if(!locationHistory.contains(loc)) {
+            locationHistory.add(loc);
+        }
     }
 }

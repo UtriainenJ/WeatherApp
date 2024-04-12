@@ -24,6 +24,8 @@ public class WeatherData {
     private String name;
     private int cod;
 
+    public WeatherData() {}
+
     public Coord getCoord() {
         return coord;
     }
