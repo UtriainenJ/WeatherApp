@@ -4,7 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import javafx.util.Pair;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -14,7 +17,17 @@ import okhttp3.Response;
  * @author jerri
  */
 public class WeatherAPI implements iAPI {
+    
+    private String locationActive;
+    private List<String> locationFavorites;
+    private List<String> locationHistory;
 
+    public WeatherAPI() {
+        this.locationActive = null;
+        this.locationFavorites = new ArrayList<>();
+        this.locationHistory = new ArrayList<>();
+    }
+    
     private static String getAPIKey() throws IOException {
         try {
             JsonParser parser = new JsonParser();
@@ -61,6 +74,22 @@ public class WeatherAPI implements iAPI {
     
     private static boolean illegalLatOrLon(double lat, double lon) {
         return lat < -90 || lat > 90 || lon < -90 || lon > 90;
+    }
+    
+    public void addToFavorites(String loc) {
+        if(!locationFavorites.contains(loc)) {
+            locationFavorites.add(loc);
+        }
+    }
+    
+    public void removeFromFavorites(String loc) {
+        if(locationFavorites.contains(loc)) {
+            locationFavorites.remove(loc);
+        }
+    }
+    
+    public void clearBrowsingHistory() {
+        this.locationHistory.clear();
     }
 
     @Override
@@ -122,5 +151,18 @@ public class WeatherAPI implements iAPI {
             return getForecast(locations[0].getLat(), locations[0].getLon());
             
         } catch (IOException ex) {return null;}
+    }
+    
+    public Pair<WeatherData, ForecastData> getData(String loc) {
+        WeatherData wd = getCurrentWeather(loc);
+        ForecastData fd = getForecast(loc);
+        Pair<WeatherData, ForecastData> WeatherEntry = new Pair<>(wd, fd);
+        locationActive = loc;
+        locationHistory.add(loc);
+        return WeatherEntry;
+    }
+    
+    public boolean writeToFile() throws Exception {
+        return new StorageSystem().writeToFile(this);
     }
 }
