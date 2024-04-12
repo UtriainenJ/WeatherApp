@@ -34,7 +34,13 @@ public class WeatherAPI implements iAPI {
         try {
             Request request = new Request.Builder().url(url).build();
             Response response = client.newCall(request).execute();
-            return response.isSuccessful() ? response.body().string() : null;
+            //System.out.println(response);
+            if (response.isSuccessful()) {
+                String res = response.body().string();
+                return res;
+            } else {
+                return null;
+            }
         } catch (IOException ex) {
             System.out.println("Error getting api response.");
             return null;
@@ -46,9 +52,19 @@ public class WeatherAPI implements iAPI {
         WeatherData data = gson.fromJson(json, WeatherData.class);
         return data;
     }
+    
+    private static ForecastData makeForecastObject(String json) {
+        Gson gson = new Gson();
+        ForecastData data = gson.fromJson(json, ForecastData.class);
+        return data;
+    }
+    
+    private static boolean illegalLatOrLon(double lat, double lon) {
+        return lat < -90 || lat > 90 || lon < -90 || lon > 90;
+    }
 
     @Override
-    public WeatherData lookUpLocation(String loc) {
+    public WeatherData getCurrentWeather(String loc) {
         try {
             String key = getAPIKey();
             String url = "https://api.openweathermap.org/data/2.5/weather"
@@ -61,6 +77,9 @@ public class WeatherAPI implements iAPI {
     @Override
     public WeatherData getCurrentWeather(double lat, double lon) {
         try {
+            if(illegalLatOrLon(lat, lon)) {
+                throw new IllegalStateException("Lat and lon must be +/- 90");
+            }
             String key = getAPIKey();
             String latStr = String.format(Locale.US,"%.4f", lat);
             String lonStr = String.format(Locale.US,"%.4f", lon);
@@ -72,14 +91,36 @@ public class WeatherAPI implements iAPI {
     }
 
     @Override
-    public String getForecast(double lat, double lon) {
+    public ForecastData getForecast(double lat, double lon) {
         try {
+            if(illegalLatOrLon(lat, lon)) {
+                throw new IllegalStateException("Lat and lon must be +/- 90");
+            }
             String key = getAPIKey();
             String latStr = String.format(Locale.US,"%.4f", lat);
             String lonStr = String.format(Locale.US,"%.4f", lon);
             String url = "https://api.openweathermap.org/data/2.5/forecast"
                     + "?lat=" + latStr + "&lon=" + lonStr + "&appid=" + key;
-            return makeHTTPCall(url);
+            String res = makeHTTPCall(url);
+            ForecastData wd = makeForecastObject(res);
+            return wd;
+        } catch (IOException ex) {return null;}
+    }
+
+    @Override
+    public ForecastData getForecast(String loc) {
+        try {
+            String key = getAPIKey();
+            String url = "http://api.openweathermap.org/geo/1.0/direct"
+                    + "?q=" + loc + "&limit=1&appid=" + key;
+            String res = makeHTTPCall(url);
+            //System.out.println(res);
+            
+            Gson gson = new Gson();
+            LocationData[] locations = gson.fromJson(res, LocationData[].class);
+
+            return getForecast(locations[0].getLat(), locations[0].getLon());
+            
         } catch (IOException ex) {return null;}
     }
 }

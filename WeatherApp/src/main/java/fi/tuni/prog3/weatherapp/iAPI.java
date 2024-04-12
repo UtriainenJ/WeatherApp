@@ -6,17 +6,17 @@ package fi.tuni.prog3.weatherapp;
 public interface iAPI {
 
     /**
-     * Returns coordinates for a location.
-     * @param loc Name of the location for which coordinates should be fetched.
-     * @return String.
+     * Returns the current weather for the given city.
+     * @param loc Name of the location for which weather data should be fetched.
+     * @return WeatherData.
      */
-    public WeatherData lookUpLocation(String loc);
+    public WeatherData getCurrentWeather(String loc);
 
     /**
      * Returns the current weather for the given coordinates.
      * @param lat The latitude of the location.
      * @param lon The longitude of the location.
-     * @return String.
+     * @return WeatherData.
      */
     public WeatherData getCurrentWeather(double lat, double lon);
 
@@ -24,7 +24,14 @@ public interface iAPI {
      * Returns a forecast for the given coordinates.
      * @param lat The latitude of the location.
      * @param lon The longitude of the location.
-     * @return String.
+     * @return ForecastData.
      */
-    public String getForecast(double lat, double lon);
+    public ForecastData getForecast(double lat, double lon);
+    
+    /**
+     * Returns a forecast for the given city.
+     * @param loc Name of the location for which weather data should be fetched.
+     * @return ForecastData.
+     */
+    public ForecastData getForecast(String loc);
 }
