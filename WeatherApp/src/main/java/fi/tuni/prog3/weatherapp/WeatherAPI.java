@@ -69,7 +69,7 @@ import okhttp3.Response;
 public class WeatherAPI implements iAPI {
     
     private String locationActive;
-    private String units;
+    private static String units;
     private List<String> locationFavorites;
     private List<String> locationHistory;
     private transient WeatherData wd;
@@ -137,7 +137,7 @@ public class WeatherAPI implements iAPI {
         }
     }
 
-    public String getUnit() {
+    public static String getUnit() {
         switch(units) {
             case "imperial":
                 return "Imperial";
@@ -190,13 +190,15 @@ public class WeatherAPI implements iAPI {
     public WeatherData getCurrentWeather(String loc) {
         try {
             String key = getAPIKey();
-            String url = "https://api.openweathermap.org/data/2.5/weather"
+            String url = "https://pro.openweathermap.org/data/2.5/weather"
                     + "?q=" + loc + "&appid=" + key
                     + "&units=" + units;
             String json = makeHTTPCall(url);
             //System.out.println(json);
             return makeWeatherObject(json);
-        } catch (IOException ex) {return null;}
+        } catch (IOException ex) {
+            throw new IllegalArgumentException("Incorrect or missing API key.");
+        }
     }
 
     @Override
@@ -208,12 +210,14 @@ public class WeatherAPI implements iAPI {
             String key = getAPIKey();
             String latStr = String.format(Locale.US,"%.4f", lat);
             String lonStr = String.format(Locale.US,"%.4f", lon);
-            String url = "https://api.openweathermap.org/data/2.5/weather"
+            String url = "https://pro.openweathermap.org/data/2.5/weather"
                     + "?lat=" + latStr + "&lon=" + lonStr + "&appid=" + key
                     + "&units=" + units;
             String json = makeHTTPCall(url);
             return makeWeatherObject(json);
-        } catch (IOException ex) {return null;}
+        } catch (IOException ex) {
+            throw new IllegalArgumentException("Incorrect or missing API key.");
+        }
     }
 
     @Override
@@ -225,13 +229,15 @@ public class WeatherAPI implements iAPI {
             String key = getAPIKey();
             String latStr = String.format(Locale.US,"%.4f", lat);
             String lonStr = String.format(Locale.US,"%.4f", lon);
-            String url = "https://api.openweathermap.org/data/2.5/forecast"
+            String url = "https://pro.openweathermap.org/data/2.5/forecast/hourly"
                     + "?lat=" + latStr + "&lon=" + lonStr + "&appid=" + key
                     + "&units=" + units;
             String res = makeHTTPCall(url);
             ForecastData weather = makeForecastObject(res);
             return weather;
-        } catch (IOException ex) {return null;}
+        } catch (IOException ex) {
+            throw new IllegalArgumentException("Incorrect or missing API key.");
+        }
     }
 
     @Override
@@ -249,7 +255,9 @@ public class WeatherAPI implements iAPI {
 
             return getForecast(locations[0].getLat(), locations[0].getLon());
             
-        } catch (IOException ex) {return null;}
+        } catch (IOException ex) {
+            throw new IllegalArgumentException("Incorrect or missing API key.");
+        }
     }
 
     private static String getAPIKey() throws IOException {
@@ -273,10 +281,9 @@ public class WeatherAPI implements iAPI {
             Response response = client.newCall(request).execute();
             //System.out.println(response);
             if (response.isSuccessful()) {
-                String res = response.body().string();
-                return res;
+                return response.body().string();
             } else {
-                return null;
+                throw new IllegalArgumentException("API key not privileged enough.");
             }
         } catch (IOException ex) {
             System.out.println("Error getting api response.");
