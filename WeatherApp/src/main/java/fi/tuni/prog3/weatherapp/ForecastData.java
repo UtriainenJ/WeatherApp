@@ -2,6 +2,7 @@ package fi.tuni.prog3.weatherapp;
 
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
+import java.util.Locale;
 
 /**
  *
@@ -9,11 +10,11 @@ import java.util.List;
  * generated with help of chatGPT
  */
 public class ForecastData {
+    
     private String cod;
     private int message;
     private int cnt;
     private List<WeatherEntry> list;
-    private City city;
     
     public ForecastData(){}
 
@@ -49,14 +50,6 @@ public class ForecastData {
         this.list = list;
     }
 
-    public City getCity() {
-        return city == null? new City() : city;
-    }
-
-    public void setCity(City city) {
-        this.city = city;
-    }
-
     public static class WeatherEntry {
         private Long dt;
         private MainData main;
@@ -69,6 +62,12 @@ public class ForecastData {
         private Snow snow;
         private Sys sys;
         private String dt_txt;
+        private City city;
+        private String country;
+        private Integer population;
+        private Integer timezone;
+        private Long sunrise;
+        private Long sunset;
 
         public String getDt() {
             return dt == null? "null" : String.valueOf(dt);
@@ -156,6 +155,54 @@ public class ForecastData {
 
         public void setDt_txt(String dt_txt) {
             this.dt_txt = dt_txt;
+        }
+
+        public City getCity() {
+            return city == null? new City() : city;
+        }
+
+        public void setCity(City city) {
+            this.city = city;
+        }
+
+        public String getCountry() {
+            return country == null? "null" : country;
+        }
+
+        public void setCountry(String country) {
+            this.country = country;
+        }
+
+        public String getPopulation() {
+            return population == null? "null" : String.valueOf(population);
+        }
+
+        public void setPopulation(int population) {
+            this.population = population;
+        }
+
+        public String getTimezone() {
+            return timezone == null? "null" : String.valueOf(timezone);
+        }
+
+        public void setTimezone(int timezone) {
+            this.timezone = timezone;
+        }
+
+        public String getSunrise() {
+            return sunrise == null? "null" : String.valueOf(sunrise);
+        }
+
+        public void setSunrise(long sunrise) {
+            this.sunrise = sunrise;
+        }
+
+        public String getSunset() {
+            return sunset == null? "null" : String.valueOf(sunset);
+        }
+
+        public void setSunset(long sunset) {
+            this.sunset = sunset;
         }
     }
 
@@ -325,11 +372,27 @@ public class ForecastData {
     }
 
     public static class Rain {
+        @SerializedName("1h")
+        private Double _1h;
         @SerializedName("3h")
         private Double _3h;
 
+        public String get1h() {
+            if("Metric".equals(WeatherAPI.getUnit())) {
+                return _1h == null? "0" : String.valueOf(_1h);
+            }
+            return _1h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
+        }
+
+        public void set1h(double _1h) {
+            this._1h = _1h;
+        }
+        
         public String get3h() {
-            return _3h == null? "0" : String.valueOf(_3h);
+            if("Metric".equals(WeatherAPI.getUnit())) {
+                return _3h == null? "0" : String.valueOf(_3h);
+            }
+            return _3h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }
 
         public void set3h(double _3h) {
@@ -338,11 +401,27 @@ public class ForecastData {
     }
     
     public static class Snow {
+        @SerializedName("1h")
+        private Double _1h;
         @SerializedName("3h")
         private Double _3h;
+
+        public String get1h() {
+            if("Metric".equals(WeatherAPI.getUnit())) {
+                return _1h == null? "0" : String.valueOf(_1h);
+            }
+            return _1h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
+        }
+
+        public void set1h(double _1h) {
+            this._1h = _1h;
+        }
         
         public String get3h() {
-            return _3h == null? "0" : String.valueOf(_3h);
+            if("Metric".equals(WeatherAPI.getUnit())) {
+                return _3h == null? "0" : String.valueOf(_3h);
+            }
+            return _3h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }
         public void set3h(double _3h) {
             this._3h = _3h;
@@ -365,11 +444,7 @@ public class ForecastData {
         private Integer id;
         private String name;
         private Coord coord;
-        private String country;
-        private Integer population;
-        private Integer timezone;
-        private Long sunrise;
-        private Long sunset;
+
 
         public String getId() {
             return id == null? "null" : String.valueOf(id);
@@ -393,46 +468,6 @@ public class ForecastData {
 
         public void setCoord(Coord coord) {
             this.coord = coord;
-        }
-
-        public String getCountry() {
-            return country == null? "null" : country;
-        }
-
-        public void setCountry(String country) {
-            this.country = country;
-        }
-
-        public String getPopulation() {
-            return population == null? "null" : String.valueOf(population);
-        }
-
-        public void setPopulation(int population) {
-            this.population = population;
-        }
-
-        public String getTimezone() {
-            return timezone == null? "null" : String.valueOf(timezone);
-        }
-
-        public void setTimezone(int timezone) {
-            this.timezone = timezone;
-        }
-
-        public String getSunrise() {
-            return sunrise == null? "null" : String.valueOf(sunrise);
-        }
-
-        public void setSunrise(long sunrise) {
-            this.sunrise = sunrise;
-        }
-
-        public String getSunset() {
-            return sunset == null? "null" : String.valueOf(sunset);
-        }
-
-        public void setSunset(long sunset) {
-            this.sunset = sunset;
         }
     }
 
