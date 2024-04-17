@@ -26,12 +26,9 @@ public class WeatherApp extends Application {
     private final int feelsLikeBarHeight = 20;
     private final int airQualityBarHeight = 40;
     private final String tempFileName = "temp.json";
-    private final String defaultLocation = "Raisio";
     
     // Control variables
     private int selectedDay = 0;
-    private String currentLocation = this.defaultLocation;
-    private String currentUnitSystem;
     
     // Containers
     private VBox[] arrayDays;
@@ -83,7 +80,7 @@ public class WeatherApp extends Application {
         this.topBar.setAlignment(searchButton, Pos.CENTER);
         
         // CIty label in the center
-        this.cityLabel = new Label("Raisio");
+        this.cityLabel = new Label();
         this.cityLabel.setFont(new Font("C059 Bold", 24)); // Not quite Cooper Black
         this.topBar.setCenter(this.cityLabel);
     }
@@ -162,7 +159,7 @@ public class WeatherApp extends Application {
         this.selectedDay = day;
     }
     
-    private VBox buildForecastDay(int day) {
+    private VBox buildForecastDay() {
         // Top: weekday and date bar
         var weekdayLabel = new Label("Tue");
         var dateLabel = new Label("24.10");
@@ -208,7 +205,7 @@ public class WeatherApp extends Application {
         var forecastDaysBar = new HBox();
         forecastDaysBar.setAlignment(Pos.CENTER);
         for (int i = 0; i < this.forecastDays; i++) {
-            var forecastDay = buildForecastDay(i);
+            var forecastDay = buildForecastDay();
             this.arrayDays[i] = forecastDay;
             forecastDaysBar.getChildren().add(forecastDay);
         }
@@ -264,41 +261,34 @@ public class WeatherApp extends Application {
     }
     
     private void updateTopBar() {
-        //this.currentUnitSystem = this.api.getUnitSystem();
-        this.currentUnitSystem = "Metric";
-        this.unitsButton.setText(this.currentUnitSystem);
-        this.cityLabel.setText(this.currentLocation);
+        this.unitsButton.setText(this.api.getUnit());
+        this.cityLabel.setText(this.api.getLocationActive());
     }
     
     private void updateWeatherPanel() {
         // Weather and temperature bar
         //this.currentWeatherIcon.setGraphic();
-        this.currentTempField.setText(String.valueOf(
-                this.api.getWeather().getMain().getTemp()));
-        //this.currentTempUnitField.setText(this.api.getTempUnit());
-        this.currentTempUnitField.setText("K");
+        this.currentTempField.setText(this.api.getWeather().getMain().getTemp());
+        this.currentTempUnitField.setText(this.api.getUnitTemp());
         
         // "Feels Like" bar
-        this.currentFeelsLikeField.setText(String.valueOf(
-                this.api.getWeather().getMain().getFeels_like()));
-        this.currentFeelsLikeUnitField.setText("K");
+        this.currentFeelsLikeField.setText(this.api.getWeather().getMain().getFeels_like());
+        this.currentFeelsLikeUnitField.setText(this.api.getUnitTemp());
         
         // Air quality, rain and wind bar
-        this.currentAirQualityField.setText(this.api.getWeather().getWeather()
-                .get(0).getDescription());
+        //this.currentAirQualityField.setText(this.api.getWeather());
+        this.currentAirQualityField.setText("TODO");
         //this.currentRainIcon.setGraphic();
-        this.currentRainField.setText(String.valueOf(
-                this.api.getWeather().getRain().get1h()));
-        this.currentRainUnitField.setText("mm");
+        this.currentRainField.setText(this.api.getWeather().getRain().get1h());
+        this.currentRainUnitField.setText(this.api.getUnitRain());
         //this.currentWindIcon.setGraphic();
-        this.currentWindField.setText(String.valueOf(
-                this.api.getWeather().getWind().getSpeed()));
-        this.currentWindUnitField.setText("m/s");
+        this.currentWindField.setText(this.api.getWeather().getWind().getSpeed());
+        this.currentWindUnitField.setText(this.api.getUnitWind());
     }
     
-    private void update(String location) {
+    private void update() {
         // Request weather and forecast data from api
-        this.api.getData(location);
+        this.api.getData();
         
         // Update UI fields
         updateTopBar();
@@ -317,7 +307,7 @@ public class WeatherApp extends Application {
         buildUI(stage);
         
         // Update UI
-        update(this.currentLocation);
+        update();
         
         // Display UI
         stage.show();
