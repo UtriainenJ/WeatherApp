@@ -1,5 +1,6 @@
 package fi.tuni.prog3.weatherapp;
 
+import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 /**
@@ -12,15 +13,15 @@ public class WeatherData {
     private List<Weather> weather;
     private String base;
     private Main main;
-    private int visibility;
+    private Integer visibility;
     private Wind wind;
     private Rain rain;
     private Snow snow;
     private Clouds clouds;
-    private long dt;
+    private Long dt;
     private Sys sys;
-    private int timezone;
-    private int id;
+    private Integer timezone;
+    private Integer id;
     private String name;
     private int cod;
 
@@ -58,8 +59,8 @@ public class WeatherData {
         this.main = main;
     }
 
-    public int getVisibility() {
-        return visibility;
+    public String getVisibility() {
+        return visibility == null? "0" : String.valueOf(visibility);
     }
 
     public void setVisibility(int visibility) {
@@ -67,7 +68,7 @@ public class WeatherData {
     }
 
     public Wind getWind() {
-        return wind;
+        return wind == null? new Wind() : wind;
     }
 
     public void setWind(Wind wind) {
@@ -75,7 +76,7 @@ public class WeatherData {
     }
 
     public Rain getRain() {
-        return rain;
+        return rain == null? new Rain() : rain;
     }
 
     public void setRain(Rain rain) {
@@ -83,7 +84,7 @@ public class WeatherData {
     }
 
     public Snow getSnow() {
-        return snow;
+        return snow == null? new Snow() : snow;
     }
 
     public void setSnow(Snow snow) {
@@ -91,15 +92,15 @@ public class WeatherData {
     }
 
     public Clouds getClouds() {
-        return clouds;
+        return clouds == null? new Clouds() : clouds;
     }
 
     public void setClouds(Clouds clouds) {
         this.clouds = clouds;
     }
 
-    public long getDt() {
-        return dt;
+    public String getDt() {
+        return dt == null? "null" : String.valueOf(dt);
     }
 
     public void setDt(long dt) {
@@ -114,16 +115,16 @@ public class WeatherData {
         this.sys = sys;
     }
 
-    public int getTimezone() {
-        return timezone;
+    public String getTimezone() {
+        return timezone == null? "null" : String.valueOf(timezone);
     }
 
     public void setTimezone(int timezone) {
         this.timezone = timezone;
     }
 
-    public int getId() {
-        return id;
+    public String getId() {
+        return id == null? "null" : String.valueOf(id);
     }
 
     public void setId(int id) {
@@ -182,7 +183,7 @@ public class WeatherData {
         }
 
         public String getMain() {
-            return main;
+            return main == null? "null" : main;
         }
 
         public void setMain(String main) {
@@ -190,7 +191,7 @@ public class WeatherData {
         }
 
         public String getDescription() {
-            return description;
+            return description == null? "No description" : description;
         }
 
         public void setDescription(String description) {
@@ -198,7 +199,7 @@ public class WeatherData {
         }
 
         public String getIcon() {
-            return icon;
+            return icon == null? "null" : icon;
         }
 
         public void setIcon(String icon) {
@@ -207,73 +208,73 @@ public class WeatherData {
     }
 
     public static class Main {
-        private double temp;
-        private double feels_like;
-        private double temp_min;
-        private double temp_max;
-        private int pressure;
-        private int humidity;
-        private int sea_level;
-        private int grnd_level;
+        private Double temp;
+        private Double feels_like;
+        private Double temp_min;
+        private Double temp_max;
+        private Integer pressure;
+        private Integer humidity;
+        private Integer sea_level;
+        private Integer grnd_level;
 
-        public double getTemp() {
-            return temp;
+        public String getTemp() {
+            return temp == null? "null" : String.valueOf(temp);
         }
 
         public void setTemp(double temp) {
             this.temp = temp;
         }
 
-        public double getFeels_like() {
-            return feels_like;
+        public String getFeels_like() {
+            return feels_like == null? "null" : String.valueOf(feels_like);
         }
 
         public void setFeels_like(double feels_like) {
             this.feels_like = feels_like;
         }
 
-        public double getTemp_min() {
-            return temp_min;
+        public String getTemp_min() {
+            return temp_min == null? "null" : String.valueOf(temp_min);
         }
 
         public void setTemp_min(double temp_min) {
             this.temp_min = temp_min;
         }
 
-        public double getTemp_max() {
-            return temp_max;
+        public String getTemp_max() {
+            return temp_max == null? "null" : String.valueOf(temp_max);
         }
 
         public void setTemp_max(double temp_max) {
             this.temp_max = temp_max;
         }
 
-        public int getPressure() {
-            return pressure;
+        public String getPressure() {
+            return pressure == null? "null" : String.valueOf(pressure);
         }
 
         public void setPressure(int pressure) {
             this.pressure = pressure;
         }
 
-        public int getHumidity() {
-            return humidity;
+        public String getHumidity() {
+            return humidity == null? "0" : String.valueOf(humidity);
         }
 
         public void setHumidity(int humidity) {
             this.humidity = humidity;
         }
 
-        public int getSea_level() {
-            return sea_level;
+        public String getSea_level() {
+            return sea_level == null? "null" : String.valueOf(sea_level);
         }
 
         public void setSea_level(int sea_level) {
             this.sea_level = sea_level;
         }
 
-        public int getGrnd_level() {
-            return grnd_level;
+        public String getGrnd_level() {
+            return grnd_level == null? "null" : String.valueOf(grnd_level);
         }
 
         public void setGrnd_level(int grnd_level) {
@@ -282,28 +283,28 @@ public class WeatherData {
     }
 
     public static class Wind {
-        private double speed;
-        private int deg;
-        private double gust;
+        private Double speed;
+        private Integer deg;
+        private Double gust;
 
-        public double getSpeed() {
-            return speed;
+        public String getSpeed() {
+            return speed == null? "0" : String.valueOf(speed);
         }
 
         public void setSpeed(double speed) {
             this.speed = speed;
         }
 
-        public int getDeg() {
-            return deg;
+        public String getDeg() {
+            return deg == null? "0" : String.valueOf(deg);
         }
 
         public void setDeg(int deg) {
             this.deg = deg;
         }
 
-        public double getGust() {
-            return gust;
+        public String getGust() {
+            return gust == null? "0" : String.valueOf(gust);
         }
 
         public void setGust(double gust) {
@@ -312,40 +313,44 @@ public class WeatherData {
     }
 
     public static class Rain {
-        private double _1h;
-        private double _3h;
+        @SerializedName("1h")
+        private Double _1h;
+        @SerializedName("3h")
+        private Double _3h;
 
-        public double get1h() {
-            return _1h;
+        public String get1h() {
+            return _1h == null? "0" : String.valueOf(_1h);
         }
 
         public void set1h(double _1h) {
             this._1h = _1h;
         }
 
-        public double get3h() {
-            return _3h;
+        public String get3h() {
+            return _3h == null? "0" : String.valueOf(_3h);
         }
 
         public void set3h(double _3h) {
             this._3h = _3h;
         }
     }
-    
-    public static class Snow {
-        private double _1h;
-        private double _3h;
 
-        public double get1h() {
-            return _1h;
+    public static class Snow {
+        @SerializedName("1h")
+        private Double _1h;
+        @SerializedName("3h")
+        private Double _3h;
+
+        public String get1h() {
+            return _1h == null? "0" : String.valueOf(_1h);
         }
 
         public void set1h(double _1h) {
             this._1h = _1h;
         }
 
-        public double get3h() {
-            return _3h;
+        public String get3h() {
+            return _3h == null? "0" : String.valueOf(_3h);
         }
 
         public void set3h(double _3h) {
@@ -354,10 +359,10 @@ public class WeatherData {
     }
 
     public static class Clouds {
-        private int all;
+        private Integer all;
 
-        public int getAll() {
-            return all;
+        public String getAll() {
+            return all == null? "0" : String.valueOf(all);
         }
 
         public void setAll(int all) {
@@ -366,13 +371,13 @@ public class WeatherData {
     }
 
     public static class Sys {
-        private int id;
+        private Integer id;
         private String country;
-        private long sunrise;
-        private long sunset;
+        private Long sunrise;
+        private Long sunset;
 
-        public int getId() {
-            return id;
+        public String getId() {
+            return id == null? "null" : String.valueOf(id);
         }
 
         public void setId(int id) {
@@ -380,23 +385,23 @@ public class WeatherData {
         }
 
         public String getCountry() {
-            return country;
+            return country == null? "null" : country;
         }
 
         public void setCountry(String country) {
             this.country = country;
         }
 
-        public long getSunrise() {
-            return sunrise;
+        public String getSunrise() {
+            return sunrise == null? "null" : String.valueOf(sunrise);
         }
 
         public void setSunrise(long sunrise) {
             this.sunrise = sunrise;
         }
 
-        public long getSunset() {
-            return sunset;
+        public String getSunset() {
+            return sunset == null? "null" : String.valueOf(sunset);
         }
 
         public void setSunset(long sunset) {
