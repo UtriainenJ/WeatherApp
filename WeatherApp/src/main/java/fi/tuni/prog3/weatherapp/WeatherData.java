@@ -1,5 +1,6 @@
 package fi.tuni.prog3.weatherapp;
 
+import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 /**
@@ -312,7 +313,9 @@ public class WeatherData {
     }
 
     public static class Rain {
+        @SerializedName("1h")
         private double _1h;
+        @SerializedName("3h")
         private double _3h;
 
         public double get1h() {
@@ -333,7 +336,9 @@ public class WeatherData {
     }
     
     public static class Snow {
+        @SerializedName("1h")
         private double _1h;
+        @SerializedName("3h")
         private double _3h;
 
         public double get1h() {

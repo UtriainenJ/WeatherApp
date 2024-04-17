@@ -133,6 +133,7 @@ public class WeatherAPI implements iAPI {
             String url = "https://api.openweathermap.org/data/2.5/weather"
                     + "?q=" + loc + "&appid=" + key;
             String json = makeHTTPCall(url);
+            System.out.println(json);
             return makeWeatherObject(json);
         } catch (IOException ex) {return null;}
     }
@@ -157,7 +158,7 @@ public class WeatherAPI implements iAPI {
     public ForecastData getForecast(double lat, double lon) {
         try {
             if(illegalLatOrLon(lat, lon)) {
-                throw new IllegalStateException("Lat and lon must be +/- 90");
+                throw new IllegalStateException("Lat must be +/- 90, longitude +/- 180");
             }
             String key = getAPIKey();
             String latStr = String.format(Locale.US,"%.4f", lat);
@@ -178,7 +179,7 @@ public class WeatherAPI implements iAPI {
                     + "?q=" + loc + "&limit=1&appid=" + key;
             String res = makeHTTPCall(url);
             //System.out.println(res);
-            
+
             Gson gson = new Gson();
             LocationData[] locations = gson.fromJson(res, LocationData[].class);
 
@@ -232,7 +233,7 @@ public class WeatherAPI implements iAPI {
     }
     
     private static boolean illegalLatOrLon(double lat, double lon) {
-        return lat < -90 || lat > 90 || lon < -90 || lon > 90;
+        return lat < -90 || lat > 90 || lon < -180 || lon > 180;
     }
     
     private void addToHistory(String loc) {
