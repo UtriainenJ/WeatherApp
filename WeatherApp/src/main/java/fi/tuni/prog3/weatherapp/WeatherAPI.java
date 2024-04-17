@@ -120,11 +120,10 @@ public class WeatherAPI implements iAPI {
     public void getData(String loc) {
         WeatherData weather = getCurrentWeather(loc);
         ForecastData forecast = getForecast(loc);
-        Pair<WeatherData, ForecastData> WeatherEntry = new Pair<>(weather, forecast);
-        locationActive = loc;
+        this.locationActive = loc;
         addToHistory(loc);
-        this.wd = WeatherEntry.getKey();
-        this.fd = WeatherEntry.getValue();
+        this.wd = weather;
+        this.fd = forecast;
     }
     
     @Override
