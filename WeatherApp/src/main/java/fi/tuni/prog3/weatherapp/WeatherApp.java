@@ -3,11 +3,14 @@ package fi.tuni.prog3.weatherapp;
 import java.io.IOException;
 import javafx.application.Application;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -38,17 +41,19 @@ public class WeatherApp extends Application {
     private WeatherAPI api;
     
     // UI containers
-    private Scene scene;
-    private VBox layout;
+    private Stage mainWindow;
+    private Stage searchWindow;
+    private VBox mainLayout;
+    private VBox searchLayout;
     private BorderPane topBar;
     private HBox midBar;
-    private VBox weatherPanel;
-    private VBox forecastPanel;
-    private VBox historyPanel;
-    private VBox mapsPanel;
+    private StackPane basePanel;
+    private VBox weather;
+    private VBox forecast;
+    private VBox history;
+    private VBox maps;
     
     // UI elements
-    private Button unitsButton;
     private Label cityLabel;
     private Label currentWeatherIcon;
     private Label currentTempField;
@@ -63,100 +68,114 @@ public class WeatherApp extends Application {
     private Label currentWindField;
     private Label currentWindUnitField;
     
+    private void switchUnits() {
+        switch(api.getUnit().toLowerCase()) {
+            case "metric":
+                api.setUnits("imperial");
+                break;
+            case "imperial":
+                api.setUnits("metric");
+                break;
+        }
+        update();
+    }
+    
     private void buildTopBar() {
         // BorderPane for left + center + right alignment
-        this.topBar = new BorderPane();
+        topBar = new BorderPane();
         
         // Units button on the left
-        this.unitsButton = new Button();
-        this.unitsButton.setPrefWidth(this.topBarButtonWidth);
-        this.topBar.setLeft(this.unitsButton);
-        this.topBar.setAlignment(this.unitsButton, Pos.CENTER);
+        var unitsButton = new Button("Switch Units");
+        unitsButton.setPrefWidth(topBarButtonWidth);
+        unitsButton.setOnAction((event) -> {switchUnits();});
+        topBar.setLeft(unitsButton);
+        topBar.setAlignment(unitsButton, Pos.CENTER);
         
         // Search button on the right
         var searchButton = new Button("Search & Favorites"); // AmE > BrE
-        searchButton.setPrefWidth(this.topBarButtonWidth);
-        this.topBar.setRight(searchButton);
-        this.topBar.setAlignment(searchButton, Pos.CENTER);
+        searchButton.setPrefWidth(topBarButtonWidth);
+        searchButton.setOnAction((event) -> {searchWindow.show();});
+        topBar.setRight(searchButton);
+        topBar.setAlignment(searchButton, Pos.CENTER);
         
-        // CIty label in the center
-        this.cityLabel = new Label();
-        this.cityLabel.setFont(new Font("C059 Bold", 24)); // Not quite Cooper Black
-        this.topBar.setCenter(this.cityLabel);
+        // City label in the center
+        cityLabel = new Label();
+        cityLabel.setFont(new Font("C059 Bold", 24)); // Not quite Cooper Black
+        topBar.setCenter(cityLabel);
     }
     
-    private void buildWeatherPanel() {
+    private void buildWeather() {
         // Current weather label
         var weatherLabel = new Label("Current Weather");
         weatherLabel.setStyle("-fx-font-weight: bold");
         weatherLabel.setAlignment(Pos.CENTER);
-        weatherLabel.setPrefHeight(this.weatherLabelHeight);
+        weatherLabel.setPrefHeight(weatherLabelHeight);
         
         // Weather and temperature bar
-        this.currentWeatherIcon = new Label("weatherIcon");
-        this.currentTempField = new Label();
-        this.currentTempField.setFont(new Font("System Regular", 70));
-        this.currentTempUnitField = new Label();
-        this.currentTempUnitField.setAlignment(Pos.TOP_LEFT);
-        this.currentTempUnitField.setFont(new Font("System Regular", 35));
-        var weatherAndTempBar = new HBox(this.currentWeatherIcon,
-                this.currentTempField, this.currentTempUnitField);
+        currentWeatherIcon = new Label("weatherIcon");
+        currentTempField = new Label();
+        currentTempField.setFont(new Font("System Regular", 70));
+        currentTempUnitField = new Label();
+        currentTempUnitField.setAlignment(Pos.TOP_LEFT);
+        currentTempUnitField.setFont(new Font("System Regular", 35));
+        var weatherAndTempBar = new HBox(currentWeatherIcon,
+                currentTempField, currentTempUnitField);
         weatherAndTempBar.setAlignment(Pos.CENTER);
-        this.currentTempUnitField.setPrefHeight(this.weatherTempBarHeight);
+        currentTempUnitField.setPrefHeight(weatherTempBarHeight);
         
         // "Feels Like" bar
         var feelsLikeLabel = new Label("Feels like:");
-        this.currentFeelsLikeField = new Label();
-        this.currentFeelsLikeField.setStyle("-fx-font-weight: bold");
-        this.currentFeelsLikeUnitField = new Label();
+        currentFeelsLikeField = new Label();
+        currentFeelsLikeField.setStyle("-fx-font-weight: bold");
+        currentFeelsLikeUnitField = new Label();
         var feelsLikeBar = new HBox(feelsLikeLabel,
-                this.currentFeelsLikeField, this.currentFeelsLikeUnitField);
+                currentFeelsLikeField, currentFeelsLikeUnitField);
         feelsLikeBar.setAlignment(Pos.CENTER);
-        feelsLikeBar.setPrefHeight(this.feelsLikeBarHeight);
+        feelsLikeBar.setPrefHeight(feelsLikeBarHeight);
         
         // Air quality, rain, wind
         var airQualityLabel = new Label("Air Quality:");
-        this.currentAirQualityField = new Label();
-        this.currentAirQualityField.setStyle("-fx-font-weight: bold");
-        this.currentRainIcon = new Label("rainIcon");
-        this.currentRainField = new Label();
-        this.currentRainField.setStyle("-fx-font-weight: bold");
-        this.currentRainUnitField = new Label();
-        this.currentWindIcon = new Label("windIcon");
-        this.currentWindField = new Label();
-        this.currentWindField.setStyle("-fx-font-weight: bold");
-        this.currentWindUnitField = new Label();
+        currentAirQualityField = new Label();
+        currentAirQualityField.setStyle("-fx-font-weight: bold");
+        currentRainIcon = new Label("rainIcon");
+        currentRainField = new Label();
+        currentRainField.setStyle("-fx-font-weight: bold");
+        currentRainUnitField = new Label();
+        currentWindIcon = new Label("windIcon");
+        currentWindField = new Label();
+        currentWindField.setStyle("-fx-font-weight: bold");
+        currentWindUnitField = new Label();
         var airQualityBar = new HBox(airQualityLabel,
-                this.currentAirQualityField, this.currentRainIcon,
-                this.currentRainField, this.currentRainUnitField,
-                this.currentWindIcon, this.currentWindField,
-                this.currentWindUnitField);
+                currentAirQualityField, currentRainIcon,
+                currentRainField, currentRainUnitField,
+                currentWindIcon, currentWindField,
+                currentWindUnitField);
         airQualityBar.setAlignment(Pos.CENTER);
-        airQualityBar.setPrefHeight(this.airQualityBarHeight);
+        airQualityBar.setPrefHeight(airQualityBarHeight);
         
-        this.weatherPanel = new VBox(weatherLabel, weatherAndTempBar,
+        weather = new VBox(weatherLabel, weatherAndTempBar,
                 feelsLikeBar, airQualityBar);
-        this.weatherPanel.setStyle("-fx-background-color: #fae49f;");
-        this.weatherPanel.setAlignment(Pos.CENTER);
+        weather.setStyle("-fx-background-color: #fae49f;");
+        weather.setAlignment(Pos.CENTER);
     }
     
     private void selectDay(int day) 
             throws ArrayIndexOutOfBoundsException {
         // Check for valid array index
-        if ((day < 0) | (day >= this.forecastDays)) {
+        if ((day < 0) | (day >= forecastDays)) {
             throw new ArrayIndexOutOfBoundsException();
         }
         
         // Reset previous day background
-        this.arrayDays[this.selectedDay].setStyle(
+        arrayDays[selectedDay].setStyle(
                 "-fx-background-color: #ffffff;");
         
         // Color new day background
-        this.arrayDays[day].setStyle("-fx-background-color: #a5c2f9;");
-        this.arrayDays[day].requestFocus();
+        arrayDays[day].setStyle("-fx-background-color: #a5c2f9;");
+        arrayDays[day].requestFocus();
         
         // Update index variable
-        this.selectedDay = day;
+        selectedDay = day;
     }
     
     private VBox buildForecastDay() {
@@ -197,98 +216,152 @@ public class WeatherApp extends Application {
         return forecastHour;
     }
     
-    private void buildForecastPanel() {
+    private void buildForecast() {
         // Init day array
-        this.arrayDays = new VBox[this.forecastDays];
+        arrayDays = new VBox[forecastDays];
         
         // Horizontal days bar
         var forecastDaysBar = new HBox();
         forecastDaysBar.setAlignment(Pos.CENTER);
-        for (int i = 0; i < this.forecastDays; i++) {
+        for (int i = 0; i < forecastDays; i++) {
             var forecastDay = buildForecastDay();
-            this.arrayDays[i] = forecastDay;
+            arrayDays[i] = forecastDay;
             forecastDaysBar.getChildren().add(forecastDay);
         }
         
         // Horizontal hourly forecast bar
         var forecastHoursBar = new HBox();
         forecastHoursBar.setAlignment(Pos.CENTER);
-        for (int i = 0; i < this.forecastHours; i++) {
+        for (int i = 0; i < forecastHours; i++) {
             var forecastHour = buildForecastHour(10 + i);
             forecastHoursBar.getChildren().add(forecastHour);
         }
         
-        this.forecastPanel = new VBox(forecastDaysBar, forecastHoursBar);
+        forecast = new VBox(forecastDaysBar, forecastHoursBar);
     }
     
-    private void buildHistoryPanel() {
+    private void buildHistory() {
+        history = new VBox();
+        history.getChildren().add(new Label("History"));
+    }
+    
+    private void buildMaps() {
+        maps = new VBox();
+        maps.getChildren().add(new Label("Maps"));
+    }
+    
+    private void selectPanel(Node panel) 
+            throws ArrayIndexOutOfBoundsException {
         
-    }
-    
-    private void buildMapsPanel() {
+        boolean panelFound = false;
+        for (Node node : basePanel.getChildren()) {
+            if (node == panel) {
+                panelFound = true;
+                node.setVisible(true);
+            } else {
+                node.setVisible(false);
+            }
+        }
         
+        if (panelFound == false) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
     }
     
-    private void buildUI(Stage stage) {
+    private void buildSearchWindow() {
         // Vertical main layout
-        this.layout = new VBox();
-        this.scene = new Scene(this.layout);
-        stage.setScene(this.scene);
+        searchLayout = new VBox();
+        searchWindow = new Stage();
+        searchWindow.setScene(new Scene(searchLayout));
+        searchLayout.setAlignment(Pos.CENTER);
+        
+        // Label at the top
+        var searchLabel = new Label("Search & Favorites");
+        searchLabel.setFont(new Font("C059 Bold", 24));
+        searchLayout.getChildren().add(searchLabel);
+        
+        // Horizontal row
+        var searchField = new TextField(); // Field for entering text
+        var searchButton = new Button("Search"); // Button for starting search
+        searchButton.setOnAction((event) -> {
+            api.setLocationActive(searchField.getText());
+            update();
+            });
+        var closeButton = new Button("Close"); // Button for closing window
+        closeButton.setOnAction((event) -> {searchWindow.close();});
+        var searchRow = new HBox(searchField, searchButton, closeButton);
+        searchLayout.getChildren().add(searchRow);
+        
+        // Search history
+        // TODO
+    }
+    
+    private void buildUI() {
+        // Vertical main layout
+        mainLayout = new VBox();
+        mainWindow.setScene(new Scene(mainLayout));
         
         // Horizontal bar with two buttons and label
         buildTopBar();
-        this.layout.getChildren().add(this.topBar);
+        mainLayout.getChildren().add(topBar);
         
         // Current Weather panel
-        buildWeatherPanel();
-        this.layout.getChildren().add(this.weatherPanel);
+        buildWeather();
+        mainLayout.getChildren().add(weather);
         
         // Horizontal bar with three buttons
         var forecastButton = new Button("Forecast");
+        forecastButton.setOnAction((event) -> {selectPanel(forecast);});
         var historyButton = new Button("History");
+        historyButton.setOnAction((event) -> {selectPanel(history);});
         var mapsButton = new Button("Maps");
-        this.midBar = new HBox(forecastButton, historyButton, mapsButton);
-        this.layout.getChildren().add(this.midBar);
+        mapsButton.setOnAction((event) -> {selectPanel(maps);});
+        midBar = new HBox(forecastButton, historyButton, mapsButton);
+        mainLayout.getChildren().add(midBar);
         
         // Bottom part of window, initially Forecast panel
-        buildForecastPanel();
-        buildHistoryPanel();
-        buildMapsPanel();
-        this.layout.getChildren().add(this.forecastPanel);
+        buildForecast();
+        buildHistory();
+        buildMaps();
+        basePanel = new StackPane(forecast, history, maps);
+        mainLayout.getChildren().add(basePanel);
+        selectPanel(forecast);
         
         // Focus middle day by default
-        selectDay(this.forecastDays / 2);
+        selectDay(forecastDays / 2);
+        
+        // "Search & Favorites" window
+        buildSearchWindow();
     }
     
     private void updateTopBar() {
-        this.unitsButton.setText(this.api.getUnit());
-        this.cityLabel.setText(this.api.getLocationActive());
+        cityLabel.setText(api.getLocationActive());
     }
     
     private void updateWeatherPanel() {
         // Weather and temperature bar
-        //this.currentWeatherIcon.setGraphic();
-        this.currentTempField.setText(this.api.getWeather().getMain().getTemp());
-        this.currentTempUnitField.setText(this.api.getUnitTemp());
+        //currentWeatherIcon.setGraphic();
+        currentTempField.setText(api.getWeather().getMain().getTemp());
+        currentTempUnitField.setText(api.getUnitTemp());
         
         // "Feels Like" bar
-        this.currentFeelsLikeField.setText(this.api.getWeather().getMain().getFeels_like());
-        this.currentFeelsLikeUnitField.setText(this.api.getUnitTemp());
+        currentFeelsLikeField.setText(api.getWeather().getMain().getFeels_like());
+        currentFeelsLikeUnitField.setText(api.getUnitTemp());
         
         // Air quality, rain and wind bar
-        //this.currentAirQualityField.setText(this.api.getWeather());
-        this.currentAirQualityField.setText("TODO");
-        //this.currentRainIcon.setGraphic();
-        this.currentRainField.setText(this.api.getWeather().getRain().get1h());
-        this.currentRainUnitField.setText(this.api.getUnitRain());
-        //this.currentWindIcon.setGraphic();
-        this.currentWindField.setText(this.api.getWeather().getWind().getSpeed());
-        this.currentWindUnitField.setText(this.api.getUnitWind());
+        //currentAirQualityField.setText(api.getWeather());
+        currentAirQualityField.setText("TODO");
+        //currentRainIcon.setGraphic();
+        currentRainField.setText(api.getWeather().getRain().get1h());
+        currentRainUnitField.setText(api.getUnitRain());
+        //currentWindIcon.setGraphic();
+        currentWindField.setText(api.getWeather().getWind().getSpeed());
+        currentWindUnitField.setText(api.getUnitWind());
     }
     
     private void update() {
         // Request weather and forecast data from api
-        this.api.getData();
+        api.getData();
         
         // Update UI fields
         updateTopBar();
@@ -300,11 +373,12 @@ public class WeatherApp extends Application {
             throws IOException {
         
         // Initialize logic
-        this.ss = new StorageSystem(this.tempFileName);
-        this.api = this.ss.readFromFile();
+        ss = new StorageSystem(tempFileName);
+        api = ss.readFromFile();
         
         // Initialize UI
-        buildUI(stage);
+        mainWindow = stage;
+        buildUI();
         
         // Update UI
         update();
