@@ -10,6 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -28,6 +29,7 @@ public class WeatherApp extends Application {
     private final int weatherTempBarHeight = 80;
     private final int feelsLikeBarHeight = 20;
     private final int airQualityBarHeight = 40;
+    private final int maxFavorites = 10;
     private final String tempFileName = "temp.json";
     
     // Control variables
@@ -35,6 +37,10 @@ public class WeatherApp extends Application {
     
     // Containers
     private VBox[] arrayDays;
+    private HBox[] arrayFavorites;
+    private Label[] arrayName;
+    private Button[] arraySelect;
+    private Button[] arrayDelete;
     
     // Class entities
     private StorageSystem ss;
@@ -268,6 +274,20 @@ public class WeatherApp extends Application {
         }
     }
     
+    private void buildSearchFavorite(int index) {
+        var nameField = new Label();
+        var selectButton = new Button("Select");
+        var deleteButton = new Button("Delete");
+        var favorite = new HBox(nameField, selectButton, deleteButton);
+        favorite.setAlignment(Pos.CENTER_RIGHT);
+        favorite.setVisible(false);
+        searchLayout.getChildren().add(favorite);
+        arrayName[index] = nameField;
+        arraySelect[index] = selectButton;
+        arrayDelete[index] = deleteButton;
+        arrayFavorites[index] = favorite;
+    }
+    
     private void buildSearchWindow() {
         // Vertical main layout
         searchLayout = new VBox();
@@ -287,13 +307,25 @@ public class WeatherApp extends Application {
             api.setLocationActive(searchField.getText());
             update();
             });
+        var favoriteButton = new Button("Favorite");
+        favoriteButton.setOnAction((event) -> {
+            api.addToFavorites(searchField.getText());
+            update();
+            });
         var closeButton = new Button("Close"); // Button for closing window
         closeButton.setOnAction((event) -> {searchWindow.close();});
-        var searchRow = new HBox(searchField, searchButton, closeButton);
+        var searchRow = new HBox(searchField, searchButton, favoriteButton,
+                closeButton);
         searchLayout.getChildren().add(searchRow);
         
-        // Search history
-        // TODO
+        // Favorites
+        arrayFavorites = new HBox[maxFavorites];
+        arrayName = new Label[maxFavorites];
+        arraySelect = new Button[maxFavorites];
+        arrayDelete = new Button[maxFavorites];
+        for (int index = 0; index < maxFavorites; index++) {
+            buildSearchFavorite(index);
+        }
     }
     
     private void buildUI() {
@@ -359,13 +391,43 @@ public class WeatherApp extends Application {
         currentWindUnitField.setText(api.getUnitWind());
     }
     
+    private void updateFavoritesIndex(int index, String loc) {
+        //selectButton.setOnAction((event) -> {api.setLocationActive(loc);});
+        //deleteButton.setOnAction((event) -> {api.removeFromFavorites(loc);});
+        arrayName[index].setText(loc);
+        arraySelect[index].setOnAction((event) -> {
+            api.setLocationActive(loc);
+            update();
+            });
+        arrayDelete[index].setOnAction((event) -> {
+            api.removeFromFavorites(loc);
+            update();
+            });
+    }
+    
+    private void updateFavorites() {
+        int size = api.getLocationFavorites().size();
+        for (int index = 0; index < maxFavorites; index++) {
+            if (index < size) {
+                updateFavoritesIndex(index,
+                        api.getLocationFavorites().get(index));
+                arrayFavorites[index].setVisible(true);
+            } else {
+                arrayFavorites[index].setVisible(false);
+            }
+        }
+    }
+    
     private void update() {
         // Request weather and forecast data from api
         api.getData();
         
-        // Update UI fields
+        // Update main window UI fields
         updateTopBar();
         updateWeatherPanel();
+        
+        // Update search window UI fields
+        updateFavorites();
     }
 
     @Override
@@ -385,6 +447,12 @@ public class WeatherApp extends Application {
         
         // Display UI
         stage.show();
+    }
+    
+    @Override
+    public void stop() 
+            throws IOException {
+        ss.writeToFile(api);
     }
 
     public static void main(String[] args) {
