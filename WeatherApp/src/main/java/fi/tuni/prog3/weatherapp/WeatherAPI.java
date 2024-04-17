@@ -75,6 +75,17 @@ public class WeatherAPI implements iAPI {
     private transient WeatherData wd;
     private transient ForecastData fd;
 
+    public WeatherAPI() throws Exception {
+        this.locationActive = null;
+        this.locationFavorites = new ArrayList<>();
+        this.locationHistory = new ArrayList<>();
+    }
+    
+    public void setLocationActive(String loc) {
+        addToHistory(loc);
+        this.locationActive = loc;
+    }
+
     public String getLocationActive() {
         return locationActive;
     }
@@ -86,13 +97,7 @@ public class WeatherAPI implements iAPI {
     public List<String> getLocationHistory() {
         return locationHistory;
     }
-
-    public WeatherAPI() throws Exception {
-        this.locationActive = null;
-        this.locationFavorites = new ArrayList<>();
-        this.locationHistory = new ArrayList<>();
-    }
-        
+   
     public void addToFavorites(String loc) {
         if(!locationFavorites.contains(loc)) {
             locationFavorites.add(loc);
@@ -131,7 +136,7 @@ public class WeatherAPI implements iAPI {
                 System.out.println("Invalid unit system" + unitSystem);
         }
     }
-    
+
     public String getUnit() {
         switch(units) {
             case "imperial":
@@ -176,13 +181,9 @@ public class WeatherAPI implements iAPI {
         }
     }
 
-    public void getData(String loc) {
-        WeatherData weather = getCurrentWeather(loc);
-        ForecastData forecast = getForecast(loc);
-        this.locationActive = loc;
-        addToHistory(loc);
-        this.wd = weather;
-        this.fd = forecast;
+    public void getData() {
+        this.wd = getCurrentWeather(locationActive);
+        this.fd = getForecast(locationActive);
     }
     
     @Override
