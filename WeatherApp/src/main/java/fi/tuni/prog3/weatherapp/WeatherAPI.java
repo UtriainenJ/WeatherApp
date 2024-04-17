@@ -72,6 +72,8 @@ public class WeatherAPI implements iAPI {
     private String locationActive;
     private List<String> locationFavorites;
     private List<String> locationHistory;
+    private WeatherData wd;
+    private ForecastData fd;
 
     public String getLocationActive() {
         return locationActive;
@@ -106,14 +108,23 @@ public class WeatherAPI implements iAPI {
     public void clearBrowsingHistory() {
         this.locationHistory.clear();
     }
-        
-    public Pair<WeatherData, ForecastData> getData(String loc) {
-        WeatherData wd = getCurrentWeather(loc);
-        ForecastData fd = getForecast(loc);
-        Pair<WeatherData, ForecastData> WeatherEntry = new Pair<>(wd, fd);
+    
+    public WeatherData getWeather() {
+        return wd;
+    }
+    
+    public ForecastData getForecast() {
+        return fd;
+    }
+
+    public void getData(String loc) {
+        WeatherData weather = getCurrentWeather(loc);
+        ForecastData forecast = getForecast(loc);
+        Pair<WeatherData, ForecastData> WeatherEntry = new Pair<>(weather, forecast);
         locationActive = loc;
         addToHistory(loc);
-        return WeatherEntry;
+        this.wd = WeatherEntry.getKey();
+        this.fd = WeatherEntry.getValue();
     }
     
     @Override
