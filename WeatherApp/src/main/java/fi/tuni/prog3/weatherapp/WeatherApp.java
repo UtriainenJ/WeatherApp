@@ -1,8 +1,8 @@
 package fi.tuni.prog3.weatherapp;
 
+import java.io.IOException;
 import javafx.application.Application;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -25,14 +25,22 @@ public class WeatherApp extends Application {
     private final int weatherTempBarHeight = 80;
     private final int feelsLikeBarHeight = 20;
     private final int airQualityBarHeight = 40;
+    private final String tempFileName = "temp.json";
+    private final String defaultLocation = "Raisio";
     
     // Control variables
     private int selectedDay = 0;
+    private String currentLocation = this.defaultLocation;
+    private String currentUnitSystem;
     
     // Containers
     private VBox[] arrayDays;
     
-    // UI elements
+    // Class entities
+    private StorageSystem ss;
+    private WeatherAPI api;
+    
+    // UI containers
     private Scene scene;
     private VBox layout;
     private BorderPane topBar;
@@ -42,15 +50,31 @@ public class WeatherApp extends Application {
     private VBox historyPanel;
     private VBox mapsPanel;
     
+    // UI elements
+    private Button unitsButton;
+    private Label cityLabel;
+    private Label currentWeatherIcon;
+    private Label currentTempField;
+    private Label currentTempUnitField;
+    private Label currentFeelsLikeField;
+    private Label currentFeelsLikeUnitField;
+    private Label currentAirQualityField;
+    private Label currentRainIcon;
+    private Label currentRainField;
+    private Label currentRainUnitField;
+    private Label currentWindIcon;
+    private Label currentWindField;
+    private Label currentWindUnitField;
+    
     private void buildTopBar() {
         // BorderPane for left + center + right alignment
         this.topBar = new BorderPane();
         
         // Units button on the left
-        var unitsButton = new Button("Imperial");
-        unitsButton.setPrefWidth(this.topBarButtonWidth);
-        this.topBar.setLeft(unitsButton);
-        this.topBar.setAlignment(unitsButton, Pos.CENTER);
+        this.unitsButton = new Button();
+        this.unitsButton.setPrefWidth(this.topBarButtonWidth);
+        this.topBar.setLeft(this.unitsButton);
+        this.topBar.setAlignment(this.unitsButton, Pos.CENTER);
         
         // Search button on the right
         var searchButton = new Button("Search & Favorites"); // AmE > BrE
@@ -59,9 +83,9 @@ public class WeatherApp extends Application {
         this.topBar.setAlignment(searchButton, Pos.CENTER);
         
         // CIty label in the center
-        var cityLabel = new Label("Raisio");
-        cityLabel.setFont(new Font("C059 Bold", 24)); // Not quite Cooper Black
-        this.topBar.setCenter(cityLabel);
+        this.cityLabel = new Label("Raisio");
+        this.cityLabel.setFont(new Font("C059 Bold", 24)); // Not quite Cooper Black
+        this.topBar.setCenter(this.cityLabel);
     }
     
     private void buildWeatherPanel() {
@@ -72,42 +96,44 @@ public class WeatherApp extends Application {
         weatherLabel.setPrefHeight(this.weatherLabelHeight);
         
         // Weather and temperature bar
-        var weatherIconLabel = new Label("weatherIcon");
-        var tempLabel = new Label("-5");
-        tempLabel.setFont(new Font("System Regular", 70));
-        var tempUnitLabel = new Label("°C");
-        tempUnitLabel.setAlignment(Pos.TOP_LEFT);
-        tempUnitLabel.setFont(new Font("System Regular", 35));
-        var weatherAndTempBar = new HBox(weatherIconLabel,
-                tempLabel, tempUnitLabel);
+        this.currentWeatherIcon = new Label("weatherIcon");
+        this.currentTempField = new Label();
+        this.currentTempField.setFont(new Font("System Regular", 70));
+        this.currentTempUnitField = new Label();
+        this.currentTempUnitField.setAlignment(Pos.TOP_LEFT);
+        this.currentTempUnitField.setFont(new Font("System Regular", 35));
+        var weatherAndTempBar = new HBox(this.currentWeatherIcon,
+                this.currentTempField, this.currentTempUnitField);
         weatherAndTempBar.setAlignment(Pos.CENTER);
-        tempUnitLabel.setPrefHeight(this.weatherTempBarHeight);
+        this.currentTempUnitField.setPrefHeight(this.weatherTempBarHeight);
         
         // "Feels Like" bar
         var feelsLikeLabel = new Label("Feels like:");
-        var feelsLikeStatusLabel = new Label("-10");
-        feelsLikeStatusLabel.setStyle("-fx-font-weight: bold");
-        var feelsLikeUnitLabel = new Label("°C");
+        this.currentFeelsLikeField = new Label();
+        this.currentFeelsLikeField.setStyle("-fx-font-weight: bold");
+        this.currentFeelsLikeUnitField = new Label();
         var feelsLikeBar = new HBox(feelsLikeLabel,
-                feelsLikeStatusLabel, feelsLikeUnitLabel);
+                this.currentFeelsLikeField, this.currentFeelsLikeUnitField);
         feelsLikeBar.setAlignment(Pos.CENTER);
         feelsLikeBar.setPrefHeight(this.feelsLikeBarHeight);
         
         // Air quality, rain, wind
         var airQualityLabel = new Label("Air Quality:");
-        var airQualityStatusLabel = new Label("Good");
-        airQualityStatusLabel.setStyle("-fx-font-weight: bold");
-        var rainIconLabel = new Label("rainIcon");
-        var rainStatusLabel = new Label("0.0");
-        rainStatusLabel.setStyle("-fx-font-weight: bold");
-        var rainUnitLabel = new Label("mm");
-        var windIconLabel = new Label("windIcon");
-        var windStatusLabel = new Label("3");
-        windStatusLabel.setStyle("-fx-font-weight: bold");
-        var windUnitLabel = new Label("m/s");
-        var airQualityBar = new HBox(airQualityLabel, airQualityStatusLabel,
-                rainIconLabel, rainStatusLabel, rainUnitLabel,
-                windIconLabel, windStatusLabel, windUnitLabel);
+        this.currentAirQualityField = new Label();
+        this.currentAirQualityField.setStyle("-fx-font-weight: bold");
+        this.currentRainIcon = new Label("rainIcon");
+        this.currentRainField = new Label();
+        this.currentRainField.setStyle("-fx-font-weight: bold");
+        this.currentRainUnitField = new Label();
+        this.currentWindIcon = new Label("windIcon");
+        this.currentWindField = new Label();
+        this.currentWindField.setStyle("-fx-font-weight: bold");
+        this.currentWindUnitField = new Label();
+        var airQualityBar = new HBox(airQualityLabel,
+                this.currentAirQualityField, this.currentRainIcon,
+                this.currentRainField, this.currentRainUnitField,
+                this.currentWindIcon, this.currentWindField,
+                this.currentWindUnitField);
         airQualityBar.setAlignment(Pos.CENTER);
         airQualityBar.setPrefHeight(this.airQualityBarHeight);
         
@@ -115,6 +141,25 @@ public class WeatherApp extends Application {
                 feelsLikeBar, airQualityBar);
         this.weatherPanel.setStyle("-fx-background-color: #fae49f;");
         this.weatherPanel.setAlignment(Pos.CENTER);
+    }
+    
+    private void selectDay(int day) 
+            throws ArrayIndexOutOfBoundsException {
+        // Check for valid array index
+        if ((day < 0) | (day >= this.forecastDays)) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        
+        // Reset previous day background
+        this.arrayDays[this.selectedDay].setStyle(
+                "-fx-background-color: #ffffff;");
+        
+        // Color new day background
+        this.arrayDays[day].setStyle("-fx-background-color: #a5c2f9;");
+        this.arrayDays[day].requestFocus();
+        
+        // Update index variable
+        this.selectedDay = day;
     }
     
     private VBox buildForecastDay(int day) {
@@ -138,24 +183,6 @@ public class WeatherApp extends Application {
         var forecastDay = new VBox(weekdayDateBar, weatherIconLabel, tempBar);
         
         return forecastDay;
-    }
-    
-    private void selectDay(int day) {
-        // Check for valid array index
-        if ((day < 0) | (day >= this.forecastDays)) {
-            throw new ArrayIndexOutOfBoundsException();
-        }
-        
-        // Reset previous day background
-        this.arrayDays[this.selectedDay].setStyle(
-                "-fx-background-color: #ffffff;");
-        
-        // Color new day background
-        this.arrayDays[day].setStyle("-fx-background-color: #a5c2f9;");
-        this.arrayDays[day].requestFocus();
-        
-        // Update index variable
-        this.selectedDay = day;
     }
     
     private VBox buildForecastHour(int hourIndex) {
@@ -235,10 +262,64 @@ public class WeatherApp extends Application {
         // Focus middle day by default
         selectDay(this.forecastDays / 2);
     }
+    
+    private void updateTopBar() {
+        //this.currentUnitSystem = this.api.getUnitSystem();
+        this.currentUnitSystem = "Metric";
+        this.unitsButton.setText(this.currentUnitSystem);
+        this.cityLabel.setText(this.currentLocation);
+    }
+    
+    private void updateWeatherPanel() {
+        // Weather and temperature bar
+        //this.currentWeatherIcon.setGraphic();
+        this.currentTempField.setText(String.valueOf(
+                this.api.getWeather().getMain().getTemp()));
+        //this.currentTempUnitField.setText(this.api.getTempUnit());
+        this.currentTempUnitField.setText("K");
+        
+        // "Feels Like" bar
+        this.currentFeelsLikeField.setText(String.valueOf(
+                this.api.getWeather().getMain().getFeels_like()));
+        this.currentFeelsLikeUnitField.setText("K");
+        
+        // Air quality, rain and wind bar
+        this.currentAirQualityField.setText(this.api.getWeather().getWeather()
+                .get(0).getDescription());
+        //this.currentRainIcon.setGraphic();
+        this.currentRainField.setText(String.valueOf(
+                this.api.getWeather().getRain().get1h()));
+        this.currentRainUnitField.setText("mm");
+        //this.currentWindIcon.setGraphic();
+        this.currentWindField.setText(String.valueOf(
+                this.api.getWeather().getWind().getSpeed()));
+        this.currentWindUnitField.setText("m/s");
+    }
+    
+    private void update(String location) {
+        // Request weather and forecast data from api
+        this.api.getData(location);
+        
+        // Update UI fields
+        updateTopBar();
+        updateWeatherPanel();
+    }
 
     @Override
-    public void start(Stage stage) {
+    public void start(Stage stage) 
+            throws IOException {
+        
+        // Initialize logic
+        this.ss = new StorageSystem(this.tempFileName);
+        this.api = this.ss.readFromFile();
+        
+        // Initialize UI
         buildUI(stage);
+        
+        // Update UI
+        update(this.currentLocation);
+        
+        // Display UI
         stage.show();
     }
 
