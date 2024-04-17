@@ -50,7 +50,7 @@ public class ForecastData {
     }
 
     public City getCity() {
-        return city;
+        return city == null? new City() : city;
     }
 
     public void setCity(City city) {
@@ -66,6 +66,7 @@ public class ForecastData {
         private Integer visibility;
         private Double pop;
         private Rain rain;
+        private Snow snow;
         private Sys sys;
         private String dt_txt;
 
@@ -94,7 +95,7 @@ public class ForecastData {
         }
 
         public Clouds getClouds() {
-            return clouds;
+            return clouds == null? new Clouds() : clouds;
         }
 
         public void setClouds(Clouds clouds) {
@@ -102,7 +103,7 @@ public class ForecastData {
         }
 
         public Wind getWind() {
-            return wind;
+            return wind == null? new Wind() : wind;
         }
 
         public void setWind(Wind wind) {
@@ -126,11 +127,19 @@ public class ForecastData {
         }
 
         public Rain getRain() {
-            return rain;
+            return rain == null? new Rain() : rain;
         }
 
         public void setRain(Rain rain) {
             this.rain = rain;
+        }
+        
+        public Snow getSnow() {
+            return snow == null? new Snow() : snow;
+        }
+        
+        public void setSnow(Snow snow) {
+            this.snow = snow;
         }
 
         public Sys getSys() {
@@ -323,6 +332,18 @@ public class ForecastData {
             return _3h == null? "0" : String.valueOf(_3h);
         }
 
+        public void set3h(double _3h) {
+            this._3h = _3h;
+        }
+    }
+    
+    public static class Snow {
+        @SerializedName("3h")
+        private Double _3h;
+        
+        public String get3h() {
+            return _3h == null? "0" : String.valueOf(_3h);
+        }
         public void set3h(double _3h) {
             this._3h = _3h;
         }

@@ -68,7 +68,7 @@ public class WeatherData {
     }
 
     public Wind getWind() {
-        return wind;
+        return wind == null? new Wind() : wind;
     }
 
     public void setWind(Wind wind) {
@@ -76,7 +76,7 @@ public class WeatherData {
     }
 
     public Rain getRain() {
-        return rain;
+        return rain == null? new Rain() : rain;
     }
 
     public void setRain(Rain rain) {
@@ -84,7 +84,7 @@ public class WeatherData {
     }
 
     public Snow getSnow() {
-        return snow;
+        return snow == null? new Snow() : snow;
     }
 
     public void setSnow(Snow snow) {
@@ -92,7 +92,7 @@ public class WeatherData {
     }
 
     public Clouds getClouds() {
-        return clouds;
+        return clouds == null? new Clouds() : clouds;
     }
 
     public void setClouds(Clouds clouds) {
