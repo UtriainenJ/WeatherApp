@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import javafx.util.Pair;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -70,10 +69,11 @@ import okhttp3.Response;
 public class WeatherAPI implements iAPI {
     
     private String locationActive;
+    private String units;
     private List<String> locationFavorites;
     private List<String> locationHistory;
-    private WeatherData wd;
-    private ForecastData fd;
+    private transient WeatherData wd;
+    private transient ForecastData fd;
 
     public String getLocationActive() {
         return locationActive;
