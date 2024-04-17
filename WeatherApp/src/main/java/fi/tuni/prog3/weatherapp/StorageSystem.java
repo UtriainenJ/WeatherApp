@@ -27,7 +27,10 @@ public class StorageSystem implements iReadAndWriteToFile {
         } catch (IOException ex) {
             try {
                 //create new file
-                writeToFile(new WeatherAPI());
+                WeatherAPI api = new WeatherAPI();
+                api.setUnits("m");
+                api.setLocationActive("Raisio");
+                writeToFile(api);
                 return readFromFile();
             } catch (Exception ex1) {
                 return null;
