@@ -2,6 +2,7 @@ package fi.tuni.prog3.weatherapp;
 
 import java.io.IOException;
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -10,7 +11,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -30,6 +30,7 @@ public class WeatherApp extends Application {
     private final int feelsLikeBarHeight = 20;
     private final int airQualityBarHeight = 40;
     private final int maxFavorites = 10;
+    private final int favoriteNameWidth = 200;
     private final String tempFileName = "temp.json";
     
     // Control variables
@@ -276,10 +277,12 @@ public class WeatherApp extends Application {
     
     private void buildSearchFavorite(int index) {
         var nameField = new Label();
+        nameField.setPrefWidth(favoriteNameWidth);
+        nameField.setPadding(new Insets(0, 0, 0, 10));
         var selectButton = new Button("Select");
         var deleteButton = new Button("Delete");
         var favorite = new HBox(nameField, selectButton, deleteButton);
-        favorite.setAlignment(Pos.CENTER_RIGHT);
+        favorite.setAlignment(Pos.CENTER_LEFT);
         favorite.setVisible(false);
         searchLayout.getChildren().add(favorite);
         arrayName[index] = nameField;
@@ -295,27 +298,32 @@ public class WeatherApp extends Application {
         searchWindow.setScene(new Scene(searchLayout));
         searchLayout.setAlignment(Pos.CENTER);
         
-        // Label at the top
+        // Label and close button at the top
+        var topBar = new BorderPane();
         var searchLabel = new Label("Search & Favorites");
         searchLabel.setFont(new Font("C059 Bold", 24));
-        searchLayout.getChildren().add(searchLabel);
+        var closeButton = new Button("Close"); // Button for closing window
+        closeButton.setOnAction((event) -> {searchWindow.close();});
+        topBar.setCenter(searchLabel);
+        topBar.setRight(closeButton);
+        topBar.setAlignment(searchLabel, Pos.CENTER);
+        topBar.setAlignment(closeButton, Pos.CENTER);
+        searchLayout.getChildren().add(topBar);
         
         // Horizontal row
-        var searchField = new TextField(); // Field for entering text
-        var searchButton = new Button("Search"); // Button for starting search
+        var searchField = new TextField(); // Entering text
+        searchField.setPrefWidth(favoriteNameWidth);
+        var searchButton = new Button("Search"); // Starting search
         searchButton.setOnAction((event) -> {
             api.setLocationActive(searchField.getText());
             update();
             });
-        var favoriteButton = new Button("Favorite");
+        var favoriteButton = new Button("Favorite"); // Adding favorites
         favoriteButton.setOnAction((event) -> {
             api.addToFavorites(searchField.getText());
             update();
             });
-        var closeButton = new Button("Close"); // Button for closing window
-        closeButton.setOnAction((event) -> {searchWindow.close();});
-        var searchRow = new HBox(searchField, searchButton, favoriteButton,
-                closeButton);
+        var searchRow = new HBox(searchField, searchButton, favoriteButton);
         searchLayout.getChildren().add(searchRow);
         
         // Favorites
