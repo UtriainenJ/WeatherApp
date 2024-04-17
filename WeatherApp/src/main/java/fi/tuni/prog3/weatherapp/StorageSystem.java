@@ -1,6 +1,7 @@
 package fi.tuni.prog3.weatherapp;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -24,13 +25,21 @@ public class StorageSystem implements iReadAndWriteToFile {
             WeatherAPI api = gson.fromJson(rd, WeatherAPI.class);
             return api;
         } catch (IOException ex) {
-            return null;
+            try {
+                //create new file
+                writeToFile(new WeatherAPI());
+                return readFromFile();
+            } catch (Exception ex1) {
+                return null;
+            }
         }
     }
 
     @Override
     public boolean writeToFile(WeatherAPI api) throws IOException {
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+                .excludeFieldsWithModifiers(java.lang.reflect.Modifier.TRANSIENT)
+                .create();
         try (FileWriter wr = new FileWriter(filename)) {
             gson.toJson(api, wr);
             return true;

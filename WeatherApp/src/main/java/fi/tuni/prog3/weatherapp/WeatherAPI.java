@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import javafx.util.Pair;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -70,10 +69,11 @@ import okhttp3.Response;
 public class WeatherAPI implements iAPI {
     
     private String locationActive;
+    private String units;
     private List<String> locationFavorites;
     private List<String> locationHistory;
-    private WeatherData wd;
-    private ForecastData fd;
+    private transient WeatherData wd;
+    private transient ForecastData fd;
 
     public String getLocationActive() {
         return locationActive;
@@ -116,6 +116,65 @@ public class WeatherAPI implements iAPI {
     public ForecastData getForecast() {
         return fd;
     }
+    
+    public void setUnits(String unitSystem) {
+        switch(unitSystem.toLowerCase()) {
+            case "m":
+            case "metric":
+                units = "metric";
+                break;
+            case "i":
+            case "imperial":
+                units = "imperial";
+                break;
+            default:
+                System.out.println("Invalid unit system" + unitSystem);
+        }
+    }
+    
+    public String getUnit() {
+        switch(units) {
+            case "imperial":
+                return "Imperial";
+            case "metric":
+                return "Metric";
+            default:
+                throw new IllegalStateException("No Units set");
+        }
+    }
+    
+    public String getUnitWind() {
+        switch(units) {
+            case "imperial":
+                return "mph";
+            case "metric":
+                return "m/s";
+            default:
+                throw new IllegalStateException("No Units set");
+        }
+    }
+    
+    public String getUnitRain() {
+        switch(units) {
+            case "imperial":
+                return String.valueOf('"');
+            case "metric":
+                return "mm";
+            default:
+                throw new IllegalStateException("No Units set");
+        }
+    }
+    
+    public String getUnitTemp() {
+        switch(units) {
+            case "imperial":
+                return "°F";
+            case "metric":
+                return "°C";
+            default:
+                throw new IllegalStateException("No Units set");
+        }
+    }
 
     public void getData(String loc) {
         WeatherData weather = getCurrentWeather(loc);
@@ -131,8 +190,10 @@ public class WeatherAPI implements iAPI {
         try {
             String key = getAPIKey();
             String url = "https://api.openweathermap.org/data/2.5/weather"
-                    + "?q=" + loc + "&appid=" + key;
+                    + "?q=" + loc + "&appid=" + key
+                    + "&units=" + units;
             String json = makeHTTPCall(url);
+            //System.out.println(json);
             return makeWeatherObject(json);
         } catch (IOException ex) {return null;}
     }
@@ -147,7 +208,8 @@ public class WeatherAPI implements iAPI {
             String latStr = String.format(Locale.US,"%.4f", lat);
             String lonStr = String.format(Locale.US,"%.4f", lon);
             String url = "https://api.openweathermap.org/data/2.5/weather"
-                    + "?lat=" + latStr + "&lon=" + lonStr + "&appid=" + key;
+                    + "?lat=" + latStr + "&lon=" + lonStr + "&appid=" + key
+                    + "&units=" + units;
             String json = makeHTTPCall(url);
             return makeWeatherObject(json);
         } catch (IOException ex) {return null;}
@@ -157,28 +219,30 @@ public class WeatherAPI implements iAPI {
     public ForecastData getForecast(double lat, double lon) {
         try {
             if(illegalLatOrLon(lat, lon)) {
-                throw new IllegalStateException("Lat and lon must be +/- 90");
+                throw new IllegalStateException("Lat must be +/- 90, longitude +/- 180");
             }
             String key = getAPIKey();
             String latStr = String.format(Locale.US,"%.4f", lat);
             String lonStr = String.format(Locale.US,"%.4f", lon);
             String url = "https://api.openweathermap.org/data/2.5/forecast"
-                    + "?lat=" + latStr + "&lon=" + lonStr + "&appid=" + key;
+                    + "?lat=" + latStr + "&lon=" + lonStr + "&appid=" + key
+                    + "&units=" + units;
             String res = makeHTTPCall(url);
-            ForecastData wd = makeForecastObject(res);
-            return wd;
+            ForecastData weather = makeForecastObject(res);
+            return weather;
         } catch (IOException ex) {return null;}
     }
 
     @Override
     public ForecastData getForecast(String loc) {
         try {
+            // get location from place name
             String key = getAPIKey();
             String url = "http://api.openweathermap.org/geo/1.0/direct"
                     + "?q=" + loc + "&limit=1&appid=" + key;
             String res = makeHTTPCall(url);
             //System.out.println(res);
-            
+
             Gson gson = new Gson();
             LocationData[] locations = gson.fromJson(res, LocationData[].class);
 
@@ -232,7 +296,7 @@ public class WeatherAPI implements iAPI {
     }
     
     private static boolean illegalLatOrLon(double lat, double lon) {
-        return lat < -90 || lat > 90 || lon < -90 || lon > 90;
+        return lat < -90 || lat > 90 || lon < -180 || lon > 180;
     }
     
     private void addToHistory(String loc) {
