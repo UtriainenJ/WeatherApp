@@ -69,7 +69,7 @@ import okhttp3.Response;
 public class WeatherAPI implements iAPI {
     
     private String locationActive;
-    private static String units;
+    private String units;
     private List<String> locationFavorites;
     private List<String> locationHistory;
     private transient WeatherData wd;
@@ -81,9 +81,10 @@ public class WeatherAPI implements iAPI {
         this.locationHistory = new ArrayList<>();
     }
     
-    public void setLocationActive(String loc) {
+    public WeatherAPI setLocationActive(String loc) {
         addToHistory(loc);
         this.locationActive = loc;
+        return this;
     }
 
     public String getLocationActive() {
@@ -127,6 +128,8 @@ public class WeatherAPI implements iAPI {
             case "m":
             case "metric":
                 units = "metric";
+                wd.setUnits(units);
+                
                 break;
             case "i":
             case "imperial":
@@ -136,8 +139,16 @@ public class WeatherAPI implements iAPI {
                 System.out.println("Invalid unit system" + unitSystem);
         }
     }
+    
+    public void switchUnits() {
+        if("metric".equals(units)) {
+            setUnits("imperial");
+        } else {
+            setUnits("metric");
+        }
+    }
 
-    public static String getUnit() {
+    public String getUnit() {
         switch(units) {
             case "imperial":
                 return "Imperial";

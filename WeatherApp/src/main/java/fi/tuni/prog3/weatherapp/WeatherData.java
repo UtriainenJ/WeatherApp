@@ -11,6 +11,9 @@ import java.util.Locale;
  */
 public class WeatherData {
     
+    private static final String METRIC = "metric";
+    private static String units;
+
     private Coord coord;
     private List<Weather> weather;
     private String base;
@@ -28,6 +31,10 @@ public class WeatherData {
     private int cod;
 
     public WeatherData() {}
+    
+    public void setUnits(String str) {
+        this.units = str;
+    }
 
     public Coord getCoord() {
         return coord;
@@ -321,7 +328,7 @@ public class WeatherData {
         private Double _3h;
 
         public String get1h() {
-            if("Metric".equals(WeatherAPI.getUnit())) {
+            if(METRIC.equals(units)) {
                 return _1h == null? "0" : String.valueOf(_1h);
             }
             return _1h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
@@ -332,7 +339,7 @@ public class WeatherData {
         }
 
         public String get3h() {
-            if("Metric".equals(WeatherAPI.getUnit())) {
+            if(METRIC.equals(units)) {
                 return _3h == null? "0" : String.valueOf(_3h);
             }
             return _3h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
@@ -350,7 +357,7 @@ public class WeatherData {
         private Double _3h;
 
         public String get1h() {
-            if("Metric".equals(WeatherAPI.getUnit())) {
+            if(METRIC.equals(units)) {
                 return _1h == null? "0" : String.valueOf(_1h);
             }
             return _1h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
@@ -361,7 +368,7 @@ public class WeatherData {
         }
 
         public String get3h() {
-            if("Metric".equals(WeatherAPI.getUnit())) {
+            if(METRIC.equals(units)) {
                 return _3h == null? "0" : String.valueOf(_3h);
             }
             return _3h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);

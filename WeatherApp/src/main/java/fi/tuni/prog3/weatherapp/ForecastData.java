@@ -9,7 +9,9 @@ import java.util.Locale;
  * @author jerri
  * generated with help of chatGPT
  */
-public class ForecastData {
+public class ForecastData {    
+    private static final String METRIC = "metric";    
+    private static String units;
     
     private String cod;
     private int message;
@@ -17,6 +19,10 @@ public class ForecastData {
     private List<WeatherEntry> list;
     
     public ForecastData(){}
+    
+    public void setUnits(String str) {
+        this.units = str;
+    }
 
     public String getCod() {
         return cod;
@@ -378,7 +384,7 @@ public class ForecastData {
         private Double _3h;
 
         public String get1h() {
-            if("Metric".equals(WeatherAPI.getUnit())) {
+            if(METRIC.equals(units)) {
                 return _1h == null? "0" : String.valueOf(_1h);
             }
             return _1h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
@@ -389,7 +395,7 @@ public class ForecastData {
         }
         
         public String get3h() {
-            if("Metric".equals(WeatherAPI.getUnit())) {
+            if(METRIC.equals(units)) {
                 return _3h == null? "0" : String.valueOf(_3h);
             }
             return _3h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
@@ -407,7 +413,7 @@ public class ForecastData {
         private Double _3h;
 
         public String get1h() {
-            if("Metric".equals(WeatherAPI.getUnit())) {
+            if(METRIC.equals(units)) {
                 return _1h == null? "0" : String.valueOf(_1h);
             }
             return _1h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
@@ -418,7 +424,7 @@ public class ForecastData {
         }
         
         public String get3h() {
-            if("Metric".equals(WeatherAPI.getUnit())) {
+            if(METRIC.equals(units)) {
                 return _3h == null? "0" : String.valueOf(_3h);
             }
             return _3h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
