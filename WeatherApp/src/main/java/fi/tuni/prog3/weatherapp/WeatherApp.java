@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -351,18 +352,24 @@ public class WeatherApp extends Application {
         searchLayout.getChildren().add(topBar);
         
         // Horizontal row
-        var searchField = new TextField(); // Entering text
+        var searchField = new TextField(); // Enter text
+        searchField.setOnKeyPressed((event) -> {
+            if (event.getCode() == KeyCode.ENTER) { // Start search
+                api.setLocationActive(searchField.getText());
+                update();
+            }
+        });
         searchField.setPrefWidth(favoriteNameWidth);
-        var searchButton = new Button("Search"); // Starting search
+        var searchButton = new Button("Search"); // Start search
         searchButton.setOnAction((event) -> {
             api.setLocationActive(searchField.getText());
             update();
-            });
-        var favoriteButton = new Button("Favorite"); // Adding favorites
+        });
+        var favoriteButton = new Button("Favorite"); // Add favorite
         favoriteButton.setOnAction((event) -> {
             api.addToFavorites(searchField.getText());
             update();
-            });
+        });
         var searchRow = new HBox(searchField, searchButton, favoriteButton);
         searchLayout.getChildren().add(searchRow);
         
@@ -470,11 +477,11 @@ public class WeatherApp extends Application {
         arrayFavoriteSelect[index].setOnAction((event) -> {
             api.setLocationActive(loc);
             update();
-            });
+        });
         arrayFavoriteDelete[index].setOnAction((event) -> {
             api.removeFromFavorites(loc);
             update();
-            });
+        });
     }
     
     private void updateFavorites() {
