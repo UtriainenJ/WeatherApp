@@ -38,10 +38,16 @@ public class WeatherApp extends Application {
     
     // Containers
     private VBox[] arrayDays;
+    private Label[] arrayDayWeekday;
+    private Label[] arrayDayDate;
+    private Label[] arrayDayIcon;
+    private Label[] arrayDayTempMin;
+    private Label[] arrayDayTempMax;
+    private Label[] arrayDayTempUnit;
     private HBox[] arrayFavorites;
-    private Label[] arrayName;
-    private Button[] arraySelect;
-    private Button[] arrayDelete;
+    private Label[] arrayFavoriteName;
+    private Button[] arrayFavoriteSelect;
+    private Button[] arrayFavoriteDelete;
     
     // Class entities
     private StorageSystem ss;
@@ -56,6 +62,7 @@ public class WeatherApp extends Application {
     private HBox midBar;
     private StackPane basePanel;
     private VBox weather;
+    private HBox forecastDaysBar;
     private VBox forecast;
     private VBox history;
     private VBox maps;
@@ -174,8 +181,7 @@ public class WeatherApp extends Application {
         }
         
         // Reset previous day background
-        arrayDays[selectedDay].setStyle(
-                "-fx-background-color: #ffffff;");
+        arrayDays[selectedDay].setStyle("");
         
         // Color new day background
         arrayDays[day].setStyle("-fx-background-color: #a5c2f9;");
@@ -185,10 +191,10 @@ public class WeatherApp extends Application {
         selectedDay = day;
     }
     
-    private VBox buildForecastDay() {
+    private void buildForecastDay(int index) {
         // Top: weekday and date bar
-        var weekdayLabel = new Label("Tue");
-        var dateLabel = new Label("24.10");
+        var weekdayLabel = new Label();
+        var dateLabel = new Label();
         dateLabel.setStyle("-fx-font-weight: bold");
         var weekdayDateBar = new HBox(weekdayLabel, dateLabel);
         
@@ -196,16 +202,24 @@ public class WeatherApp extends Application {
         var weatherIconLabel = new Label("weatherIcon");
         
         // Bottom: temperature bar
-        var minTempLabel = new Label("-4");
+        var minTempLabel = new Label();
         var sepLabel = new Label("...");
-        var maxTempLabel = new Label("-2");
-        var tempUnitLabel = new Label("°C");
+        var maxTempLabel = new Label();
+        var tempUnitLabel = new Label();
         var tempBar = new HBox(minTempLabel, sepLabel,maxTempLabel,
                 tempUnitLabel);
         
         var forecastDay = new VBox(weekdayDateBar, weatherIconLabel, tempBar);
+        forecastDaysBar.getChildren().add(forecastDay);
         
-        return forecastDay;
+        // Add elements to class arrays
+        arrayDays[index] = forecastDay;
+        arrayDayWeekday[index] = weekdayLabel;
+        arrayDayDate[index] = dateLabel;
+        arrayDayIcon[index] = weatherIconLabel;
+        arrayDayTempMin[index] = minTempLabel;
+        arrayDayTempMax[index] = maxTempLabel;
+        arrayDayTempUnit[index] = tempUnitLabel;
     }
     
     private VBox buildForecastHour(int hourIndex) {
@@ -224,16 +238,20 @@ public class WeatherApp extends Application {
     }
     
     private void buildForecast() {
-        // Init day array
+        // Initialize arrays
         arrayDays = new VBox[forecastDays];
+        arrayDayWeekday = new Label[forecastDays];
+        arrayDayDate = new Label[forecastDays];
+        arrayDayIcon = new Label[forecastDays];
+        arrayDayTempMin = new Label[forecastDays];
+        arrayDayTempMax = new Label[forecastDays];
+        arrayDayTempUnit = new Label[forecastDays];
         
         // Horizontal days bar
-        var forecastDaysBar = new HBox();
+        forecastDaysBar = new HBox();
         forecastDaysBar.setAlignment(Pos.CENTER);
         for (int i = 0; i < forecastDays; i++) {
-            var forecastDay = buildForecastDay();
-            arrayDays[i] = forecastDay;
-            forecastDaysBar.getChildren().add(forecastDay);
+            buildForecastDay(i);
         }
         
         // Horizontal hourly forecast bar
@@ -285,9 +303,9 @@ public class WeatherApp extends Application {
         favorite.setAlignment(Pos.CENTER_LEFT);
         favorite.setVisible(false);
         searchLayout.getChildren().add(favorite);
-        arrayName[index] = nameField;
-        arraySelect[index] = selectButton;
-        arrayDelete[index] = deleteButton;
+        arrayFavoriteName[index] = nameField;
+        arrayFavoriteSelect[index] = selectButton;
+        arrayFavoriteDelete[index] = deleteButton;
         arrayFavorites[index] = favorite;
     }
     
@@ -328,9 +346,9 @@ public class WeatherApp extends Application {
         
         // Favorites
         arrayFavorites = new HBox[maxFavorites];
-        arrayName = new Label[maxFavorites];
-        arraySelect = new Button[maxFavorites];
-        arrayDelete = new Button[maxFavorites];
+        arrayFavoriteName = new Label[maxFavorites];
+        arrayFavoriteSelect = new Button[maxFavorites];
+        arrayFavoriteDelete = new Button[maxFavorites];
         for (int index = 0; index < maxFavorites; index++) {
             buildSearchFavorite(index);
         }
@@ -399,15 +417,31 @@ public class WeatherApp extends Application {
         currentWindUnitField.setText(api.getUnitWind());
     }
     
+    private void updateForecastDay(int index) {
+        var forecastDay = api.getForecast().getList().get(index);
+        //arrayDayWeekday[index].setText(); TODO: weekday
+        arrayDayDate[index].setText(forecastDay.getDt_txt()); // TODO: date
+        //arrayDayIcon[index] TODO: icon
+        //arrayDayTempMin[index].setText(); TODO: daily minimum temperature
+        //arrayDayTempMax[index].setText(); TODO: daily maximum temperature
+        arrayDayTempUnit[index].setText(api.getUnitTemp());
+    }
+    
+    private void updateForecast() {
+        for (int i = 0; i < forecastDays; i++) {
+            updateForecastDay(i);
+        }
+    }
+    
     private void updateFavoritesIndex(int index, String loc) {
         //selectButton.setOnAction((event) -> {api.setLocationActive(loc);});
         //deleteButton.setOnAction((event) -> {api.removeFromFavorites(loc);});
-        arrayName[index].setText(loc);
-        arraySelect[index].setOnAction((event) -> {
+        arrayFavoriteName[index].setText(loc);
+        arrayFavoriteSelect[index].setOnAction((event) -> {
             api.setLocationActive(loc);
             update();
             });
-        arrayDelete[index].setOnAction((event) -> {
+        arrayFavoriteDelete[index].setOnAction((event) -> {
             api.removeFromFavorites(loc);
             update();
             });
@@ -433,6 +467,9 @@ public class WeatherApp extends Application {
         // Update main window UI fields
         updateTopBar();
         updateWeatherPanel();
+        
+        // Update bottom panel
+        updateForecast();
         
         // Update search window UI fields
         updateFavorites();
