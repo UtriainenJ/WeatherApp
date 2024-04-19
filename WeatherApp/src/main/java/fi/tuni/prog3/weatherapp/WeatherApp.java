@@ -1,5 +1,6 @@
 package fi.tuni.prog3.weatherapp;
 
+import java.io.File;
 import java.io.IOException;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -9,6 +10,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -27,8 +30,8 @@ public class WeatherApp extends Application {
     private final int topBarButtonWidth = 150;
     private final int weatherLabelHeight = 30;
     private final int weatherTempBarHeight = 80;
-    private final int feelsLikeBarHeight = 20;
-    private final int airQualityBarHeight = 40;
+    private final int feelsLikeBarHeight = 30;
+    private final int airQualityBarHeight = 30;
     private final int maxFavorites = 10;
     private final int favoriteNameWidth = 200;
     private final String tempFileName = "temp.json";
@@ -40,7 +43,7 @@ public class WeatherApp extends Application {
     private VBox[] arrayDays;
     private Label[] arrayDayWeekday;
     private Label[] arrayDayDate;
-    private Label[] arrayDayIcon;
+    private ImageView[] arrayDayIcon;
     private Label[] arrayDayTempMin;
     private Label[] arrayDayTempMax;
     private Label[] arrayDayTempUnit;
@@ -69,16 +72,16 @@ public class WeatherApp extends Application {
     
     // UI elements
     private Label cityLabel;
-    private Label currentWeatherIcon;
+    private ImageView currentWeatherIcon;
+    private ImageView currentRainIcon;
+    private ImageView currentWindIcon;
     private Label currentTempField;
     private Label currentTempUnitField;
     private Label currentFeelsLikeField;
     private Label currentFeelsLikeUnitField;
     private Label currentAirQualityField;
-    private Label currentRainIcon;
     private Label currentRainField;
     private Label currentRainUnitField;
-    private Label currentWindIcon;
     private Label currentWindField;
     private Label currentWindUnitField;
     
@@ -126,13 +129,16 @@ public class WeatherApp extends Application {
         weatherLabel.setPrefHeight(weatherLabelHeight);
         
         // Weather and temperature bar
-        currentWeatherIcon = new Label("weatherIcon");
+        currentWeatherIcon = new ImageView();
+        currentWeatherIcon.setPreserveRatio(true);
+        var currentWeatherLabel = new Label();
+        currentWeatherLabel.setGraphic(currentWeatherIcon);
         currentTempField = new Label();
         currentTempField.setFont(new Font("System Regular", 70));
         currentTempUnitField = new Label();
         currentTempUnitField.setAlignment(Pos.TOP_LEFT);
         currentTempUnitField.setFont(new Font("System Regular", 35));
-        var weatherAndTempBar = new HBox(currentWeatherIcon,
+        var weatherAndTempBar = new HBox(currentWeatherLabel,
                 currentTempField, currentTempUnitField);
         weatherAndTempBar.setAlignment(Pos.CENTER);
         currentTempUnitField.setPrefHeight(weatherTempBarHeight);
@@ -151,11 +157,21 @@ public class WeatherApp extends Application {
         var airQualityLabel = new Label("Air Quality:");
         currentAirQualityField = new Label();
         currentAirQualityField.setStyle("-fx-font-weight: bold");
-        currentRainIcon = new Label("rainIcon");
+        currentAirQualityField.setPadding(new Insets(0, 30, 0, 0));
+        currentRainIcon = new ImageView();
+        currentRainIcon.setPreserveRatio(true);
+        currentRainIcon.setFitWidth(airQualityBarHeight);
+        var currentRainLabel = new Label();
+        currentRainLabel.setGraphic(currentRainIcon);
         currentRainField = new Label();
         currentRainField.setStyle("-fx-font-weight: bold");
         currentRainUnitField = new Label();
-        currentWindIcon = new Label("windIcon");
+        currentRainUnitField.setPadding(new Insets(0, 30, 0, 0));
+        currentWindIcon = new ImageView();
+        currentWindIcon.setPreserveRatio(true);
+        currentWindIcon.setFitWidth(airQualityBarHeight);
+        var currentWindLabel = new Label();
+        currentWindLabel.setGraphic(currentWindIcon);
         currentWindField = new Label();
         currentWindField.setStyle("-fx-font-weight: bold");
         currentWindUnitField = new Label();
@@ -199,24 +215,30 @@ public class WeatherApp extends Application {
         var weekdayDateBar = new HBox(weekdayLabel, dateLabel);
         
         // Middle: weather icon
-        var weatherIconLabel = new Label("weatherIcon");
+        var weatherIconImage = new ImageView();
+        weatherIconImage.setPreserveRatio(true);
+        var weatherIconLabel = new Label();
+        weatherIconLabel.setGraphic(weatherIconImage);
         
         // Bottom: temperature bar
         var minTempLabel = new Label();
         var sepLabel = new Label("...");
+        sepLabel.setPadding(new Insets(0, 5, 0, 5));
         var maxTempLabel = new Label();
         var tempUnitLabel = new Label();
-        var tempBar = new HBox(minTempLabel, sepLabel,maxTempLabel,
+        var tempBar = new HBox(minTempLabel, sepLabel, maxTempLabel,
                 tempUnitLabel);
+        tempBar.setAlignment(Pos.CENTER);
         
         var forecastDay = new VBox(weekdayDateBar, weatherIconLabel, tempBar);
+        forecastDay.setAlignment(Pos.CENTER);
         forecastDaysBar.getChildren().add(forecastDay);
         
         // Add elements to class arrays
         arrayDays[index] = forecastDay;
         arrayDayWeekday[index] = weekdayLabel;
         arrayDayDate[index] = dateLabel;
-        arrayDayIcon[index] = weatherIconLabel;
+        arrayDayIcon[index] = weatherIconImage;
         arrayDayTempMin[index] = minTempLabel;
         arrayDayTempMax[index] = maxTempLabel;
         arrayDayTempUnit[index] = tempUnitLabel;
@@ -242,7 +264,7 @@ public class WeatherApp extends Application {
         arrayDays = new VBox[forecastDays];
         arrayDayWeekday = new Label[forecastDays];
         arrayDayDate = new Label[forecastDays];
-        arrayDayIcon = new Label[forecastDays];
+        arrayDayIcon = new ImageView[forecastDays];
         arrayDayTempMin = new Label[forecastDays];
         arrayDayTempMax = new Label[forecastDays];
         arrayDayTempUnit = new Label[forecastDays];
@@ -392,13 +414,21 @@ public class WeatherApp extends Application {
         buildSearchWindow();
     }
     
+    private Image getIcon(String icon) {
+        String filename = String.format("icons/%s.png", icon);
+        var iconFile = new File(filename);
+        var iconImage = new Image(iconFile.toURI().toString());
+        return iconImage;
+    }
+    
     private void updateTopBar() {
         cityLabel.setText(api.getLocationActive());
     }
     
     private void updateWeatherPanel() {
         // Weather and temperature bar
-        //currentWeatherIcon.setGraphic();
+        var iconWeat = getIcon(api.getWeather().getWeather().get(0).getIcon());
+        currentWeatherIcon.setImage(iconWeat);
         currentTempField.setText(api.getWeather().getMain().getTemp());
         currentTempUnitField.setText(api.getUnitTemp());
         
@@ -407,12 +437,11 @@ public class WeatherApp extends Application {
         currentFeelsLikeUnitField.setText(api.getUnitTemp());
         
         // Air quality, rain and wind bar
-        //currentAirQualityField.setText(api.getWeather());
         currentAirQualityField.setText("TODO");
-        //currentRainIcon.setGraphic();
+        currentRainIcon.setImage(getIcon("rain"));
         currentRainField.setText(api.getWeather().getRain().get1h());
         currentRainUnitField.setText(api.getUnitRain());
-        //currentWindIcon.setGraphic();
+        currentWindIcon.setImage(getIcon("wind"));
         currentWindField.setText(api.getWeather().getWind().getSpeed());
         currentWindUnitField.setText(api.getUnitWind());
     }
@@ -421,9 +450,10 @@ public class WeatherApp extends Application {
         var forecastDay = api.getForecast().getList().get(index);
         //arrayDayWeekday[index].setText(); TODO: weekday
         arrayDayDate[index].setText(forecastDay.getDt_txt()); // TODO: date
-        //arrayDayIcon[index] TODO: icon
-        //arrayDayTempMin[index].setText(); TODO: daily minimum temperature
-        //arrayDayTempMax[index].setText(); TODO: daily maximum temperature
+        Image icon = getIcon(forecastDay.getWeather().get(0).getIcon());
+        arrayDayIcon[index].setImage(icon);
+        arrayDayTempMin[index].setText(forecastDay.getMain().getTemp_min()); // TODO: daily minimum temperature
+        arrayDayTempMax[index].setText(forecastDay.getMain().getTemp_max()); // TODO: daily maximum temperature
         arrayDayTempUnit[index].setText(api.getUnitTemp());
     }
     
