@@ -33,7 +33,7 @@ public class WeatherData {
     public WeatherData() {}
     
     public void setUnits(String str) {
-        this.units = str;
+        WeatherData.units = str;
     }
 
     public Coord getCoord() {

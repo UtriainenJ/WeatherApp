@@ -24,14 +24,14 @@ public interface iAPI {
      * Returns a forecast for the given coordinates.
      * @param lat The latitude of the location.
      * @param lon The longitude of the location.
-     * @return ForecastData.
+     * @return ForecastDataHourly.
      */
-    public ForecastData getForecast(double lat, double lon);
+    public ForecastDataHourly getForecastHourly(double lat, double lon);
     
     /**
      * Returns a forecast for the given city.
      * @param loc Name of the location for which weather data should be fetched.
-     * @return ForecastData.
+     * @return ForecastDataHourly.
      */
-    public ForecastData getForecast(String loc);
+    public ForecastDataHourly getForecastHourly(String loc);
 }

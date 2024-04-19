@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package fi.tuni.prog3.weatherapp;
 
 import com.google.gson.annotations.SerializedName;
@@ -7,9 +11,8 @@ import java.util.Locale;
 /**
  *
  * @author jerri
- * generated with help of chatGPT
  */
-public class ForecastData {    
+public class ForecastDataDaily {
     private static final String METRIC = "metric";    
     private static String units;
     
@@ -17,11 +20,10 @@ public class ForecastData {
     private int message;
     private int cnt;
     private List<WeatherEntry> list;
-    
-    public ForecastData(){}
+    private City city;
     
     public void setUnits(String str) {
-        this.units = str;
+        ForecastDataDaily.units = str;
     }
 
     public String getCod() {
@@ -56,7 +58,15 @@ public class ForecastData {
         this.list = list;
     }
 
-    public static class WeatherEntry {
+    public City getCity() {
+        return city;
+    }
+
+    public void setCity(City city) {
+        this.city = city;
+    }
+
+    public class WeatherEntry {
         private Long dt;
         private MainData main;
         private List<Weather> weather;
@@ -68,13 +78,7 @@ public class ForecastData {
         private Snow snow;
         private Sys sys;
         private String dt_txt;
-        private City city;
-        private String country;
-        private Integer population;
-        private Integer timezone;
-        private Long sunrise;
-        private Long sunset;
-
+        
         public String getDt() {
             return dt == null? "null" : String.valueOf(dt);
         }
@@ -116,15 +120,15 @@ public class ForecastData {
         }
 
         public String getVisibility() {
-            return visibility == null? "0": String.valueOf(visibility);
+            return visibility == null? "0" : String.valueOf(visibility);
         }
 
         public void setVisibility(int visibility) {
             this.visibility = visibility;
         }
 
-        public String getPop() {
-            return pop == null? "null" : String.valueOf(pop);
+        public double getPop() {
+            return pop;
         }
 
         public void setPop(double pop) {
@@ -142,7 +146,7 @@ public class ForecastData {
         public Snow getSnow() {
             return snow == null? new Snow() : snow;
         }
-        
+
         public void setSnow(Snow snow) {
             this.snow = snow;
         }
@@ -162,57 +166,9 @@ public class ForecastData {
         public void setDt_txt(String dt_txt) {
             this.dt_txt = dt_txt;
         }
-
-        public City getCity() {
-            return city == null? new City() : city;
-        }
-
-        public void setCity(City city) {
-            this.city = city;
-        }
-
-        public String getCountry() {
-            return country == null? "null" : country;
-        }
-
-        public void setCountry(String country) {
-            this.country = country;
-        }
-
-        public String getPopulation() {
-            return population == null? "null" : String.valueOf(population);
-        }
-
-        public void setPopulation(int population) {
-            this.population = population;
-        }
-
-        public String getTimezone() {
-            return timezone == null? "null" : String.valueOf(timezone);
-        }
-
-        public void setTimezone(int timezone) {
-            this.timezone = timezone;
-        }
-
-        public String getSunrise() {
-            return sunrise == null? "null" : String.valueOf(sunrise);
-        }
-
-        public void setSunrise(long sunrise) {
-            this.sunrise = sunrise;
-        }
-
-        public String getSunset() {
-            return sunset == null? "null" : String.valueOf(sunset);
-        }
-
-        public void setSunset(long sunset) {
-            this.sunset = sunset;
-        }
     }
 
-    public static class MainData {
+    public class MainData {
         private Double temp;
         private Double feels_like;
         private Double temp_min;
@@ -296,7 +252,7 @@ public class ForecastData {
         }
     }
 
-    public static class Weather {
+    public class Weather {
         private int id;
         private String main;
         private String description;
@@ -335,7 +291,7 @@ public class ForecastData {
         }
     }
 
-    public static class Clouds {
+    public class Clouds {
         private Integer all;
 
         public String getAll() {
@@ -347,7 +303,7 @@ public class ForecastData {
         }
     }
 
-    public static class Wind {
+    public class Wind {
         private Double speed;
         private Integer deg;
         private Double gust;
@@ -377,7 +333,7 @@ public class ForecastData {
         }
     }
 
-    public static class Rain {
+    public class Rain {
         @SerializedName("1h")
         private Double _1h;
         @SerializedName("3h")
@@ -434,7 +390,7 @@ public class ForecastData {
         }
     }
 
-    public static class Sys {
+    public class Sys {
         private String pod;
 
         public String getPod() {
@@ -446,11 +402,15 @@ public class ForecastData {
         }
     }
 
-    public static class City {
+    public class City {
         private Integer id;
         private String name;
         private Coord coord;
-
+        private String country;
+        private Integer population;
+        private Integer timezone;
+        private Long sunrise;
+        private Long sunset;
 
         public String getId() {
             return id == null? "null" : String.valueOf(id);
@@ -461,7 +421,7 @@ public class ForecastData {
         }
 
         public String getName() {
-            return name == null? "null" : name;
+            return name;
         }
 
         public void setName(String name) {
@@ -475,9 +435,49 @@ public class ForecastData {
         public void setCoord(Coord coord) {
             this.coord = coord;
         }
+
+        public String getCountry() {
+            return country;
+        }
+
+        public void setCountry(String country) {
+            this.country = country;
+        }
+
+        public String getPopulation() {
+            return population == null? "null" : String.valueOf(population);
+        }
+
+        public void setPopulation(int population) {
+            this.population = population;
+        }
+
+        public String getTimezone() {
+            return timezone == null? "null" : String.valueOf(timezone);
+        }
+
+        public void setTimezone(int timezone) {
+            this.timezone = timezone;
+        }
+
+        public String getSunrise() {
+            return sunrise == null? "null" : String.valueOf(sunrise);
+        }
+
+        public void setSunrise(long sunrise) {
+            this.sunrise = sunrise;
+        }
+
+        public String getSunset() {
+            return sunset == null? "null" : String.valueOf(sunset);
+        }
+
+        public void setSunset(long sunset) {
+            this.sunset = sunset;
+        }
     }
 
-    public static class Coord {
+    public class Coord {
         private double lat;
         private double lon;
 
@@ -496,5 +496,5 @@ public class ForecastData {
         public void setLon(double lon) {
             this.lon = lon;
         }
-    }    
+    }
 }
