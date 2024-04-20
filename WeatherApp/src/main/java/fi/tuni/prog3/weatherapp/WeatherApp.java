@@ -1,7 +1,9 @@
 package fi.tuni.prog3.weatherapp;
 
-import java.io.File;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -46,7 +48,8 @@ public class WeatherApp extends Application {
     private VBox[] arrayDays;
     private VBox[] arrayHours;
     private ImageView[] arrayDayIcon;
-    private ImageView[] arrayHourIcon;
+    private ImageView[] arrayHourWeatherIcon;
+    private ImageView[] arrayHourWindIcon;
     private Label[] arrayDayWeekday;
     private Label[] arrayDayDate;
     private Label[] arrayDayTempMin;
@@ -265,7 +268,11 @@ public class WeatherApp extends Application {
         var tempStatusLabel = new Label();
         
         // Wind
+        var windIconImage = new ImageView(getIcon("compass"));
+        windIconImage.setPreserveRatio(true);
+        windIconImage.setFitWidth(hourlyForecastWidth);
         var windIconLabel = new Label();
+        windIconLabel.setGraphic(windIconImage);
         var windStatusLabel = new Label();
         
         // Rain
@@ -282,7 +289,8 @@ public class WeatherApp extends Application {
         
         // Add elements to class arrays
         arrayHours[index] = forecastHour;
-        arrayHourIcon[index] = weatherIconImage;
+        arrayHourWeatherIcon[index] = weatherIconImage;
+        arrayHourWindIcon[index] = windIconImage;
         arrayHourLabel[index] = hourLabel;
         arrayHourTemp[index] = tempStatusLabel;
         arrayHourWind[index] = windStatusLabel;
@@ -301,7 +309,8 @@ public class WeatherApp extends Application {
         arrayDayTempUnit = new Label[forecastDays];
         
         arrayHours = new VBox[forecastHours];
-        arrayHourIcon = new ImageView[forecastHours];
+        arrayHourWeatherIcon = new ImageView[forecastHours];
+        arrayHourWindIcon = new ImageView[forecastHours];
         arrayHourLabel = new Label[forecastHours];
         arrayHourTemp = new Label[forecastHours];
         arrayHourWind = new Label[forecastHours];
@@ -460,9 +469,21 @@ public class WeatherApp extends Application {
     
     private Image getIcon(String icon) {
         String filename = String.format("icons/%s.png", icon);
-        var iconFile = new File(filename);
-        var iconImage = new Image(iconFile.toURI().toString());
-        return iconImage;
+        try { // Find icon
+            final InputStream iconFile = new DataInputStream(
+                    new FileInputStream(filename));
+            var iconImage = new Image(iconFile);
+            return iconImage;
+        } catch (IOException ex1) { // Icon missing. get default
+            try {
+                final InputStream defaultFile = new DataInputStream(
+                        new FileInputStream("icons/default.png"));
+                var iconImage = new Image(defaultFile);
+                return iconImage;
+            } catch (IOException ex2) { // Both missing
+                return null;
+            }
+        }
     }
     
     private void updateTopBar() {
@@ -496,15 +517,16 @@ public class WeatherApp extends Application {
         arrayDayIcon[index].setImage(icon);
         //arrayDayWeekday[index].setText(); TODO: weekday
         arrayDayDate[index].setText(forecastDay.getDt_txt()); // TODO: date
-        arrayDayTempMin[index].setText(forecastDay.getMain().getTemp_min()); // TODO: daily minimum temperature
-        arrayDayTempMax[index].setText(forecastDay.getMain().getTemp_max()); // TODO: daily maximum temperature
+        arrayDayTempMin[index].setText(forecastDay.getMain().getTemp_min());
+        arrayDayTempMax[index].setText(forecastDay.getMain().getTemp_max());
         arrayDayTempUnit[index].setText(api.getUnitTemp());
     }
     
     private void updateForecastHour(int index) {
         var forecastHour = api.getForecastHourly().getList().get(index);
         Image icon = getIcon(forecastHour.getWeather().get(0).getIcon());
-        arrayHourIcon[index].setImage(icon);
+        arrayHourWeatherIcon[index].setImage(icon);
+        arrayHourWindIcon[index].setRotate(Double.parseDouble(forecastHour.getWind().getDeg()));
         arrayHourLabel[index].setText(forecastHour.getDt_txt()); // TODO: hour
         arrayHourTemp[index].setText(forecastHour.getMain().getTemp());
         arrayHourWind[index].setText(forecastHour.getWind().getSpeed());
