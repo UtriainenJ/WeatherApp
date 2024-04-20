@@ -140,6 +140,7 @@ public class WeatherApp extends Application {
         currentWeatherLabel.setGraphic(currentWeatherIcon);
         currentTempField = new Label();
         currentTempField.setFont(new Font("System Regular", 70));
+        currentTempField.setPadding(new Insets(0, 0, 0, 10));
         currentTempUnitField = new Label();
         currentTempUnitField.setAlignment(Pos.TOP_LEFT);
         currentTempUnitField.setFont(new Font("System Regular", 35));
@@ -162,7 +163,7 @@ public class WeatherApp extends Application {
         var airQualityLabel = new Label("Air Quality:");
         currentAirQualityField = new Label();
         currentAirQualityField.setStyle("-fx-font-weight: bold");
-        currentAirQualityField.setPadding(new Insets(0, 30, 0, 0));
+        currentAirQualityField.setPadding(new Insets(0, 30, 0, 5));
         currentRainIcon = new ImageView();
         currentRainIcon.setPreserveRatio(true);
         currentRainIcon.setFitWidth(airQualityBarHeight);
@@ -170,6 +171,7 @@ public class WeatherApp extends Application {
         currentRainLabel.setGraphic(currentRainIcon);
         currentRainField = new Label();
         currentRainField.setStyle("-fx-font-weight: bold");
+        currentRainField.setPadding(new Insets(0, 5, 0, 5));
         currentRainUnitField = new Label();
         currentRainUnitField.setPadding(new Insets(0, 30, 0, 0));
         currentWindIcon = new ImageView();
@@ -179,6 +181,7 @@ public class WeatherApp extends Application {
         currentWindLabel.setGraphic(currentWindIcon);
         currentWindField = new Label();
         currentWindField.setStyle("-fx-font-weight: bold");
+        currentWindField.setPadding(new Insets(0, 5, 0, 5));
         currentWindUnitField = new Label();
         var airQualityBar = new HBox(airQualityLabel,
                 currentAirQualityField, currentRainIcon,
@@ -215,9 +218,11 @@ public class WeatherApp extends Application {
     private void buildForecastDay(int index) {
         // Top: weekday and date bar
         var weekdayLabel = new Label();
+        weekdayLabel.setPadding(new Insets(0, 5, 0, 0));
         var dateLabel = new Label();
         dateLabel.setStyle("-fx-font-weight: bold");
         var weekdayDateBar = new HBox(weekdayLabel, dateLabel);
+        weekdayDateBar.setAlignment(Pos.CENTER);
         
         // Middle: weather icon
         var weatherIconImage = new ImageView();
@@ -515,10 +520,10 @@ public class WeatherApp extends Application {
         var forecastDay = api.getForecastDaily().getList().get(index);
         Image icon = getIcon(forecastDay.getWeather().get(0).getIcon());
         arrayDayIcon[index].setImage(icon);
-        //arrayDayWeekday[index].setText(); TODO: weekday
-        arrayDayDate[index].setText(forecastDay.getDt_txt()); // TODO: date
-        arrayDayTempMin[index].setText(forecastDay.getMain().getTemp_min());
-        arrayDayTempMax[index].setText(forecastDay.getMain().getTemp_max());
+        arrayDayWeekday[index].setText(forecastDay.getWeekday());
+        arrayDayDate[index].setText(forecastDay.getDate());
+        arrayDayTempMin[index].setText(forecastDay.getTemp().getMax());
+        arrayDayTempMax[index].setText(forecastDay.getTemp().getMin());
         arrayDayTempUnit[index].setText(api.getUnitTemp());
     }
     
@@ -526,12 +531,13 @@ public class WeatherApp extends Application {
         var forecastHour = api.getForecastHourly().getList().get(index);
         Image icon = getIcon(forecastHour.getWeather().get(0).getIcon());
         arrayHourWeatherIcon[index].setImage(icon);
-        arrayHourWindIcon[index].setRotate(Double.parseDouble(forecastHour.getWind().getDeg()));
-        arrayHourLabel[index].setText(forecastHour.getDt_txt()); // TODO: hour
+        double rot = Double.parseDouble(forecastHour.getWind().getDeg());
+        arrayHourWindIcon[index].setRotate(rot);
+        arrayHourLabel[index].setText(forecastHour.getHour());
         arrayHourTemp[index].setText(forecastHour.getMain().getTemp());
         arrayHourWind[index].setText(forecastHour.getWind().getSpeed());
         arrayHourRainStat[index].setText(forecastHour.getRain().get1h());
-        //arrayHourRainPerc[index].setText(); TODO: chance of rain
+        arrayHourRainPerc[index].setText(forecastHour.getPop());
     }
     
     private void updateForecast() {
@@ -545,8 +551,6 @@ public class WeatherApp extends Application {
     }
     
     private void updateFavoritesIndex(int index, String loc) {
-        //selectButton.setOnAction((event) -> {api.setLocationActive(loc);});
-        //deleteButton.setOnAction((event) -> {api.removeFromFavorites(loc);});
         arrayFavoriteName[index].setText(loc);
         arrayFavoriteSelect[index].setOnAction((event) -> {
             api.setLocationActive(loc);
