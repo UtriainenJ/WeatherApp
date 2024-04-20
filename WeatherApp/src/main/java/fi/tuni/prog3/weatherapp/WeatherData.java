@@ -2,6 +2,7 @@ package fi.tuni.prog3.weatherapp;
 
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
+import java.util.Locale;
 
 /**
  *
@@ -9,6 +10,10 @@ import java.util.List;
  * chatGPT used for generating all this silliness
  */
 public class WeatherData {
+    
+    private static final String METRIC = "metric";
+    private static String units;
+
     private Coord coord;
     private List<Weather> weather;
     private String base;
@@ -26,6 +31,10 @@ public class WeatherData {
     private int cod;
 
     public WeatherData() {}
+    
+    public void setUnits(String str) {
+        WeatherData.units = str;
+    }
 
     public Coord getCoord() {
         return coord;
@@ -319,7 +328,10 @@ public class WeatherData {
         private Double _3h;
 
         public String get1h() {
-            return _1h == null? "0" : String.valueOf(_1h);
+            if(METRIC.equals(units)) {
+                return _1h == null? "0" : String.valueOf(_1h);
+            }
+            return _1h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }
 
         public void set1h(double _1h) {
@@ -327,7 +339,10 @@ public class WeatherData {
         }
 
         public String get3h() {
-            return _3h == null? "0" : String.valueOf(_3h);
+            if(METRIC.equals(units)) {
+                return _3h == null? "0" : String.valueOf(_3h);
+            }
+            return _3h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }
 
         public void set3h(double _3h) {
@@ -342,7 +357,10 @@ public class WeatherData {
         private Double _3h;
 
         public String get1h() {
-            return _1h == null? "0" : String.valueOf(_1h);
+            if(METRIC.equals(units)) {
+                return _1h == null? "0" : String.valueOf(_1h);
+            }
+            return _1h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }
 
         public void set1h(double _1h) {
@@ -350,7 +368,10 @@ public class WeatherData {
         }
 
         public String get3h() {
-            return _3h == null? "0" : String.valueOf(_3h);
+            if(METRIC.equals(units)) {
+                return _3h == null? "0" : String.valueOf(_3h);
+            }
+            return _3h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }
 
         public void set3h(double _3h) {

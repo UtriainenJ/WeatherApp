@@ -1,21 +1,30 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package fi.tuni.prog3.weatherapp;
 
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
+import java.util.Locale;
 
 /**
  *
  * @author jerri
- * generated with help of chatGPT
  */
-public class ForecastData {
+public class ForecastDataDaily {
+    private static final String METRIC = "metric";    
+    private static String units;
+    
     private String cod;
     private int message;
     private int cnt;
     private List<WeatherEntry> list;
     private City city;
     
-    public ForecastData(){}
+    public void setUnits(String str) {
+        ForecastDataDaily.units = str;
+    }
 
     public String getCod() {
         return cod;
@@ -50,14 +59,14 @@ public class ForecastData {
     }
 
     public City getCity() {
-        return city == null? new City() : city;
+        return city;
     }
 
     public void setCity(City city) {
         this.city = city;
     }
 
-    public static class WeatherEntry {
+    public class WeatherEntry {
         private Long dt;
         private MainData main;
         private List<Weather> weather;
@@ -69,7 +78,7 @@ public class ForecastData {
         private Snow snow;
         private Sys sys;
         private String dt_txt;
-
+        
         public String getDt() {
             return dt == null? "null" : String.valueOf(dt);
         }
@@ -111,15 +120,15 @@ public class ForecastData {
         }
 
         public String getVisibility() {
-            return visibility == null? "0": String.valueOf(visibility);
+            return visibility == null? "0" : String.valueOf(visibility);
         }
 
         public void setVisibility(int visibility) {
             this.visibility = visibility;
         }
 
-        public String getPop() {
-            return pop == null? "null" : String.valueOf(pop);
+        public double getPop() {
+            return pop;
         }
 
         public void setPop(double pop) {
@@ -137,7 +146,7 @@ public class ForecastData {
         public Snow getSnow() {
             return snow == null? new Snow() : snow;
         }
-        
+
         public void setSnow(Snow snow) {
             this.snow = snow;
         }
@@ -159,7 +168,7 @@ public class ForecastData {
         }
     }
 
-    public static class MainData {
+    public class MainData {
         private Double temp;
         private Double feels_like;
         private Double temp_min;
@@ -243,7 +252,7 @@ public class ForecastData {
         }
     }
 
-    public static class Weather {
+    public class Weather {
         private int id;
         private String main;
         private String description;
@@ -282,7 +291,7 @@ public class ForecastData {
         }
     }
 
-    public static class Clouds {
+    public class Clouds {
         private Integer all;
 
         public String getAll() {
@@ -294,7 +303,7 @@ public class ForecastData {
         }
     }
 
-    public static class Wind {
+    public class Wind {
         private Double speed;
         private Integer deg;
         private Double gust;
@@ -324,12 +333,28 @@ public class ForecastData {
         }
     }
 
-    public static class Rain {
+    public class Rain {
+        @SerializedName("1h")
+        private Double _1h;
         @SerializedName("3h")
         private Double _3h;
 
+        public String get1h() {
+            if(METRIC.equals(units)) {
+                return _1h == null? "0" : String.valueOf(_1h);
+            }
+            return _1h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
+        }
+
+        public void set1h(double _1h) {
+            this._1h = _1h;
+        }
+        
         public String get3h() {
-            return _3h == null? "0" : String.valueOf(_3h);
+            if(METRIC.equals(units)) {
+                return _3h == null? "0" : String.valueOf(_3h);
+            }
+            return _3h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }
 
         public void set3h(double _3h) {
@@ -338,18 +363,34 @@ public class ForecastData {
     }
     
     public static class Snow {
+        @SerializedName("1h")
+        private Double _1h;
         @SerializedName("3h")
         private Double _3h;
+
+        public String get1h() {
+            if(METRIC.equals(units)) {
+                return _1h == null? "0" : String.valueOf(_1h);
+            }
+            return _1h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
+        }
+
+        public void set1h(double _1h) {
+            this._1h = _1h;
+        }
         
         public String get3h() {
-            return _3h == null? "0" : String.valueOf(_3h);
+            if(METRIC.equals(units)) {
+                return _3h == null? "0" : String.valueOf(_3h);
+            }
+            return _3h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }
         public void set3h(double _3h) {
             this._3h = _3h;
         }
     }
 
-    public static class Sys {
+    public class Sys {
         private String pod;
 
         public String getPod() {
@@ -361,7 +402,7 @@ public class ForecastData {
         }
     }
 
-    public static class City {
+    public class City {
         private Integer id;
         private String name;
         private Coord coord;
@@ -380,7 +421,7 @@ public class ForecastData {
         }
 
         public String getName() {
-            return name == null? "null" : name;
+            return name;
         }
 
         public void setName(String name) {
@@ -396,7 +437,7 @@ public class ForecastData {
         }
 
         public String getCountry() {
-            return country == null? "null" : country;
+            return country;
         }
 
         public void setCountry(String country) {
@@ -436,7 +477,7 @@ public class ForecastData {
         }
     }
 
-    public static class Coord {
+    public class Coord {
         private double lat;
         private double lon;
 
@@ -455,5 +496,5 @@ public class ForecastData {
         public void setLon(double lon) {
             this.lon = lon;
         }
-    }    
+    }
 }

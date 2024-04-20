@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import javafx.util.Pair;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -73,7 +74,8 @@ public class WeatherAPI implements iAPI {
     private List<String> locationFavorites;
     private List<String> locationHistory;
     private transient WeatherData wd;
-    private transient ForecastData fd;
+    private transient ForecastDataHourly fdh;
+    private transient ForecastDataDaily fdd;
 
     public WeatherAPI() throws Exception {
         this.locationActive = null;
@@ -81,9 +83,10 @@ public class WeatherAPI implements iAPI {
         this.locationHistory = new ArrayList<>();
     }
     
-    public void setLocationActive(String loc) {
+    public WeatherAPI setLocationActive(String loc) {
         addToHistory(loc);
         this.locationActive = loc;
+        return this;
     }
 
     public String getLocationActive() {
@@ -118,8 +121,12 @@ public class WeatherAPI implements iAPI {
         return wd;
     }
     
-    public ForecastData getForecast() {
-        return fd;
+    public ForecastDataHourly getForecastHourly() {
+        return fdh;
+    }
+    
+    public ForecastDataDaily getForecastDaily() {
+        return fdd;
     }
     
     public void setUnits(String unitSystem) {
@@ -127,13 +134,28 @@ public class WeatherAPI implements iAPI {
             case "m":
             case "metric":
                 units = "metric";
+                wd.setUnits(units);
+                fdd.setUnits(units);
+                fdh.setUnits(units);
+                
                 break;
             case "i":
             case "imperial":
                 units = "imperial";
+                wd.setUnits(units);
+                fdd.setUnits(units);
+                fdh.setUnits(units);
                 break;
             default:
                 System.out.println("Invalid unit system" + unitSystem);
+        }
+    }
+    
+    public void switchUnits() {
+        if("metric".equals(units)) {
+            setUnits("imperial");
+        } else {
+            setUnits("metric");
         }
     }
 
@@ -183,41 +205,27 @@ public class WeatherAPI implements iAPI {
 
     public void getData() {
         this.wd = getCurrentWeather(locationActive);
-        this.fd = getForecast(locationActive);
+        this.fdh = getForecastHourly(locationActive);
+        this.fdd = getForecastDaily(locationActive);
     }
     
     @Override
     public WeatherData getCurrentWeather(String loc) {
         try {
             String key = getAPIKey();
-            String url = "https://api.openweathermap.org/data/2.5/weather"
+            String url = "https://pro.openweathermap.org/data/2.5/weather"
                     + "?q=" + loc + "&appid=" + key
                     + "&units=" + units;
             String json = makeHTTPCall(url);
             //System.out.println(json);
             return makeWeatherObject(json);
-        } catch (IOException ex) {return null;}
+        } catch (IOException ex) {
+            throw new IllegalArgumentException("Incorrect or missing API key.");
+        }
     }
 
     @Override
     public WeatherData getCurrentWeather(double lat, double lon) {
-        try {
-            if(illegalLatOrLon(lat, lon)) {
-                throw new IllegalStateException("Lat and lon must be +/- 90");
-            }
-            String key = getAPIKey();
-            String latStr = String.format(Locale.US,"%.4f", lat);
-            String lonStr = String.format(Locale.US,"%.4f", lon);
-            String url = "https://api.openweathermap.org/data/2.5/weather"
-                    + "?lat=" + latStr + "&lon=" + lonStr + "&appid=" + key
-                    + "&units=" + units;
-            String json = makeHTTPCall(url);
-            return makeWeatherObject(json);
-        } catch (IOException ex) {return null;}
-    }
-
-    @Override
-    public ForecastData getForecast(double lat, double lon) {
         try {
             if(illegalLatOrLon(lat, lon)) {
                 throw new IllegalStateException("Lat must be +/- 90, longitude +/- 180");
@@ -225,17 +233,58 @@ public class WeatherAPI implements iAPI {
             String key = getAPIKey();
             String latStr = String.format(Locale.US,"%.4f", lat);
             String lonStr = String.format(Locale.US,"%.4f", lon);
-            String url = "https://api.openweathermap.org/data/2.5/forecast"
+            String url = "https://pro.openweathermap.org/data/2.5/weather"
                     + "?lat=" + latStr + "&lon=" + lonStr + "&appid=" + key
                     + "&units=" + units;
-            String res = makeHTTPCall(url);
-            ForecastData weather = makeForecastObject(res);
-            return weather;
-        } catch (IOException ex) {return null;}
+            String json = makeHTTPCall(url);
+            return makeWeatherObject(json);
+        } catch (IOException ex) {
+            throw new IllegalArgumentException("Incorrect or missing API key.");
+        }
     }
 
     @Override
-    public ForecastData getForecast(String loc) {
+    public ForecastDataHourly getForecastHourly(double lat, double lon) {
+        try {
+            if(illegalLatOrLon(lat, lon)) {
+                throw new IllegalStateException("Lat must be +/- 90, longitude +/- 180");
+            }
+            String key = getAPIKey();
+            String latStr = String.format(Locale.US,"%.4f", lat);
+            String lonStr = String.format(Locale.US,"%.4f", lon);
+            String url = "https://pro.openweathermap.org/data/2.5/forecast/hourly"
+                    + "?lat=" + latStr + "&lon=" + lonStr + "&appid=" + key
+                    + "&units=" + units;
+            String res = makeHTTPCall(url);
+            ForecastDataHourly weather = makeForecastHourlyObject(res);
+            return weather;
+        } catch (IOException ex) {
+            throw new IllegalArgumentException("Incorrect or missing API key.");
+        }
+    }
+
+    @Override
+    public ForecastDataHourly getForecastHourly(String loc) {
+        Pair<Double, Double> coords = getLocation(loc);
+        return getForecastHourly(coords.getKey(), coords.getValue());
+    }
+    
+    public ForecastDataDaily getForecastDaily(String loc) {
+        try {
+            Pair<Double, Double> coords = getLocation(loc);
+            String key = getAPIKey();
+            String url = "https://api.openweathermap.org/data/2.5/forecast"
+                    + "?lat=" + coords.getKey() + "&lon=" + coords.getValue()
+                    + "&appid=" + key + "&units=" + units;
+            String res = makeHTTPCall(url);
+            ForecastDataDaily weather = makeForecastDailyObject(res);
+            return weather;
+        } catch (IOException ex) {
+            throw new IllegalArgumentException("Incorrect or missing API key.");
+        }
+    }
+    
+    private Pair<Double, Double> getLocation(String loc) {
         try {
             // get location from place name
             String key = getAPIKey();
@@ -246,10 +295,10 @@ public class WeatherAPI implements iAPI {
 
             Gson gson = new Gson();
             LocationData[] locations = gson.fromJson(res, LocationData[].class);
-
-            return getForecast(locations[0].getLat(), locations[0].getLon());
-            
-        } catch (IOException ex) {return null;}
+            return new Pair<>(locations[0].getLat(),locations[0].getLon());
+        } catch (IOException ex) {
+            throw new IllegalArgumentException("Incorrect or missing API key.");
+        }
     }
 
     private static String getAPIKey() throws IOException {
@@ -271,12 +320,13 @@ public class WeatherAPI implements iAPI {
         try {
             Request request = new Request.Builder().url(url).build();
             Response response = client.newCall(request).execute();
+            String res = response.body().string();
+            //System.out.println(res);
             //System.out.println(response);
             if (response.isSuccessful()) {
-                String res = response.body().string();
                 return res;
             } else {
-                return null;
+                throw new IllegalArgumentException("API key not privileged enough.");
             }
         } catch (IOException ex) {
             System.out.println("Error getting api response.");
@@ -290,9 +340,15 @@ public class WeatherAPI implements iAPI {
         return data;
     }
     
-    private static ForecastData makeForecastObject(String json) {
+    private static ForecastDataHourly makeForecastHourlyObject(String json) {
         Gson gson = new Gson();
-        ForecastData data = gson.fromJson(json, ForecastData.class);
+        ForecastDataHourly data = gson.fromJson(json, ForecastDataHourly.class);
+        return data;
+    }
+    
+    private static ForecastDataDaily makeForecastDailyObject(String json) {
+        Gson gson = new Gson();
+        ForecastDataDaily data = gson.fromJson(json, ForecastDataDaily.class);
         return data;
     }
     
