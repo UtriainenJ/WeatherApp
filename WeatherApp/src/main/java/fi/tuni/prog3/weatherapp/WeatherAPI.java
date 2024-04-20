@@ -273,7 +273,7 @@ public class WeatherAPI implements iAPI {
         try {
             Pair<Double, Double> coords = getLocation(loc);
             String key = getAPIKey();
-            String url = "https://api.openweathermap.org/data/2.5/forecast"
+            String url = "https://api.openweathermap.org/data/2.5/forecast/daily"
                     + "?lat=" + coords.getKey() + "&lon=" + coords.getValue()
                     + "&appid=" + key + "&units=" + units;
             String res = makeHTTPCall(url);
