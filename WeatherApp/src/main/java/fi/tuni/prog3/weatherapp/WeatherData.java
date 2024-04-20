@@ -227,7 +227,7 @@ public class WeatherData {
         private Integer grnd_level;
 
         public String getTemp() {
-            return temp == null? "null" : String.format("%.0f", temp);
+            return temp == null? "null" : String.format(Locale.US, "%.0f", temp);
         }
 
         public void setTemp(double temp) {
@@ -235,7 +235,7 @@ public class WeatherData {
         }
 
         public String getFeels_like() {
-            return feels_like == null? "null" : String.format("%.0f", feels_like);
+            return feels_like == null? "null" : String.format(Locale.US, "%.0f", feels_like);
         }
 
         public void setFeels_like(double feels_like) {
@@ -243,7 +243,7 @@ public class WeatherData {
         }
 
         public String getTemp_min() {
-            return temp_min == null? "null" : String.format("%.0f", temp_min);
+            return temp_min == null? "null" : String.format(Locale.US, "%.0f", temp_min);
         }
 
         public void setTemp_min(double temp_min) {
@@ -251,7 +251,7 @@ public class WeatherData {
         }
 
         public String getTemp_max() {
-            return temp_max == null? "null" : String.format("%.0f", temp_max);
+            return temp_max == null? "null" : String.format(Locale.US, "%.0f", temp_max);
         }
 
         public void setTemp_max(double temp_max) {
@@ -297,7 +297,7 @@ public class WeatherData {
         private Double gust;
 
         public String getSpeed() {
-            return speed == null? "0" : String.format("%.0f", speed);
+            return speed == null? "0" : String.format(Locale.US, "%.0f", speed);
         }
 
         public void setSpeed(double speed) {
@@ -313,7 +313,7 @@ public class WeatherData {
         }
 
         public String getGust() {
-            return gust == null? "0" : String.format("%.0f", gust);
+            return gust == null? "0" : String.format(Locale.US, "%.0f", gust);
         }
 
         public void setGust(double gust) {
@@ -329,7 +329,7 @@ public class WeatherData {
 
         public String get1h() {
             if(METRIC.equals(units)) {
-                return _1h == null? "0" : String.format("%.1f", _1h);
+                return _1h == null? "0" : String.format(Locale.US, "%.1f", _1h);
             }
             return _1h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }
@@ -340,7 +340,7 @@ public class WeatherData {
 
         public String get3h() {
             if(METRIC.equals(units)) {
-                return _3h == null? "0" : String.format("%.1f", _3h);
+                return _3h == null? "0" : String.format(Locale.US, "%.1f", _3h);
             }
             return _3h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }
@@ -358,7 +358,7 @@ public class WeatherData {
 
         public String get1h() {
             if(METRIC.equals(units)) {
-                return _1h == null? "0" : String.format("%.1f", _1h);
+                return _1h == null? "0" : String.format(Locale.US, "%.1f", _1h);
             }
             return _1h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }
@@ -369,7 +369,7 @@ public class WeatherData {
 
         public String get3h() {
             if(METRIC.equals(units)) {
-                return _3h == null? "0" : String.format("%.1f", _3h);
+                return _3h == null? "0" : String.format(Locale.US, "%.1f", _3h);
             }
             return _3h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }

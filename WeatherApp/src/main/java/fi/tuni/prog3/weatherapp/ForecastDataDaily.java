@@ -4,7 +4,9 @@
  */
 package fi.tuni.prog3.weatherapp;
 
-import com.google.gson.annotations.SerializedName;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Locale;
 
@@ -16,6 +18,7 @@ import java.util.Locale;
 public class ForecastDataDaily {
     private static final String METRIC = "metric";    
     private static String units;
+    private static int FIN_OFFSET = 10800;
     
     private City city;
     private String cod;
@@ -243,7 +246,7 @@ public class ForecastDataDaily {
         }
 
         public String getGust() {
-            return gust == null? "0" : String.format("%.0f", gust);
+            return gust == null? "0" : String.format(Locale.US, "%.0f", gust);
         }
 
         public void setGust(Double gust) {
@@ -259,7 +262,7 @@ public class ForecastDataDaily {
         }
 
         public String getPop() {
-            return pop == null? "0" : String.valueOf(pop);
+            return pop == null? "0" : String.format(Locale.US, "%.0f",100*pop);
         }
 
         public void setPop(Double pop) {
@@ -286,6 +289,26 @@ public class ForecastDataDaily {
 
         public void setSnow(Double snow) {
             this.snow = snow;
+        }
+        
+        public String getWeekday() {
+            LocalDateTime ldt = epochToDateTime(dt);
+            String day = ldt.getDayOfWeek().toString();
+            String dayShort = day.substring(0, 3).toLowerCase();
+            dayShort = Character.toUpperCase(dayShort.charAt(0)) + dayShort.substring(1);
+            return dayShort;
+        }
+
+        public String getDate() {
+            LocalDateTime ldt = epochToDateTime(dt);
+            return ldt.getDayOfMonth() + "." + ldt.getMonthValue();
+        }
+        
+        private static LocalDateTime epochToDateTime(long epochSeconds) {
+            Instant instant = Instant.ofEpochSecond(epochSeconds);
+            ZoneOffset zoneOffset = ZoneOffset.ofTotalSeconds(FIN_OFFSET);
+            LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zoneOffset);
+            return localDateTime;
         }
     }
 

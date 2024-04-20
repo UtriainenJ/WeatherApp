@@ -124,7 +124,7 @@ public class ForecastDataHourly {
         }
 
         public String getPop() {
-            return pop == null? "null" : String.valueOf(pop);
+            return pop == null? "null" : String.format(Locale.US, "%.0f",100*pop);
         }
 
         public void setPop(double pop) {
@@ -157,6 +157,10 @@ public class ForecastDataHourly {
 
         public String getDt_txt() {
             return dt_txt;
+        }
+        
+        public String getHour() {
+            return dt_txt.substring(11, 13);
         }
 
         public void setDt_txt(String dt_txt) {
@@ -380,57 +384,32 @@ public class ForecastDataHourly {
     public static class Rain {
         @SerializedName("1h")
         private Double _1h;
-        @SerializedName("3h")
-        private Double _3h;
 
         public String get1h() {
             if(METRIC.equals(units)) {
-                return _1h == null? "0" : String.format("%.1f", _1h);
+                return _1h == null? "0" : String.format(Locale.US, "%.1f", _1h);
             }
             return _1h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }
 
         public void set1h(double _1h) {
             this._1h = _1h;
-        }
-        
-        public String get3h() {
-            if(METRIC.equals(units)) {
-                return _3h == null? "0" : String.format("%.1f", _3h);
-            }
-            return _3h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
-        }
-
-        public void set3h(double _3h) {
-            this._3h = _3h;
         }
     }
     
     public static class Snow {
         @SerializedName("1h")
         private Double _1h;
-        @SerializedName("3h")
-        private Double _3h;
 
         public String get1h() {
             if(METRIC.equals(units)) {
-                return _1h == null? "0" : String.format("%.1f", _1h);
+                return _1h == null? "0" : String.format(Locale.US, "%.1f", _1h);
             }
             return _1h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }
 
         public void set1h(double _1h) {
             this._1h = _1h;
-        }
-        
-        public String get3h() {
-            if(METRIC.equals(units)) {
-                return _3h == null? "0" : String.format("%.1f", _3h);
-            }
-            return _3h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
-        }
-        public void set3h(double _3h) {
-            this._3h = _3h;
         }
     }
 
