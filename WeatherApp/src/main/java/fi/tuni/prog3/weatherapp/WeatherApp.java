@@ -86,18 +86,6 @@ public class WeatherApp extends Application {
     private Label currentWindField;
     private Label currentWindUnitField;
     
-    private void switchUnits() {
-        switch(api.getUnit().toLowerCase()) {
-            case "metric":
-                api.setUnits("imperial");
-                break;
-            case "imperial":
-                api.setUnits("metric");
-                break;
-        }
-        update();
-    }
-    
     private void buildTopBar() {
         // BorderPane for left + center + right alignment
         topBar = new BorderPane();
@@ -105,7 +93,10 @@ public class WeatherApp extends Application {
         // Units button on the left
         var unitsButton = new Button("Switch Units");
         unitsButton.setPrefWidth(topBarButtonWidth);
-        unitsButton.setOnAction((event) -> {switchUnits();});
+        unitsButton.setOnAction((event) -> {
+            api.switchUnits();
+            update();
+        });
         topBar.setLeft(unitsButton);
         topBar.setAlignment(unitsButton, Pos.CENTER);
         
@@ -232,6 +223,7 @@ public class WeatherApp extends Application {
         tempBar.setAlignment(Pos.CENTER);
         
         var forecastDay = new VBox(weekdayDateBar, weatherIconLabel, tempBar);
+        forecastDay.setOnMouseClicked((event) -> {selectDay(index);});
         forecastDay.setAlignment(Pos.CENTER);
         forecastDaysBar.getChildren().add(forecastDay);
         
@@ -414,8 +406,8 @@ public class WeatherApp extends Application {
         mainLayout.getChildren().add(basePanel);
         selectPanel(forecast);
         
-        // Focus middle day by default
-        selectDay(forecastDays / 2);
+        // Focus today by default
+        selectDay(0);
         
         // "Search & Favorites" window
         buildSearchWindow();
@@ -454,7 +446,7 @@ public class WeatherApp extends Application {
     }
     
     private void updateForecastDay(int index) {
-        var forecastDay = api.getForecast().getList().get(index);
+        var forecastDay = api.getForecastDaily().getList().get(index);
         //arrayDayWeekday[index].setText(); TODO: weekday
         arrayDayDate[index].setText(forecastDay.getDt_txt()); // TODO: date
         Image icon = getIcon(forecastDay.getWeather().get(0).getIcon());
