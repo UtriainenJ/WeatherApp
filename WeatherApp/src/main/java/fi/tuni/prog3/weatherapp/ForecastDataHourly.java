@@ -385,7 +385,7 @@ public class ForecastDataHourly {
 
         public String get1h() {
             if(METRIC.equals(units)) {
-                return _1h == null? "0" : String.valueOf(_1h);
+                return _1h == null? "0" : String.format("%.1f", _1h);
             }
             return _1h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }
@@ -396,7 +396,7 @@ public class ForecastDataHourly {
         
         public String get3h() {
             if(METRIC.equals(units)) {
-                return _3h == null? "0" : String.valueOf(_3h);
+                return _3h == null? "0" : String.format("%.1f", _3h);
             }
             return _3h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }
@@ -414,7 +414,7 @@ public class ForecastDataHourly {
 
         public String get1h() {
             if(METRIC.equals(units)) {
-                return _1h == null? "0" : String.valueOf(_1h);
+                return _1h == null? "0" : String.format("%.1f", _1h);
             }
             return _1h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }
@@ -425,7 +425,7 @@ public class ForecastDataHourly {
         
         public String get3h() {
             if(METRIC.equals(units)) {
-                return _3h == null? "0" : String.valueOf(_3h);
+                return _3h == null? "0" : String.format("%.1f", _3h);
             }
             return _3h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }
