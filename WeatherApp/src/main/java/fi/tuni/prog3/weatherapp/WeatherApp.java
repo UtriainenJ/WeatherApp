@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import static java.lang.Math.round;
 import javafx.application.Application;
-import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -19,6 +18,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -38,8 +38,9 @@ public class WeatherApp extends Application {
     private final int weatherTempBarHeight = 80;
     private final int feelsLikeBarHeight = 30;
     private final int airQualityBarHeight = 30;
-    private final int maxFavorites = 10;
-    private final int favoriteNameWidth = 200;
+    private final int maxFavorites = 8;
+    private final int maxHistory = 8;
+    private final int searchTextWidth = 200;
     private final double dailyForecastWidth = 96;
     private final double hourlyForecastWidth = 30;
     private final String tempFileName = "temp.json";
@@ -64,8 +65,10 @@ public class WeatherApp extends Application {
     private Label[] arrayHourWind;
     private Label[] arrayHourRainStat;
     private Label[] arrayHourRainPerc;
-    private HBox[] arrayFavorites;
+    private Label[] arrayHistoryName;
     private Label[] arrayFavoriteName;
+    private Button[] arrayHistorySelect;
+    private Button[] arrayHistoryFavorite;
     private Button[] arrayFavoriteSelect;
     private Button[] arrayFavoriteDelete;
     
@@ -77,7 +80,7 @@ public class WeatherApp extends Application {
     private Stage mainWindow;
     private Stage searchWindow;
     private VBox mainLayout;
-    private VBox searchLayout;
+    private GridPane searchLayout;
     private BorderPane topBar;
     private HBox midBar;
     private StackPane basePanel;
@@ -395,20 +398,67 @@ public class WeatherApp extends Application {
         }
     }
     
-    private void buildSearchFavorite(int index) {
+    private void buildSearchHistory(int offset, int index) {
         var nameField = new Label();
-        nameField.setPrefWidth(favoriteNameWidth);
+        nameField.setPrefWidth(searchTextWidth);
         nameField.setPadding(new Insets(0, 0, 0, 10));
         var selectButton = new Button("Select");
-        var deleteButton = new Button("Delete");
-        var favorite = new HBox(nameField, selectButton, deleteButton);
-        favorite.setAlignment(Pos.CENTER_LEFT);
-        favorite.setVisible(false);
-        searchLayout.getChildren().add(favorite);
+        selectButton.setOnAction((event) -> {
+            api.setLocationActive(nameField.getText());
+            update();
+        });
+        var favoriteButton = new Button("Favorite");
+        favoriteButton.setOnAction((event) -> {
+            api.addToFavorites(nameField.getText());
+            update();
+        });
+        
+        // Make elemenets invisible by default
+        selectButton.setVisible(false);
+        favoriteButton.setVisible(false);
+        
+        // Add elements to UI
+        int gridIndex = index + offset;
+        searchLayout.add(nameField, 0, gridIndex);
+        searchLayout.add(selectButton, 1, gridIndex);
+        searchLayout.add(favoriteButton, 2, gridIndex);
+        
+        // Add elements to arrays
+        arrayHistoryName[index] = nameField;
+        arrayHistorySelect[index] = selectButton;
+        arrayHistoryFavorite[index] = favoriteButton;
+    }
+    
+    private void buildSearchFavorite(int offset, int index) {
+        var nameField = new Label();
+        nameField.setPrefWidth(searchTextWidth);
+        nameField.setPadding(new Insets(0, 0, 0, 10));
+        var selectButton = new Button("Select");
+        selectButton.setOnAction((event) -> {
+            api.setLocationActive(nameField.getText());
+            update();
+        });
+        var deleteButton = new Button("Unfavorite");
+        deleteButton.setOnAction((event) -> {
+            api.removeFromFavorites(nameField.getText());
+            searchLayout.requestFocus(); // Remove focus from delete button
+            update();
+        });
+        
+        // Make elemenets invisible by default
+        selectButton.setVisible(false);
+        deleteButton.setVisible(false);
+        
+        // Add elements to UI
+        int gridIndex = index + offset;
+        searchLayout.add(nameField, 0, gridIndex);
+        searchLayout.add(selectButton, 1, gridIndex);
+        searchLayout.add(deleteButton, 2, gridIndex);
+        
+        // Add elements to arrays
         arrayFavoriteName[index] = nameField;
         arrayFavoriteSelect[index] = selectButton;
         arrayFavoriteDelete[index] = deleteButton;
-        arrayFavorites[index] = favorite;
     }
     
     private void search(String location) {
@@ -425,30 +475,30 @@ public class WeatherApp extends Application {
     
     private void buildSearchWindow() {
         // Vertical main layout
-        searchLayout = new VBox();
+        int row = 0;
+        searchLayout = new GridPane();
         searchWindow = new Stage();
         searchWindow.setScene(new Scene(searchLayout));
-        searchLayout.setAlignment(Pos.CENTER);
         
         // Label and close button at the top
-        var topBar = new BorderPane();
-        var searchLabel = new Label("Search & Favorites");
+        var searchLabel = new Label("Search");
         searchLabel.setFont(new Font("C059 Bold", 24));
+        searchLabel.setPrefWidth(searchTextWidth);
+        searchLabel.setAlignment(Pos.CENTER_LEFT);
+        searchLabel.setPadding(new Insets(0, 0, 0, 10));
         var closeButton = new Button("Close"); // Button for closing window
         closeButton.setOnAction((event) -> {searchWindow.close();});
-        topBar.setCenter(searchLabel);
-        topBar.setRight(closeButton);
-        topBar.setAlignment(searchLabel, Pos.CENTER);
-        topBar.setAlignment(closeButton, Pos.CENTER);
-        searchLayout.getChildren().add(topBar);
+        searchLayout.add(searchLabel, 0, row);
+        searchLayout.add(closeButton, 2, row);
+        row++;
         
         // Search status field
         searchStatusField = new Label();
         searchStatusField.setPadding(new Insets(5, 0, 5, 10));
-        searchLayout.getChildren().add(searchStatusField);
-        searchLayout.setAlignment(Pos.CENTER_LEFT);
+        searchLayout.add(searchStatusField, 0, row);
+        row++;
         
-        // Horizontal row
+        // Search row
         searchField = new TextField(); // Enter text
         searchField.setOnKeyPressed((event) -> {
             if (event.getCode() == KeyCode.ENTER) { // Start search
@@ -457,24 +507,45 @@ public class WeatherApp extends Application {
                 searchStatusField.setText("");
             }
         });
-        searchField.setPrefWidth(favoriteNameWidth);
+        searchField.setPrefWidth(searchTextWidth);
         var searchButton = new Button("Search"); // Start search
         searchButton.setOnAction((event) -> {search(searchField.getText());});
-        var favoriteButton = new Button("Favorite"); // Add favorite
-        favoriteButton.setOnAction((event) -> {
-            api.addToFavorites(searchField.getText());
-            update();
-        });
-        var searchRow = new HBox(searchField, searchButton, favoriteButton);
-        searchLayout.getChildren().add(searchRow);
+        var clearButton = new Button("Clear"); // Button for clearing search
+        clearButton.setOnAction((event) -> {searchField.setText("");});
+        searchLayout.add(searchField, 0, row);
+        searchLayout.add(searchButton, 1, row);
+        searchLayout.add(clearButton, 2, row);
+        row++;
+        
+        // Search history
+        var historyLabel = new Label("History");
+        historyLabel.setFont(new Font("C059 Bold", 24));
+        historyLabel.setPrefWidth(searchTextWidth);
+        historyLabel.setAlignment(Pos.CENTER_LEFT);
+        historyLabel.setPadding(new Insets(0, 0, 0, 10));
+        searchLayout.add(historyLabel, 0, row);
+        row++;
+        arrayHistoryName = new Label[maxHistory];
+        arrayHistorySelect = new Button[maxHistory];
+        arrayHistoryFavorite = new Button[maxHistory];
+        for (int index = 0; index < maxHistory; index++) {
+            buildSearchHistory(row, index);
+        }
+        row += 10;
         
         // Favorites
-        arrayFavorites = new HBox[maxFavorites];
+        var favoritesLabel = new Label("Favorites");
+        favoritesLabel.setFont(new Font("C059 Bold", 24));
+        favoritesLabel.setPrefWidth(searchTextWidth);
+        favoritesLabel.setAlignment(Pos.CENTER_LEFT);
+        favoritesLabel.setPadding(new Insets(0, 0, 0, 10));
+        searchLayout.add(favoritesLabel, 0, row);
+        row++;
         arrayFavoriteName = new Label[maxFavorites];
         arrayFavoriteSelect = new Button[maxFavorites];
         arrayFavoriteDelete = new Button[maxFavorites];
         for (int index = 0; index < maxFavorites; index++) {
-            buildSearchFavorite(index);
+            buildSearchFavorite(row, index);
         }
     }
     
@@ -620,27 +691,32 @@ public class WeatherApp extends Application {
         }
     }
     
-    private void updateFavoritesIndex(int index, String loc) {
-        arrayFavoriteName[index].setText(loc);
-        arrayFavoriteSelect[index].setOnAction((event) -> {
-            api.setLocationActive(loc);
-            update();
-        });
-        arrayFavoriteDelete[index].setOnAction((event) -> {
-            api.removeFromFavorites(loc);
-            update();
-        });
+    private void updateSearchHistory() {
+        int size = api.getLocationHistory().size();
+        for (int i = 0; i < maxHistory; i++) {
+            if (i < size) {
+                arrayHistoryName[i].setText(api.getLocationHistory().get(i));
+                arrayHistorySelect[i].setVisible(true);
+                arrayHistoryFavorite[i].setVisible(true);
+            } else {
+                arrayHistoryName[i].setText("");
+                arrayHistorySelect[i].setVisible(false);
+                arrayHistoryFavorite[i].setVisible(false);
+            }
+        }
     }
     
-    private void updateFavorites() {
+    private void updateSearchFavorites() {
         int size = api.getLocationFavorites().size();
-        for (int index = 0; index < maxFavorites; index++) {
-            if (index < size) {
-                updateFavoritesIndex(index,
-                        api.getLocationFavorites().get(index));
-                arrayFavorites[index].setVisible(true);
+        for (int i = 0; i < maxFavorites; i++) {
+            if (i < size) {
+                arrayFavoriteName[i].setText(api.getLocationFavorites().get(i));
+                arrayFavoriteSelect[i].setVisible(true);
+                arrayFavoriteDelete[i].setVisible(true);
             } else {
-                arrayFavorites[index].setVisible(false);
+                arrayFavoriteName[i].setText("");
+                arrayFavoriteSelect[i].setVisible(false);
+                arrayFavoriteDelete[i].setVisible(false);
             }
         }
     }
@@ -658,7 +734,8 @@ public class WeatherApp extends Application {
         
             // Update search window UI fields
             searchStatusField.setText("");
-            updateFavorites();
+            updateSearchHistory();
+            updateSearchFavorites();
         }
         return requestSuccess;
     }
