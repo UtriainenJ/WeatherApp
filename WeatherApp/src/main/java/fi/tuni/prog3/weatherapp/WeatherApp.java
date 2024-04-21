@@ -33,7 +33,6 @@ public class WeatherApp extends Application {
     // Constants
     private final int forecastDays = 5;
     private final int forecastHours = 16;
-    private final int topBarButtonWidth = 150;
     private final int weatherLabelHeight = 30;
     private final int weatherTempBarHeight = 80;
     private final int feelsLikeBarHeight = 30;
@@ -115,18 +114,18 @@ public class WeatherApp extends Application {
         
         // Units button on the left
         var unitsButton = new Button("Switch Units");
-        unitsButton.setPrefWidth(topBarButtonWidth);
         unitsButton.setOnAction((event) -> {
             api.switchUnits();
             update();
         });
+        unitsButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         topBar.setLeft(unitsButton);
         topBar.setAlignment(unitsButton, Pos.CENTER);
         
         // Search button on the right
         var searchButton = new Button("Search & Favorites"); // AmE > BrE
-        searchButton.setPrefWidth(topBarButtonWidth);
         searchButton.setOnAction((event) -> {searchWindow.show();});
+        searchButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         topBar.setRight(searchButton);
         topBar.setAlignment(searchButton, Pos.CENTER);
         
@@ -407,11 +406,13 @@ public class WeatherApp extends Application {
             api.setLocationActive(nameField.getText());
             update();
         });
+        selectButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         var favoriteButton = new Button("Favorite");
         favoriteButton.setOnAction((event) -> {
             api.addToFavorites(nameField.getText());
             update();
         });
+        favoriteButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         
         // Make elemenets invisible by default
         selectButton.setVisible(false);
@@ -438,12 +439,14 @@ public class WeatherApp extends Application {
             api.setLocationActive(nameField.getText());
             update();
         });
+        selectButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         var deleteButton = new Button("Unfavorite");
         deleteButton.setOnAction((event) -> {
             api.removeFromFavorites(nameField.getText());
             searchLayout.requestFocus(); // Remove focus from delete button
             update();
         });
+        deleteButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         
         // Make elemenets invisible by default
         selectButton.setVisible(false);
@@ -488,6 +491,7 @@ public class WeatherApp extends Application {
         searchLabel.setPadding(new Insets(0, 0, 0, 10));
         var closeButton = new Button("Close"); // Button for closing window
         closeButton.setOnAction((event) -> {searchWindow.close();});
+        closeButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         searchLayout.add(searchLabel, 0, row);
         searchLayout.add(closeButton, 2, row);
         row++;
@@ -510,8 +514,10 @@ public class WeatherApp extends Application {
         searchField.setPrefWidth(searchTextWidth);
         var searchButton = new Button("Search"); // Start search
         searchButton.setOnAction((event) -> {search(searchField.getText());});
+        searchButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         var clearButton = new Button("Clear"); // Button for clearing search
         clearButton.setOnAction((event) -> {searchField.setText("");});
+        clearButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         searchLayout.add(searchField, 0, row);
         searchLayout.add(searchButton, 1, row);
         searchLayout.add(clearButton, 2, row);
