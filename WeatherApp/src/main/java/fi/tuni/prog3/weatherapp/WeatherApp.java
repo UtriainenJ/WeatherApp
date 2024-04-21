@@ -645,8 +645,8 @@ public class WeatherApp extends Application {
         arrayDayIcon[index].setImage(icon);
         arrayDayWeekday[index].setText(forecastDay.getWeekday());
         arrayDayDate[index].setText(forecastDay.getDate());
-        arrayDayTempMin[index].setText(forecastDay.getTemp().getMax());
-        arrayDayTempMax[index].setText(forecastDay.getTemp().getMin());
+        arrayDayTempMin[index].setText(forecastDay.getTemp().getMin());
+        arrayDayTempMax[index].setText(forecastDay.getTemp().getMax());
         arrayDayTempUnit[index].setText(api.getUnitTemp());
     }
     
