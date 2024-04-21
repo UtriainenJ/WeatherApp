@@ -13,6 +13,7 @@ public class WeatherData {
     
     private static final String METRIC = "metric";
     private static String units;
+    private String airQuality;
 
     private Coord coord;
     private List<Weather> weather;
@@ -31,6 +32,14 @@ public class WeatherData {
     private int cod;
 
     public WeatherData() {}
+    
+    public void setAirQuality(String aq) {
+        this.airQuality = aq;
+    }
+    
+    public String getAirQuality() {
+        return airQuality;
+    }
     
     public void setUnits(String str) {
         WeatherData.units = str;

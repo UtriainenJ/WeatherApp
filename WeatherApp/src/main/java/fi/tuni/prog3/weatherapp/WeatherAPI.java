@@ -203,10 +203,16 @@ public class WeatherAPI implements iAPI {
         }
     }
 
-    public void getData() {
-        this.wd = getCurrentWeather(locationActive);
-        this.fdh = getForecastHourly(locationActive);
-        this.fdd = getForecastDaily(locationActive);
+    public boolean getData() {
+        try {
+            this.wd = getCurrentWeather(locationActive);
+            this.fdh = getForecastHourly(locationActive);
+            this.fdd = getForecastDaily(locationActive);
+            return true;
+        } catch (Exception ex) {
+            System.out.println(ex);
+            return false;
+        }
     }
     
     @Override
@@ -334,9 +340,11 @@ public class WeatherAPI implements iAPI {
         }
     }
     
-    private static WeatherData makeWeatherObject(String json) {
+    private static WeatherData makeWeatherObject(String json) throws IOException {
         Gson gson = new Gson();
         WeatherData data = gson.fromJson(json, WeatherData.class);
+        String aq = getAirQuality(data);
+        data.setAirQuality(aq);
         return data;
     }
     
@@ -350,6 +358,32 @@ public class WeatherAPI implements iAPI {
         Gson gson = new Gson();
         ForecastDataDaily data = gson.fromJson(json, ForecastDataDaily.class);
         return data;
+    }
+    
+    private static AirQuality makeAirQualityObject(String json) {
+        Gson gson = new Gson();
+        AirQuality aq = gson.fromJson(json, AirQuality.class);
+        return aq;
+    }
+    
+    private static String getAirQuality(WeatherData data) throws IOException {
+        String lat = String.valueOf(data.getCoord().getLat());
+        String lon = String.valueOf(data.getCoord().getLon());
+        
+        String url = "http://api.openweathermap.org/data/2.5/air_pollution"
+                + "?lat=" + lat + "&lon=" + lon + "&appid=" + getAPIKey();
+        String res = makeHTTPCall(url);
+        //System.out.println(res);
+        AirQuality aq = makeAirQualityObject(res);
+        int aqi = aq.getList().get(0).getMain().getAqi();
+        switch(aqi) {
+            case 1: return "Good";
+            case 2: return "Fair";
+            case 3: return "Moderate";
+            case 4: return "Poor";
+            case 5: return "Very Poor";
+            default: return "null";
+        }
     }
     
     private static boolean illegalLatOrLon(double lat, double lon) {

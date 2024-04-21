@@ -228,7 +228,7 @@ public class ForecastDataHourly {
         private double temp_kf;
 
         public String getTemp() {
-            return temp == null? "null" : String.valueOf(temp);
+            return temp == null? "null" : String.format(Locale.US, "%.0f", temp);
         }
 
         public void setTemp(double temp) {
@@ -236,7 +236,7 @@ public class ForecastDataHourly {
         }
 
         public String getFeels_like() {
-            return feels_like == null? "null" : String.valueOf(feels_like);
+            return feels_like == null? "null" : String.format(Locale.US, "%.0f", feels_like);
         }
 
         public void setFeels_like(double feels_like) {
@@ -244,7 +244,7 @@ public class ForecastDataHourly {
         }
 
         public String getTemp_min() {
-            return temp_min == null? "null" : String.valueOf(temp_min);
+            return temp_min == null? "null" : String.format(Locale.US, "%.0f", temp_min);
         }
 
         public void setTemp_min(double temp_min) {
@@ -252,7 +252,7 @@ public class ForecastDataHourly {
         }
 
         public String getTemp_max() {
-            return temp_max == null? "null" : String.valueOf(temp_max);
+            return temp_max == null? "null" : String.format(Locale.US, "%.0f", temp_max);
         }
 
         public void setTemp_max(double temp_max) {
@@ -357,7 +357,7 @@ public class ForecastDataHourly {
         private Double gust;
 
         public String getSpeed() {
-            return speed == null? "0" : String.valueOf(speed);
+            return speed == null? "0" : String.format(Locale.US, "%.0f", speed);
         }
 
         public void setSpeed(double speed) {
@@ -373,7 +373,7 @@ public class ForecastDataHourly {
         }
 
         public String getGust() {
-            return gust == null? "0" : String.valueOf(gust);
+            return gust == null? "0" : String.format(Locale.US, "%.0f", gust);
         }
 
         public void setGust(double gust) {
