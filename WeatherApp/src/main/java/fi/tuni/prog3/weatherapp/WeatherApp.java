@@ -521,23 +521,25 @@ public class WeatherApp extends Application {
     }
     
     private void updateWeatherPanel() {
+        var weather = api.getWeather();
+        
         // Weather and temperature bar
-        var iconWeat = getIcon(api.getWeather().getWeather().get(0).getIcon());
+        var iconWeat = getIcon(weather.getWeather().get(0).getIcon());
         currentWeatherIcon.setImage(iconWeat);
-        currentTempField.setText(api.getWeather().getMain().getTemp());
+        currentTempField.setText(weather.getMain().getTemp());
         currentTempUnitField.setText(api.getUnitTemp());
         
         // "Feels Like" bar
-        currentFeelsLikeField.setText(api.getWeather().getMain().getFeels_like());
+        currentFeelsLikeField.setText(weather.getMain().getFeels_like());
         currentFeelsLikeUnitField.setText(api.getUnitTemp());
         
         // Air quality, rain and wind bar
-        currentAirQualityField.setText("TODO");
+        currentAirQualityField.setText(weather.getAirQuality());
         currentRainIcon.setImage(getIcon("rain"));
-        currentRainField.setText(api.getWeather().getRain().get1h());
+        currentRainField.setText(weather.getRain().get1h());
         currentRainUnitField.setText(api.getUnitRain());
         currentWindIcon.setImage(getIcon("wind"));
-        currentWindField.setText(api.getWeather().getWind().getSpeed());
+        currentWindField.setText(weather.getWind().getSpeed());
         currentWindUnitField.setText(api.getUnitWind());
     }
     
