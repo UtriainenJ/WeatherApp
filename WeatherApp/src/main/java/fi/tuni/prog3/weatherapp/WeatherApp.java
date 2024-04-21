@@ -554,7 +554,7 @@ public class WeatherApp extends Application {
     
     private void updateForecastHour(int bias, int index) {
         var forecast = api.getForecastHourly().getList();
-        if (bias + index < forecast.size()) {
+        if ((bias + index < forecast.size()) & (bias + index >= 0)) {
             var forecastHour = forecast.get(bias + index);
             Image icon = getIcon(forecastHour.getWeather().get(0).getIcon());
             arrayHourWeatherIcon[index].setImage(icon);
@@ -566,7 +566,7 @@ public class WeatherApp extends Application {
             arrayHourRainStat[index].setText(forecastHour.getRain().get1h());
             arrayHourRainPerc[index].setText(forecastHour.getPop());
             arrayHours[index].setVisible(true);
-        } else { // Forecast doesn't go this far
+        } else { // Forecast doesn't go this far (forward or back)
             arrayHours[index].setVisible(false);
         }
     }
@@ -576,9 +576,24 @@ public class WeatherApp extends Application {
             updateForecastDay(i);
         }
         
+        int buffer = 24 - forecastHours;
+        int currentHour = Integer.parseInt(
+                api.getForecastHourly().getList().get(0).getHour());
         int biasDays = 24 * selectedDay;
-        int biasHours =  (int)round(sliderValue * (24 - forecastHours));
-        int bias = biasDays + biasHours;
+        int biasHours =  (int)round(sliderValue * buffer);
+        if ((selectedDay == 0) & (biasHours < currentHour)) {
+            forecastSlider.setDisable(true);
+            if (currentHour < buffer) {
+                biasHours = currentHour;
+            } else {
+                biasHours = buffer;
+            }
+        } else if ((selectedDay >= forecastDays - 1) & (currentHour > buffer)) {
+            forecastSlider.setDisable(true);
+        } else {
+            forecastSlider.setDisable(false);
+        }
+        int bias = biasDays + biasHours - currentHour;
         for (int i = 0; i < forecastHours; i++) {
             updateForecastHour(bias, i);
         }
