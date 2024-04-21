@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import static java.lang.Math.round;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -101,6 +102,8 @@ public class WeatherApp extends Application {
     private Label currentRainUnitField;
     private Label currentWindField;
     private Label currentWindUnitField;
+    private Label searchStatusField;
+    private TextField searchField;
     private Slider forecastSlider;
     
     private void buildTopBar() {
@@ -408,6 +411,18 @@ public class WeatherApp extends Application {
         arrayFavorites[index] = favorite;
     }
     
+    private void search(String location) {
+        String previousLocation = api.getLocationActive();
+        api.setLocationActive(location);
+        boolean locationFound = update();
+        if (locationFound) {
+            searchStatusField.setText("Search Successful");
+        } else {
+            searchStatusField.setText("Try Again");
+            api.setLocationActive(previousLocation);
+        }
+    }
+    
     private void buildSearchWindow() {
         // Vertical main layout
         searchLayout = new VBox();
@@ -427,20 +442,24 @@ public class WeatherApp extends Application {
         topBar.setAlignment(closeButton, Pos.CENTER);
         searchLayout.getChildren().add(topBar);
         
+        // Search status field
+        searchStatusField = new Label();
+        searchStatusField.setPadding(new Insets(5, 0, 5, 10));
+        searchLayout.getChildren().add(searchStatusField);
+        searchLayout.setAlignment(Pos.CENTER_LEFT);
+        
         // Horizontal row
-        var searchField = new TextField(); // Enter text
+        searchField = new TextField(); // Enter text
         searchField.setOnKeyPressed((event) -> {
             if (event.getCode() == KeyCode.ENTER) { // Start search
-                api.setLocationActive(searchField.getText());
-                update();
+                search(searchField.getText());
+            } else {
+                searchStatusField.setText("");
             }
         });
         searchField.setPrefWidth(favoriteNameWidth);
         var searchButton = new Button("Search"); // Start search
-        searchButton.setOnAction((event) -> {
-            api.setLocationActive(searchField.getText());
-            update();
-        });
+        searchButton.setOnAction((event) -> {search(searchField.getText());});
         var favoriteButton = new Button("Favorite"); // Add favorite
         favoriteButton.setOnAction((event) -> {
             api.addToFavorites(searchField.getText());
@@ -626,19 +645,22 @@ public class WeatherApp extends Application {
         }
     }
     
-    private void update() {
+    private boolean update() {
         // Request weather and forecast data from api
-        api.getData();
+        boolean requestSuccess = api.getData();
+        if (requestSuccess) {
+            // Update main window UI fields
+            updateTopBar();
+            updateWeatherPanel();
         
-        // Update main window UI fields
-        updateTopBar();
-        updateWeatherPanel();
+            // Update bottom panel
+            updateForecast();
         
-        // Update bottom panel
-        updateForecast();
-        
-        // Update search window UI fields
-        updateFavorites();
+            // Update search window UI fields
+            searchStatusField.setText("");
+            updateFavorites();
+        }
+        return requestSuccess;
     }
 
     @Override
