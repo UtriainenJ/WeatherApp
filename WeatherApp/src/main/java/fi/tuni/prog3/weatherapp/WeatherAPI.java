@@ -82,7 +82,7 @@ public class WeatherAPI implements iAPI {
         this.locationFavorites = new ArrayList<>();
         this.locationHistory = new ArrayList<>();
     }
-    
+
     public WeatherAPI setLocationActive(String loc) {
         addToHistory(loc);
         this.locationActive = loc;
@@ -208,6 +208,9 @@ public class WeatherAPI implements iAPI {
             this.wd = getCurrentWeather(locationActive);
             this.fdh = getForecastHourly(locationActive);
             this.fdd = getForecastDaily(locationActive);
+            this.wd.setUnits(units);
+            this.fdh.setUnits(units);
+            this.fdd.setUnits(units);
             return true;
         } catch (Exception ex) {
             System.out.println(ex);
