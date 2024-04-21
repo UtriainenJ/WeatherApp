@@ -203,10 +203,16 @@ public class WeatherAPI implements iAPI {
         }
     }
 
-    public void getData() {
-        this.wd = getCurrentWeather(locationActive);
-        this.fdh = getForecastHourly(locationActive);
-        this.fdd = getForecastDaily(locationActive);
+    public boolean getData() {
+        try {
+            this.wd = getCurrentWeather(locationActive);
+            this.fdh = getForecastHourly(locationActive);
+            this.fdd = getForecastDaily(locationActive);
+            return true;
+        } catch (Exception ex) {
+            System.out.println(ex);
+            return false;
+        }
     }
     
     @Override
