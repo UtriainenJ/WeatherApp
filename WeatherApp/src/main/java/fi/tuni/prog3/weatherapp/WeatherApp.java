@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import static java.lang.Math.round;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -11,6 +12,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -43,6 +45,7 @@ public class WeatherApp extends Application {
     
     // Control variables
     private int selectedDay = 0;
+    private double sliderValue = 0;
     
     // Containers
     private VBox[] arrayDays;
@@ -85,10 +88,10 @@ public class WeatherApp extends Application {
     private VBox maps;
     
     // UI elements
-    private Label cityLabel;
     private ImageView currentWeatherIcon;
     private ImageView currentRainIcon;
     private ImageView currentWindIcon;
+    private Label cityLabel;
     private Label currentTempField;
     private Label currentTempUnitField;
     private Label currentFeelsLikeField;
@@ -98,6 +101,7 @@ public class WeatherApp extends Application {
     private Label currentRainUnitField;
     private Label currentWindField;
     private Label currentWindUnitField;
+    private Slider forecastSlider;
     
     private void buildTopBar() {
         // BorderPane for left + center + right alignment
@@ -242,7 +246,12 @@ public class WeatherApp extends Application {
         tempBar.setAlignment(Pos.CENTER);
         
         var forecastDay = new VBox(weekdayDateBar, weatherIconLabel, tempBar);
-        forecastDay.setOnMouseClicked((event) -> {selectDay(index);});
+        forecastDay.setOnMouseClicked((event) -> {
+            selectDay(index);
+            forecastSlider.setValue(0); // Reset hourly slider
+            sliderValue = 0; // Reset slider value too
+            updateForecast(); // Update
+        });
         forecastDay.setAlignment(Pos.CENTER);
         forecastDay.setPrefWidth(dailyForecastWidth);
         forecastDaysBar.getChildren().add(forecastDay);
@@ -336,7 +345,23 @@ public class WeatherApp extends Application {
             buildForecastHour(i);
         }
         
-        forecast = new VBox(forecastDaysBar, forecastHoursBar);
+        // Hourly forecast slider
+        forecastSlider = new Slider();
+        forecastSlider.setMin(0);
+        forecastSlider.setMax(24 - forecastHours);
+        forecastSlider.setMinorTickCount(0);
+        forecastSlider.setMajorTickUnit(1);
+        forecastSlider.setSnapToTicks(true);
+        forecastSlider.setShowTickMarks(true);
+        forecastSlider.setOnMouseDragged((event) -> {
+            double prevSliderValue = sliderValue;
+            sliderValue = forecastSlider.getValue() / forecastSlider.getMax();
+            if (sliderValue != prevSliderValue) {
+                updateForecast();
+            }
+        });
+        
+        forecast = new VBox(forecastDaysBar, forecastHoursBar, forecastSlider);
     }
     
     private void buildHistory() {
@@ -527,17 +552,23 @@ public class WeatherApp extends Application {
         arrayDayTempUnit[index].setText(api.getUnitTemp());
     }
     
-    private void updateForecastHour(int index) {
-        var forecastHour = api.getForecastHourly().getList().get(index);
-        Image icon = getIcon(forecastHour.getWeather().get(0).getIcon());
-        arrayHourWeatherIcon[index].setImage(icon);
-        double rot = Double.parseDouble(forecastHour.getWind().getDeg());
-        arrayHourWindIcon[index].setRotate(rot);
-        arrayHourLabel[index].setText(forecastHour.getHour());
-        arrayHourTemp[index].setText(forecastHour.getMain().getTemp());
-        arrayHourWind[index].setText(forecastHour.getWind().getSpeed());
-        arrayHourRainStat[index].setText(forecastHour.getRain().get1h());
-        arrayHourRainPerc[index].setText(forecastHour.getPop());
+    private void updateForecastHour(int bias, int index) {
+        var forecast = api.getForecastHourly().getList();
+        if (bias + index < forecast.size()) {
+            var forecastHour = forecast.get(bias + index);
+            Image icon = getIcon(forecastHour.getWeather().get(0).getIcon());
+            arrayHourWeatherIcon[index].setImage(icon);
+            double rot = Double.parseDouble(forecastHour.getWind().getDeg());
+            arrayHourWindIcon[index].setRotate(rot);
+            arrayHourLabel[index].setText(forecastHour.getHour());
+            arrayHourTemp[index].setText(forecastHour.getMain().getTemp());
+            arrayHourWind[index].setText(forecastHour.getWind().getSpeed());
+            arrayHourRainStat[index].setText(forecastHour.getRain().get1h());
+            arrayHourRainPerc[index].setText(forecastHour.getPop());
+            arrayHours[index].setVisible(true);
+        } else { // Forecast doesn't go this far
+            arrayHours[index].setVisible(false);
+        }
     }
     
     private void updateForecast() {
@@ -545,8 +576,11 @@ public class WeatherApp extends Application {
             updateForecastDay(i);
         }
         
+        int biasDays = 24 * selectedDay;
+        int biasHours =  (int)round(sliderValue * (24 - forecastHours));
+        int bias = biasDays + biasHours;
         for (int i = 0; i < forecastHours; i++) {
-            updateForecastHour(i);
+            updateForecastHour(bias, i);
         }
     }
     
