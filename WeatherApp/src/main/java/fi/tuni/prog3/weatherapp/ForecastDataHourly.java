@@ -389,7 +389,7 @@ public class ForecastDataHourly {
             if(METRIC.equals(units)) {
                 return _1h == null? "0" : String.format(Locale.US, "%.1f", _1h);
             }
-            return _1h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
+            return _1h == null? "0" : String.format(Locale.US, "%.1f",_1h/25.4);
         }
 
         public void set1h(double _1h) {
@@ -405,7 +405,7 @@ public class ForecastDataHourly {
             if(METRIC.equals(units)) {
                 return _1h == null? "0" : String.format(Locale.US, "%.1f", _1h);
             }
-            return _1h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
+            return _1h == null? "0" : String.format(Locale.US, "%.1f",_1h/25.4);
         }
 
         public void set1h(double _1h) {

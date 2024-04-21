@@ -269,24 +269,24 @@ public class ForecastDataDaily {
             if(METRIC.equals(units)) {
                 return rain == null? "0" : String.format("%.1f", rain);
             }
-            return rain == null? "0" : String.format(Locale.US, "%.2f",rain/25.4);
+            return rain == null? "0" : String.format(Locale.US, "%.1f",rain/25.4);
         }
 
         public void setRain(Double rain) {
             this.rain = rain;
         }
-        
+
         public String getSnow() {
             if(METRIC.equals(units)) {
                 return snow == null? "0" : String.format("%.1f", snow);
             }
-            return snow == null? "0" : String.format(Locale.US, "%.2f",snow/25.4);
+            return snow == null? "0" : String.format(Locale.US, "%.1f",snow/25.4);
         }
 
         public void setSnow(Double snow) {
             this.snow = snow;
         }
-        
+
         public String getWeekday() {
             LocalDateTime ldt = epochToDateTime(dt);
             String day = ldt.getDayOfWeek().toString();
