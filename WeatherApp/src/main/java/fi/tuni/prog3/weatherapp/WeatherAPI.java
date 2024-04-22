@@ -103,7 +103,7 @@ public class WeatherAPI implements iAPI {
    
     public void addToFavorites(String loc) {
         if(!locationFavorites.contains(loc)) {
-            locationFavorites.add(loc);
+            locationFavorites.add(0, loc);
         }
     }
     
@@ -395,7 +395,10 @@ public class WeatherAPI implements iAPI {
     
     private void addToHistory(String loc) {
         if(!locationHistory.contains(loc)) {
-            locationHistory.add(loc);
+            locationHistory.add(0, loc);
+        } else {
+            locationHistory.remove(loc);
+            addToHistory(loc);
         }
     }
 }
