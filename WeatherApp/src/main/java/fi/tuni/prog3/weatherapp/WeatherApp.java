@@ -42,13 +42,26 @@ public class WeatherApp extends Application {
     private final int searchTextWidth = 200;
     private final double dailyForecastWidth = 96;
     private final double hourlyForecastWidth = 30;
+    private final double rainMeterHeight = 20;
     private final String tempFileName = "temp.json";
+    
+    // Cell styles
+    private final String styleYellow = "-fx-background-color: #fae49f;";
+    private final String styleBlue = "-fx-background-color: #a5c2f9;";
+    private final String styleNoData = "-fx-background-color: #949494;";
+    private final String[] styleRain = {
+        "",
+        "-fx-background-color: #078500;",
+        "-fx-background-color: #00e1ff;",
+        "-fx-background-color: #0096bb;",
+        "-fx-background-color: #004488;"
+    };
     
     // Control variables
     private int selectedDay = 0;
     private double sliderValue = 0;
     
-    // Containers
+    // Element arrays
     private VBox[] arrayDays;
     private VBox[] arrayHours;
     private ImageView[] arrayDayIcon;
@@ -70,6 +83,7 @@ public class WeatherApp extends Application {
     private Button[] arrayHistoryFavorite;
     private Button[] arrayFavoriteSelect;
     private Button[] arrayFavoriteDelete;
+    private Label[][] arrayRainMeters;
     
     // Class entities
     private StorageSystem ss;
@@ -202,7 +216,7 @@ public class WeatherApp extends Application {
         
         weather = new VBox(weatherLabel, weatherAndTempBar,
                 feelsLikeBar, airQualityBar);
-        weather.setStyle("-fx-background-color: #fae49f;");
+        weather.setStyle(styleYellow);
         weather.setAlignment(Pos.CENTER);
     }
     
@@ -217,30 +231,30 @@ public class WeatherApp extends Application {
         arrayDays[selectedDay].setStyle("");
         
         // Color new day background
-        arrayDays[day].setStyle("-fx-background-color: #a5c2f9;");
+        arrayDays[day].setStyle(styleBlue);
         arrayDays[day].requestFocus();
         
         // Update index variable
         selectedDay = day;
     }
     
-    private void buildForecastDay(int index) {
-        // Top: weekday and date bar
+    private void buildForecastDay(int day) {
+        // Weekday and date
         var weekdayLabel = new Label();
         weekdayLabel.setPadding(new Insets(0, 5, 0, 0));
         var dateLabel = new Label();
         dateLabel.setStyle("-fx-font-weight: bold");
-        var weekdayDateBar = new HBox(weekdayLabel, dateLabel);
-        weekdayDateBar.setAlignment(Pos.CENTER);
+        var dateBar = new HBox(weekdayLabel, dateLabel);
+        dateBar.setAlignment(Pos.CENTER);
         
-        // Middle: weather icon
+        // Weather icon
         var weatherIconImage = new ImageView();
         weatherIconImage.setPreserveRatio(true);
         weatherIconImage.setFitWidth(dailyForecastWidth);
-        var weatherIconLabel = new Label();
-        weatherIconLabel.setGraphic(weatherIconImage);
+        var weatherIcon = new Label();
+        weatherIcon.setGraphic(weatherIconImage);
         
-        // Bottom: temperature bar
+        // Maximum and minimum temperature
         var minTempLabel = new Label();
         var sepLabel = new Label("...");
         sepLabel.setPadding(new Insets(0, 5, 0, 5));
@@ -250,9 +264,19 @@ public class WeatherApp extends Application {
                 tempUnitLabel);
         tempBar.setAlignment(Pos.CENTER);
         
-        var forecastDay = new VBox(weekdayDateBar, weatherIconLabel, tempBar);
+        // Rain meter
+        var rainMeter = new HBox();
+        for (int hour = 0; hour < 24; hour++) {
+            var hourLabel = new Label();
+            hourLabel.setPrefSize(dailyForecastWidth / 24, rainMeterHeight);
+            rainMeter.getChildren().add(hourLabel);
+            arrayRainMeters[day][hour] = hourLabel;
+        }
+        
+        // Build UI container
+        var forecastDay = new VBox(dateBar, weatherIcon, tempBar, rainMeter);
         forecastDay.setOnMouseClicked((event) -> {
-            selectDay(index);
+            selectDay(day);
             forecastSlider.setValue(0); // Reset hourly slider
             sliderValue = 0; // Reset slider value too
             updateForecast(); // Update
@@ -262,13 +286,13 @@ public class WeatherApp extends Application {
         forecastDaysBar.getChildren().add(forecastDay);
         
         // Add elements to class arrays
-        arrayDays[index] = forecastDay;
-        arrayDayWeekday[index] = weekdayLabel;
-        arrayDayDate[index] = dateLabel;
-        arrayDayIcon[index] = weatherIconImage;
-        arrayDayTempMin[index] = minTempLabel;
-        arrayDayTempMax[index] = maxTempLabel;
-        arrayDayTempUnit[index] = tempUnitLabel;
+        arrayDays[day] = forecastDay;
+        arrayDayWeekday[day] = weekdayLabel;
+        arrayDayDate[day] = dateLabel;
+        arrayDayIcon[day] = weatherIconImage;
+        arrayDayTempMin[day] = minTempLabel;
+        arrayDayTempMax[day] = maxTempLabel;
+        arrayDayTempUnit[day] = tempUnitLabel;
     }
     
     private void buildForecastHour(int index) {
@@ -326,6 +350,7 @@ public class WeatherApp extends Application {
         arrayDayTempMin = new Label[forecastDays];
         arrayDayTempMax = new Label[forecastDays];
         arrayDayTempUnit = new Label[forecastDays];
+        arrayRainMeters = new Label[forecastDays][24];
         
         arrayHours = new VBox[forecastHours];
         arrayHourWeatherIcon = new ImageView[forecastHours];
@@ -639,6 +664,39 @@ public class WeatherApp extends Application {
         currentWindUnitField.setText(api.getUnitWind());
     }
     
+    void updateRainMeter(int dayIndex) {
+        var forecast = api.getForecastHourly().getList();
+        int currentHour = Integer.parseInt(forecast.get(0).getHour());
+        for (int hourIndex = 0; hourIndex < 24; hourIndex++) {
+            String style;
+            int forecastIndex = 24 * dayIndex + hourIndex - currentHour;
+            if ((forecastIndex > 0) & (forecastIndex < forecast.size())) {
+                var forecastHour = forecast.get(forecastIndex);
+                String rainStr = forecastHour.getRain().get1h();
+                double rainValue = Double.parseDouble(rainStr);
+                if (api.getUnit().equals("imperial")) { // Convert to mm
+                    rainValue = 25.4 * rainValue;
+                }
+                
+                // Check rain intensity
+                if (rainValue == 0) { // No rain
+                    style = styleRain[0];
+                } else if (rainValue < 2.5) { // Light rain
+                    style = styleRain[1];
+                } else if (rainValue < 10) { // Moderate rain
+                    style = styleRain[2];
+                } else if (rainValue < 50) { // Heavy rain
+                    style = styleRain[3];
+                } else { // Violent rain
+                    style = styleRain[4];
+                }
+            } else {
+                style = styleNoData;
+            }
+            arrayRainMeters[dayIndex][hourIndex].setStyle(style);
+        }
+    }
+    
     private void updateForecastDay(int index) {
         var forecastDay = api.getForecastDaily().getList().get(index);
         Image icon = getIcon(forecastDay.getWeather().get(0).getIcon());
@@ -648,6 +706,7 @@ public class WeatherApp extends Application {
         arrayDayTempMin[index].setText(forecastDay.getTemp().getMin());
         arrayDayTempMax[index].setText(forecastDay.getTemp().getMax());
         arrayDayTempUnit[index].setText(api.getUnitTemp());
+        updateRainMeter(index);
     }
     
     private void updateForecastHour(int bias, int index) {
