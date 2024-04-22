@@ -14,7 +14,7 @@ import java.util.Locale;
 public class ForecastDataDaily {
     private static final String METRIC = "metric";    
     private static String units;
-    private static int FIN_OFFSET = 10800;
+    private static final int FIN_OFFSET = 10800;
     
     private City city;
     private String cod;
