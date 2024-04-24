@@ -23,6 +23,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 
@@ -37,13 +38,17 @@ public class WeatherApp extends Application {
     private final int weatherTempBarHeight = 80;
     private final int feelsLikeBarHeight = 30;
     private final int airQualityBarHeight = 30;
+    private final int moveButtonLength = 40;
+    private final int moveButtonWidth = moveButtonLength;
     private final int maxFavorites = 8;
     private final int maxHistory = 8;
     private final int searchTextWidth = 200;
     private final double dailyForecastWidth = 96;
     private final double hourlyForecastWidth = 30;
     private final double rainMeterHeight = 20;
+    private final double mapHeight = 240;
     private final String tempFileName = "temp.json";
+    private final String mapFileName = "map.png";
     
     // Cell styles
     private final String styleYellow = "-fx-background-color: #fae49f;";
@@ -88,6 +93,7 @@ public class WeatherApp extends Application {
     // Class entities
     private StorageSystem ss;
     private WeatherAPI api;
+    private WeatherMap map;
     
     // UI containers
     private Stage mainWindow;
@@ -98,16 +104,17 @@ public class WeatherApp extends Application {
     private HBox midBar;
     private StackPane basePanel;
     private VBox weather;
-    private HBox forecastDaysBar;
-    private HBox forecastHoursBar;
-    private VBox forecast;
-    private VBox history;
-    private VBox maps;
+    private HBox fcDaysBar;
+    private HBox fcHoursBar;
+    private VBox forecastPanel;
+    private VBox historyPanel;
+    private VBox mapsPanel;
     
     // UI elements
     private ImageView currentWeatherIcon;
     private ImageView currentRainIcon;
     private ImageView currentWindIcon;
+    private ImageView mapImage;
     private Label cityLabel;
     private Label currentTempField;
     private Label currentTempUnitField;
@@ -120,7 +127,7 @@ public class WeatherApp extends Application {
     private Label currentWindUnitField;
     private Label searchStatusField;
     private TextField searchField;
-    private Slider forecastSlider;
+    private Slider fcSlider;
     
     private void buildTopBar() {
         // BorderPane for left + center + right alignment
@@ -220,6 +227,24 @@ public class WeatherApp extends Application {
         weather.setAlignment(Pos.CENTER);
     }
     
+    private void selectPanel(Node panel) 
+            throws ArrayIndexOutOfBoundsException {
+        
+        boolean panelFound = false;
+        for (Node node : basePanel.getChildren()) {
+            if (node == panel) {
+                panelFound = true;
+                node.setVisible(true);
+            } else {
+                node.setVisible(false);
+            }
+        }
+        
+        if (panelFound == false) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+    }
+    
     private void selectDay(int day) 
             throws ArrayIndexOutOfBoundsException {
         // Check for valid array index
@@ -277,13 +302,13 @@ public class WeatherApp extends Application {
         var forecastDay = new VBox(dateBar, weatherIcon, tempBar, rainMeter);
         forecastDay.setOnMouseClicked((event) -> {
             selectDay(day);
-            forecastSlider.setValue(0); // Reset hourly slider
+            fcSlider.setValue(0); // Reset hourly slider
             sliderValue = 0; // Reset slider value too
             updateForecast(); // Update
         });
         forecastDay.setAlignment(Pos.CENTER);
         forecastDay.setPrefWidth(dailyForecastWidth);
-        forecastDaysBar.getChildren().add(forecastDay);
+        fcDaysBar.getChildren().add(forecastDay);
         
         // Add elements to class arrays
         arrayDays[day] = forecastDay;
@@ -328,7 +353,7 @@ public class WeatherApp extends Application {
                 rainStatusLabel, rainPercLabel);
         forecastHour.setAlignment(Pos.CENTER);
         forecastHour.setPrefWidth(hourlyForecastWidth);
-        forecastHoursBar.getChildren().add(forecastHour);
+        fcHoursBar.getChildren().add(forecastHour);
         
         // Add elements to class arrays
         arrayHours[index] = forecastHour;
@@ -341,7 +366,7 @@ public class WeatherApp extends Application {
         arrayHourRainPerc[index] = rainPercLabel;
     }
     
-    private void buildForecast() {
+    private void buildForecastPanel() {
         // Initialize arrays
         arrayDays = new VBox[forecastDays];
         arrayDayIcon = new ImageView[forecastDays];
@@ -362,64 +387,139 @@ public class WeatherApp extends Application {
         arrayHourRainPerc = new Label[forecastHours];
         
         // Horizontal days bar
-        forecastDaysBar = new HBox();
-        forecastDaysBar.setAlignment(Pos.CENTER);
+        fcDaysBar = new HBox();
+        fcDaysBar.setAlignment(Pos.CENTER);
         for (int i = 0; i < forecastDays; i++) {
             buildForecastDay(i);
         }
         
         // Horizontal hourly forecast bar
-        forecastHoursBar = new HBox();
-        forecastHoursBar.setAlignment(Pos.CENTER);
+        fcHoursBar = new HBox();
+        fcHoursBar.setAlignment(Pos.CENTER);
         for (int i = 0; i < forecastHours; i++) {
             buildForecastHour(i);
         }
         
         // Hourly forecast slider
-        forecastSlider = new Slider();
-        forecastSlider.setMin(0);
-        forecastSlider.setMax(24 - forecastHours);
-        forecastSlider.setMinorTickCount(0);
-        forecastSlider.setMajorTickUnit(1);
-        forecastSlider.setSnapToTicks(true);
-        forecastSlider.setShowTickMarks(true);
-        forecastSlider.setOnMouseDragged((event) -> {
+        fcSlider = new Slider();
+        fcSlider.setMin(0);
+        fcSlider.setMax(24 - forecastHours);
+        fcSlider.setMinorTickCount(0);
+        fcSlider.setMajorTickUnit(1);
+        fcSlider.setSnapToTicks(true);
+        fcSlider.setShowTickMarks(true);
+        fcSlider.setOnMouseDragged((event) -> {
             double prevSliderValue = sliderValue;
-            sliderValue = forecastSlider.getValue() / forecastSlider.getMax();
+            sliderValue = fcSlider.getValue() / fcSlider.getMax();
             if (sliderValue != prevSliderValue) {
                 updateForecast();
             }
         });
         
-        forecast = new VBox(forecastDaysBar, forecastHoursBar, forecastSlider);
+        forecastPanel = new VBox(fcDaysBar, fcHoursBar, fcSlider);
     }
     
-    private void buildHistory() {
-        history = new VBox();
-        history.getChildren().add(new Label("History"));
+    private void buildHistoryPanel() {
+        historyPanel = new VBox();
+        historyPanel.getChildren().add(new Label("History"));
     }
     
-    private void buildMaps() {
-        maps = new VBox();
-        maps.getChildren().add(new Label("Maps"));
-    }
-    
-    private void selectPanel(Node panel) 
-            throws ArrayIndexOutOfBoundsException {
+    private void buildMapsPanel() {
+        // Initialization
+        map = new WeatherMap();
+        map.init();
         
-        boolean panelFound = false;
-        for (Node node : basePanel.getChildren()) {
-            if (node == panel) {
-                panelFound = true;
-                node.setVisible(true);
-            } else {
-                node.setVisible(false);
-            }
-        }
+        // Main view of map
+        mapImage = new ImageView();
+        mapImage.setPreserveRatio(true);
+        mapImage.setFitHeight(mapHeight);
+        var mapContainer = new Label();
+        mapContainer.setGraphic(mapImage);
+        mapContainer.setPadding(new Insets(25, 40, 25, 40));
         
-        if (panelFound == false) {
-            throw new ArrayIndexOutOfBoundsException();
-        }
+        // Controls for moving and zooming
+        var moveButtonRight = new Button("->");
+        moveButtonRight.setOnAction((event) -> {
+            map.move_x(-1);
+            updateMaps();
+        });
+        moveButtonRight.setTextAlignment(TextAlignment.CENTER);
+        moveButtonRight.setMinSize(moveButtonLength, moveButtonWidth);
+        var moveButtonDown = new Button("|\nv");
+        moveButtonDown.setOnAction((event) -> {
+            map.move_y(1);
+            updateMaps();
+        });
+        moveButtonDown.setTextAlignment(TextAlignment.CENTER);
+        moveButtonDown.setMinSize(moveButtonWidth, moveButtonLength);
+        var moveButtonLeft = new Button("<-");
+        moveButtonLeft.setOnAction((event) -> {
+            map.move_x(1);
+            updateMaps();
+        });
+        moveButtonLeft.setTextAlignment(TextAlignment.CENTER);
+        moveButtonLeft.setMinSize(moveButtonLength, moveButtonWidth);
+        var moveButtonUp = new Button("^\n|");
+        moveButtonUp.setOnAction((event) -> {
+            map.move_y(-1);
+            updateMaps();
+        });
+        moveButtonUp.setTextAlignment(TextAlignment.CENTER);
+        moveButtonUp.setMinSize(moveButtonWidth, moveButtonLength);
+        var zoomButtonIn = new Button("+");
+        zoomButtonIn.setOnAction((event) -> {
+            map.zoom_in();
+            updateMaps();
+        });
+        zoomButtonIn.setTextAlignment(TextAlignment.CENTER);
+        zoomButtonIn.setMinSize(moveButtonLength, moveButtonLength / 2);
+        var zoomButtonOut = new Button("-");
+        zoomButtonOut.setOnAction((event) -> {
+            map.zoom_out();
+            updateMaps();
+        });
+        zoomButtonOut.setTextAlignment(TextAlignment.CENTER);
+        zoomButtonOut.setMinSize(moveButtonLength, moveButtonLength / 2);
+        var zoomButtons = new VBox(zoomButtonIn, zoomButtonOut);
+        zoomButtons.setAlignment(Pos.CENTER);
+        var moveButtonContainer = new GridPane();
+        moveButtonContainer.add(moveButtonUp, 1, 0);
+        moveButtonContainer.add(moveButtonLeft, 0, 1);
+        moveButtonContainer.add(zoomButtons, 1, 1);
+        moveButtonContainer.add(moveButtonRight, 2, 1);
+        moveButtonContainer.add(moveButtonDown, 1, 2);
+        moveButtonContainer.setPrefSize(3*moveButtonLength, 3*moveButtonLength);
+        var moveButtonPlacer = new VBox(moveButtonContainer);
+        moveButtonPlacer.setAlignment(Pos.CENTER);
+        
+        // Horizontal layout for map and buttons due to limited space
+        var hLayout = new HBox(mapContainer, moveButtonPlacer);
+        
+        // Controls for map mode
+        var modeButtonRain = new Button("Rain");
+        modeButtonRain.setOnAction((event) -> {
+            map.setMode("Rain");
+            updateMaps();
+        });
+        var modeButtonTemp = new Button("Temperature");
+        modeButtonTemp.setOnAction((event) -> {
+            map.setMode("Temperature");
+            updateMaps();
+        });
+        var modeButtonWind = new Button("Wind");
+        modeButtonWind.setOnAction((event) -> {
+            map.setMode("Wind");
+            updateMaps();
+        });
+        var modeButtonClouds = new Button("Clouds");
+        modeButtonClouds.setOnAction((event) -> {
+            map.setMode("Clouds");
+            updateMaps();
+        });
+        var modeButtonContainer = new HBox(modeButtonRain, modeButtonTemp,
+                modeButtonWind, modeButtonClouds);
+        
+        mapsPanel = new VBox(hLayout, modeButtonContainer);
     }
     
     private void buildSearchHistory(int offset, int index) {
@@ -595,21 +695,21 @@ public class WeatherApp extends Application {
         
         // Horizontal bar with three buttons
         var forecastButton = new Button("Forecast");
-        forecastButton.setOnAction((event) -> {selectPanel(forecast);});
+        forecastButton.setOnAction((event) -> {selectPanel(forecastPanel);});
         var historyButton = new Button("History");
-        historyButton.setOnAction((event) -> {selectPanel(history);});
+        historyButton.setOnAction((event) -> {selectPanel(historyPanel);});
         var mapsButton = new Button("Maps");
-        mapsButton.setOnAction((event) -> {selectPanel(maps);});
+        mapsButton.setOnAction((event) -> {selectPanel(mapsPanel);});
         midBar = new HBox(forecastButton, historyButton, mapsButton);
         mainLayout.getChildren().add(midBar);
         
         // Bottom part of window, initially Forecast panel
-        buildForecast();
-        buildHistory();
-        buildMaps();
-        basePanel = new StackPane(forecast, history, maps);
+        buildForecastPanel();
+        buildHistoryPanel();
+        buildMapsPanel();
+        basePanel = new StackPane(forecastPanel, historyPanel, mapsPanel);
         mainLayout.getChildren().add(basePanel);
-        selectPanel(forecast);
+        selectPanel(forecastPanel);
         
         // Focus today by default
         selectDay(0);
@@ -635,10 +735,6 @@ public class WeatherApp extends Application {
                 return null;
             }
         }
-    }
-    
-    private void updateTopBar() {
-        cityLabel.setText(api.getLocationActive());
     }
     
     private void updateWeatherPanel() {
@@ -739,21 +835,33 @@ public class WeatherApp extends Application {
         int biasDays = 24 * selectedDay;
         int biasHours =  (int)round(sliderValue * buffer);
         if ((selectedDay == 0) & (biasHours < currentHour)) {
-            forecastSlider.setDisable(true);
+            fcSlider.setDisable(true);
             if (currentHour < buffer) {
                 biasHours = currentHour;
             } else {
                 biasHours = buffer;
             }
         } else if ((selectedDay >= forecastDays - 1) & (currentHour > buffer)) {
-            forecastSlider.setDisable(true);
+            fcSlider.setDisable(true);
         } else {
-            forecastSlider.setDisable(false);
+            fcSlider.setDisable(false);
         }
         int bias = biasDays + biasHours - currentHour;
         for (int i = 0; i < forecastHours; i++) {
             updateForecastHour(bias, i);
         }
+    }
+    
+    private void updateMaps() {
+        Image mapTexture;
+        try {
+            final InputStream mapFile = new DataInputStream(
+                    new FileInputStream(mapFileName));
+            mapTexture = new Image(mapFile);
+        } catch (IOException exception) {
+            mapTexture = getIcon("default");
+        }
+        mapImage.setImage(mapTexture);
     }
     
     private void updateSearchHistory() {
@@ -791,11 +899,12 @@ public class WeatherApp extends Application {
         boolean requestSuccess = api.getData();
         if (requestSuccess) {
             // Update main window UI fields
-            updateTopBar();
+            cityLabel.setText(api.getLocationActive());
             updateWeatherPanel();
         
             // Update bottom panel
             updateForecast();
+            updateMaps();
         
             // Update search window UI fields
             searchStatusField.setText("");
