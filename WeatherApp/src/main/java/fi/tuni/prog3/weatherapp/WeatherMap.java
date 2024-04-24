@@ -14,6 +14,7 @@ import okhttp3.ResponseBody;
  * @author jerri
  */
 public class WeatherMap {
+    private static String API_KEY;
     private static final String FILE_NAME = "map.png";
     private static final int MAX_ZOOM = 4;
     private static final int MIN_ZOOM = 0;
@@ -31,9 +32,19 @@ public class WeatherMap {
         WeatherMap.Y = 0;
         WeatherMap.MAX_COORD = 0;
         WeatherMap.MODE = "PR0";
+        WeatherMap.API_KEY = getAPIKey();
         getImg();
     }
-    public static boolean zoom_in() {
+    
+    public static boolean canZoomIn() {
+        return ZOOM != MAX_ZOOM;
+    }
+    
+    public static boolean canZoomOut() {
+        return ZOOM != MIN_ZOOM;
+    }
+    
+    public static boolean zoomIn() {
         if(ZOOM >= MAX_ZOOM) {
             return false;
         }
@@ -45,7 +56,7 @@ public class WeatherMap {
         return getImg();
     }
     
-    public static boolean zoom_out() {
+    public static boolean zoomOut() {
         if(ZOOM <= MIN_ZOOM) {
             return false;
         } 
@@ -57,19 +68,38 @@ public class WeatherMap {
         return getImg();
     }
     
-    public static boolean move_y(int num) {
-        if(Y+num < MIN_COORD || Y+num > MAX_COORD) {
-            return false;
+    public static boolean moveUp() {
+        if(Y-1 < MIN_COORD) {
+            Y = MAX_COORD;
+        } else {
+            Y--;
         }
-        Y += num;
+        return getImg();
+    }
+
+    public static boolean moveDown() {
+        if(Y+1 > MAX_COORD) {
+            Y = MIN_COORD;
+        } else {
+            Y++;
+        }
         return getImg();
     }
     
-    public static boolean move_x(int num) {
-        if(X+num < MIN_COORD || X+num > MAX_COORD) {
-            return false;
+    public static boolean moveRight() {
+        if(X+1 > MAX_COORD) {
+            X = MIN_COORD;
+        } else {
+            X++;
         }
-        X += num;
+        return getImg();
+    }
+    public static boolean moveLeft() {
+        if(X-1 < MIN_COORD) {
+            X = MAX_COORD;
+        } else {
+            X--;
+        }
         return getImg();
     }
     
@@ -94,17 +124,15 @@ public class WeatherMap {
     }
     
     private static boolean getImg() {
-        String key = getAPIKey();
         String url = "https://maps.openweathermap.org/maps/2.0/weather/"
-                + MODE + "/" + ZOOM + "/" + X + "/" + Y + "?fill_bound=true&opacity=0.7"
-                + "&appid=" + key;
+                + MODE + "/" + ZOOM + "/" + X + "/" + Y + "?fill_bound=true"
+                + "&appid=" + API_KEY;
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder().url(url).build();
         try (Response response = client.newCall(request).execute()){
             if(!response.isSuccessful()) {
                 throw new IOException("Bad response");
             }
-            
             ResponseBody responseBody = response.body();
             if(responseBody != null) {
                 return saveImgToFile(responseBody);

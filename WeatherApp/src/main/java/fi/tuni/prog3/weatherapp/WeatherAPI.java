@@ -78,7 +78,8 @@ public class WeatherAPI implements iAPI {
     private transient ForecastDataDaily fdd;
 
     public WeatherAPI() throws Exception {
-        this.locationActive = null;
+        this.locationActive = "Raisio";
+        this.units = "metric";
         this.locationFavorites = new ArrayList<>();
         this.locationHistory = new ArrayList<>();
     }
