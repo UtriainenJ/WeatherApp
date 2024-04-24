@@ -28,11 +28,17 @@ import javafx.stage.Stage;
 
 /**
  * JavaFX Weather Application.
+ * <p>
+ * @author Joonas Pinomäki
+ * @author Jerri Tarpio
+ * @author Jaakko Utriainen
+ * @since 1.0
  */
 public class WeatherApp extends Application {
     // Constants
     private final int forecastDays = 5;
     private final int forecastHours = 16;
+    private final int topBarButtonWidth = 150;
     private final int weatherLabelHeight = 30;
     private final int weatherTempBarHeight = 80;
     private final int feelsLikeBarHeight = 30;
@@ -122,6 +128,9 @@ public class WeatherApp extends Application {
     private TextField searchField;
     private Slider forecastSlider;
     
+    /**
+     * Builds the top bar of the main window.
+     */
     private void buildTopBar() {
         // BorderPane for left + center + right alignment
         topBar = new BorderPane();
@@ -132,14 +141,16 @@ public class WeatherApp extends Application {
             api.switchUnits();
             update();
         });
-        unitsButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        unitsButton.setPrefWidth(topBarButtonWidth);
+        unitsButton.setMaxHeight(Double.MAX_VALUE);
         topBar.setLeft(unitsButton);
         topBar.setAlignment(unitsButton, Pos.CENTER);
         
         // Search button on the right
         var searchButton = new Button("Search & Favorites"); // AmE > BrE
         searchButton.setOnAction((event) -> {searchWindow.show();});
-        searchButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        searchButton.setPrefWidth(topBarButtonWidth);
+        searchButton.setMaxHeight(Double.MAX_VALUE);
         topBar.setRight(searchButton);
         topBar.setAlignment(searchButton, Pos.CENTER);
         
@@ -149,6 +160,10 @@ public class WeatherApp extends Application {
         topBar.setCenter(cityLabel);
     }
     
+    /**
+     * Builds the main weather panel.
+     * This is at the top of the main window.
+     */
     private void buildWeather() {
         // Current weather label
         var weatherLabel = new Label("Current Weather");
@@ -220,6 +235,11 @@ public class WeatherApp extends Application {
         weather.setAlignment(Pos.CENTER);
     }
     
+    /**
+     * Controls which day the hourly forecast is displayed for.
+     * @param day The index of the day that is requested for selection
+     * @throws ArrayIndexOutOfBoundsException
+     */
     private void selectDay(int day) 
             throws ArrayIndexOutOfBoundsException {
         // Check for valid array index
@@ -238,6 +258,10 @@ public class WeatherApp extends Application {
         selectedDay = day;
     }
     
+    /**
+     * Builds one day of the daily forecast in the Forecast panel.
+     * @param day The index of the day to be built
+     */
     private void buildForecastDay(int day) {
         // Weekday and date
         var weekdayLabel = new Label();
@@ -295,6 +319,10 @@ public class WeatherApp extends Application {
         arrayDayTempUnit[day] = tempUnitLabel;
     }
     
+    /**
+     * Builds one hour of the hourly forecast in the Forecast panel.
+     * @param index The index of the elements in the UI arrays
+     */
     private void buildForecastHour(int index) {
         // Hour
         var hourLabel = new Label();
@@ -341,6 +369,10 @@ public class WeatherApp extends Application {
         arrayHourRainPerc[index] = rainPercLabel;
     }
     
+    /**
+     * Builds the Forecast panel.
+     * This is the bottom half of the main window by default.
+     */
     private void buildForecast() {
         // Initialize arrays
         arrayDays = new VBox[forecastDays];
@@ -394,16 +426,27 @@ public class WeatherApp extends Application {
         forecast = new VBox(forecastDaysBar, forecastHoursBar, forecastSlider);
     }
     
+    /**
+     * Placeholder for the History panel
+     */
     private void buildHistory() {
         history = new VBox();
         history.getChildren().add(new Label("History"));
     }
     
+    /**
+     * Placeholder for the Maps panel
+     */
     private void buildMaps() {
         maps = new VBox();
         maps.getChildren().add(new Label("Maps"));
     }
     
+    /**
+     * Switches between the bottom panels of the UI
+     * @param panel The root of the requested panel element
+     * @throws ArrayIndexOutOfBoundsException
+     */
     private void selectPanel(Node panel) 
             throws ArrayIndexOutOfBoundsException {
         
@@ -422,6 +465,11 @@ public class WeatherApp extends Application {
         }
     }
     
+    /**
+     * Builds one index of the graphical search history in the Search window.
+     * @param offset Used to place the element correctly in the GUI
+     * @param index The index of the element in the UI arrays
+     */
     private void buildSearchHistory(int offset, int index) {
         var nameField = new Label();
         nameField.setPrefWidth(searchTextWidth);
@@ -455,6 +503,11 @@ public class WeatherApp extends Application {
         arrayHistoryFavorite[index] = favoriteButton;
     }
     
+    /**
+     * Builds one index of the graphical favorites list in the Search window.
+     * @param offset Used to place the element correctly in the GUI
+     * @param index The index of the element in the UI arrays
+     */
     private void buildSearchFavorite(int offset, int index) {
         var nameField = new Label();
         nameField.setPrefWidth(searchTextWidth);
@@ -489,6 +542,11 @@ public class WeatherApp extends Application {
         arrayFavoriteDelete[index] = deleteButton;
     }
     
+    /**
+     * Performs a query through the API with the given location.
+     * Restores the previous location if the query was unsuccessful.
+     * @param location The name of the location in String format
+     */
     private void search(String location) {
         String previousLocation = api.getLocationActive();
         api.setLocationActive(location);
@@ -501,6 +559,9 @@ public class WeatherApp extends Application {
         }
     }
     
+    /**
+     * Builds the separate Search window.
+     */
     private void buildSearchWindow() {
         // Vertical main layout
         int row = 0;
@@ -580,6 +641,10 @@ public class WeatherApp extends Application {
         }
     }
     
+    /**
+     * Main initialization function.
+     * Builds all windows and elements of the GUI.
+     */
     private void buildUI() {
         // Vertical main layout
         mainLayout = new VBox();
@@ -618,6 +683,11 @@ public class WeatherApp extends Application {
         buildSearchWindow();
     }
     
+    /**
+     * Fetches an icon matching the given identifier and handles exceptions.
+     * @param icon The filename (without extension) of the requested icon
+     * @return Image The requested icon, default icon or null if not available
+     */
     private Image getIcon(String icon) {
         String filename = String.format("icons/%s.png", icon);
         try { // Find icon
@@ -641,6 +711,9 @@ public class WeatherApp extends Application {
         cityLabel.setText(api.getLocationActive());
     }
     
+    /**
+     * Updates the main weather panel at the top of the window.
+     */
     private void updateWeatherPanel() {
         var weather = api.getWeather();
         
@@ -664,6 +737,10 @@ public class WeatherApp extends Application {
         currentWindUnitField.setText(api.getUnitWind());
     }
     
+    /**
+     * Updates the bar graph representing rain in the Forecast panel.
+     * @param dayIndex The index of the day the rain data is related to
+     */
     void updateRainMeter(int dayIndex) {
         var forecast = api.getForecastHourly().getList();
         int currentHour = Integer.parseInt(forecast.get(0).getHour());
@@ -697,6 +774,10 @@ public class WeatherApp extends Application {
         }
     }
     
+    /**
+     * Updates one day of the daily forecast in the Forecast panel.
+     * @param index The index of the UI elements corresponding to the day
+     */
     private void updateForecastDay(int index) {
         var forecastDay = api.getForecastDaily().getList().get(index);
         Image icon = getIcon(forecastDay.getWeather().get(0).getIcon());
@@ -709,6 +790,11 @@ public class WeatherApp extends Application {
         updateRainMeter(index);
     }
     
+    /**
+     * Updates one hour of the hourly forecast in the Forecast panel.
+     * @param bias Pans the 16-hour selection window
+     * @param index The index of the UI elements corresponding to the hour
+     */
     private void updateForecastHour(int bias, int index) {
         var forecast = api.getForecastHourly().getList();
         if ((bias + index < forecast.size()) & (bias + index >= 0)) {
@@ -728,6 +814,9 @@ public class WeatherApp extends Application {
         }
     }
     
+    /**
+     * Updates the Forecast panel.
+     */
     private void updateForecast() {
         for (int i = 0; i < forecastDays; i++) {
             updateForecastDay(i);
@@ -756,6 +845,9 @@ public class WeatherApp extends Application {
         }
     }
     
+    /**
+     * Updates the list of search history entries in the search window.
+     */
     private void updateSearchHistory() {
         int size = api.getLocationHistory().size();
         for (int i = 0; i < maxHistory; i++) {
@@ -771,6 +863,9 @@ public class WeatherApp extends Application {
         }
     }
     
+    /**
+     * Updates the list of favorites in the search window.
+     */
     private void updateSearchFavorites() {
         int size = api.getLocationFavorites().size();
         for (int i = 0; i < maxFavorites; i++) {
@@ -786,6 +881,11 @@ public class WeatherApp extends Application {
         }
     }
     
+    /**
+     * Main update function
+     * Updates all fields in all windows of the GUI with new data from the API.
+     * @return boolean true if the api request was successful
+     */
     private boolean update() {
         // Request weather and forecast data from api
         boolean requestSuccess = api.getData();
