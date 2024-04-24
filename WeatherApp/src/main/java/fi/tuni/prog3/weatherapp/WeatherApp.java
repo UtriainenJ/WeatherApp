@@ -470,8 +470,7 @@ public class WeatherApp extends Application {
      */
     private void buildMapsPanel() {
         // Initialization
-        map = new WeatherMap();
-        map.init();
+        WeatherMap.init();
         
         // Main view of map
         mapImage = new ImageView();
@@ -484,42 +483,42 @@ public class WeatherApp extends Application {
         // Controls for moving and zooming
         var moveButtonRight = new Button("->");
         moveButtonRight.setOnAction((event) -> {
-            map.move_x(-1);
+            WeatherMap.moveRight();
             updateMaps();
         });
         moveButtonRight.setTextAlignment(TextAlignment.CENTER);
         moveButtonRight.setMinSize(moveButtonLength, moveButtonWidth);
         var moveButtonDown = new Button("|\nv");
         moveButtonDown.setOnAction((event) -> {
-            map.move_y(1);
+            WeatherMap.moveUp();
             updateMaps();
         });
         moveButtonDown.setTextAlignment(TextAlignment.CENTER);
         moveButtonDown.setMinSize(moveButtonWidth, moveButtonLength);
         var moveButtonLeft = new Button("<-");
         moveButtonLeft.setOnAction((event) -> {
-            map.move_x(1);
+            WeatherMap.moveLeft();
             updateMaps();
         });
         moveButtonLeft.setTextAlignment(TextAlignment.CENTER);
         moveButtonLeft.setMinSize(moveButtonLength, moveButtonWidth);
         var moveButtonUp = new Button("^\n|");
         moveButtonUp.setOnAction((event) -> {
-            map.move_y(-1);
+            WeatherMap.moveDown();
             updateMaps();
         });
         moveButtonUp.setTextAlignment(TextAlignment.CENTER);
         moveButtonUp.setMinSize(moveButtonWidth, moveButtonLength);
         var zoomButtonIn = new Button("+");
         zoomButtonIn.setOnAction((event) -> {
-            map.zoom_in();
+            WeatherMap.zoomIn();
             updateMaps();
         });
         zoomButtonIn.setTextAlignment(TextAlignment.CENTER);
         zoomButtonIn.setMinSize(moveButtonLength, moveButtonLength / 2);
         var zoomButtonOut = new Button("-");
         zoomButtonOut.setOnAction((event) -> {
-            map.zoom_out();
+            WeatherMap.zoomOut();
             updateMaps();
         });
         zoomButtonOut.setTextAlignment(TextAlignment.CENTER);
@@ -542,22 +541,22 @@ public class WeatherApp extends Application {
         // Controls for map mode
         var modeButtonRain = new Button("Rain");
         modeButtonRain.setOnAction((event) -> {
-            map.setMode("Rain");
+            WeatherMap.setMode("Rain");
             updateMaps();
         });
         var modeButtonTemp = new Button("Temperature");
         modeButtonTemp.setOnAction((event) -> {
-            map.setMode("Temperature");
+            WeatherMap.setMode("Temperature");
             updateMaps();
         });
         var modeButtonWind = new Button("Wind");
         modeButtonWind.setOnAction((event) -> {
-            map.setMode("Wind");
+            WeatherMap.setMode("Wind");
             updateMaps();
         });
         var modeButtonClouds = new Button("Clouds");
         modeButtonClouds.setOnAction((event) -> {
-            map.setMode("Clouds");
+            WeatherMap.setMode("Clouds");
             updateMaps();
         });
         var modeButtonContainer = new HBox(modeButtonRain, modeButtonTemp,
