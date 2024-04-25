@@ -13,62 +13,10 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- * A WeatherAPI object is used to get weather info on cities.
- * Preferred method of getting weather info is with getData(*cityname*).
- * Cities looked up with getData(*cityname*) get saved in browsing history,
- * and the last one looked up gets saved as the active city.
- * 
- * Browsing history can be deleted.
- * You can add and remove cities from favourites.
- * 
- * Interpreting the given results:
- * 
- * WeatherData object data corresponds to this link's fields:
- * https://openweathermap.org/current
- * 
- * Same with ForecastData:
- * https://openweathermap.org/forecast5
- * 
- * with getData() pair you can use .getKey() to access the WeatherData object,
- * and .getValue() to access the ForecastData object.
- * 
- * 
- *  **Use example:**
- * 
- *  **loading WeatherAPI from file**
- * 
- * StorageSystem ss = new StorageSystem("temp.json");
- * WeatherAPI api = ss.readFromFile();
- * 
- *  **getting location info by city name, this saves the city to history,**
- *  **and sets the most recent one as active.**
- * 
- * Pair<WeatherData, ForecastData> nyc = api.getData("New York City");
- * var hervanta = api.getData("Hervanta");
- * 
- * **calling getCurrentWeather() or getForecast() does not do saving to history.**
- * **you can use coordinates or city name.**
- * 
- * WeatherData vaasaW = api.getCurrentWeather(63.096, 21.61577);
- * WeatherData osloW = api.getCurrentWeather("Oslo");
- * 
- * ForecastData tampereF = api.getForecast("Tampere");
- * ForecastData toijalaF = api.getForecast(61.166666, 23.86749653);
- * 
- *  **deleting browsing history:**
- * api.clearBrowsingHistory();
- * 
- *  **adding and removing from favorites:**
- * api.addToFavorites(nyc.getKey().getName());
- * api.removeFromFavorites(hervanta.getKey().getName());
- */
-
-/**
- *
+ * Used for interacting with openweathermap.org weather API.
  * @author jerri
  */
 public class WeatherAPI implements iAPI {
-    
     private String locationActive;
     private String units;
     private List<String> locationFavorites;
@@ -77,58 +25,107 @@ public class WeatherAPI implements iAPI {
     private transient ForecastDataHourly fdh;
     private transient ForecastDataDaily fdd;
 
+    /**
+     * Constructor. Default location is Raisio, and default unit is metric.
+     * @throws Exception
+     */
     public WeatherAPI() throws Exception {
-        this.locationActive = null;
+        this.locationActive = "Raisio";
+        this.units = "metric";
         this.locationFavorites = new ArrayList<>();
         this.locationHistory = new ArrayList<>();
     }
 
+    /**
+     * Set a location as active before calling API
+     * @param loc location
+     * @return this
+     */
     public WeatherAPI setLocationActive(String loc) {
         addToHistory(loc);
         this.locationActive = loc;
         return this;
     }
 
+    /**
+     * Get active location
+     * @return String active location
+     */
     public String getLocationActive() {
         return locationActive;
     }
 
+    /**
+     * Get favourited locations
+     * @return List of favourites
+     */
     public List<String> getLocationFavorites() {
         return locationFavorites;
     }
 
+    /**
+     * Get searched locations
+     * @return History list
+     */
     public List<String> getLocationHistory() {
         return locationHistory;
     }
    
+    /**
+     * Add location to favourites
+     * @param loc location
+     */
     public void addToFavorites(String loc) {
         if(!locationFavorites.contains(loc)) {
             locationFavorites.add(0, loc);
         }
     }
     
+    /**
+     * Remove location from favourites
+     * @param loc location
+     */
     public void removeFromFavorites(String loc) {
         if(locationFavorites.contains(loc)) {
             locationFavorites.remove(loc);
         }
     }
  
+    /**
+     * Clear location history
+     */
     public void clearBrowsingHistory() {
         this.locationHistory.clear();
     }
     
+    /**
+     * Get WeatherData object
+     * @return WeatherData
+     */
     public WeatherData getWeather() {
         return wd;
     }
     
+    /**
+     * Get ForecastDataHourly object
+     * @return ForecastDataHourly
+     */
     public ForecastDataHourly getForecastHourly() {
         return fdh;
     }
     
+    /**
+     * Get ForecastDataDaily object
+     * @return ForecastDataDaily
+     */
     public ForecastDataDaily getForecastDaily() {
         return fdd;
     }
     
+    /**
+     * Set units used by entire program, metric or imperial
+     * @param unitSystem
+     */
     public void setUnits(String unitSystem) {
         switch(unitSystem.toLowerCase()) {
             case "m":
@@ -151,6 +148,9 @@ public class WeatherAPI implements iAPI {
         }
     }
     
+    /**
+     * Change from imperial to metric or vice versa
+     */
     public void switchUnits() {
         if("metric".equals(units)) {
             setUnits("imperial");
@@ -159,6 +159,10 @@ public class WeatherAPI implements iAPI {
         }
     }
 
+    /**
+     * Get unit name
+     * @return String unit name
+     */
     public String getUnit() {
         switch(units) {
             case "imperial":
@@ -170,6 +174,10 @@ public class WeatherAPI implements iAPI {
         }
     }
     
+    /**
+     * Get wind speed unit corresponding to unit system
+     * @return String wind speed unit
+     */
     public String getUnitWind() {
         switch(units) {
             case "imperial":
@@ -181,6 +189,10 @@ public class WeatherAPI implements iAPI {
         }
     }
     
+    /**
+     * Get rain amount unit corresponding to unit system
+     * @return String rain amount unit
+     */
     public String getUnitRain() {
         switch(units) {
             case "imperial":
@@ -192,6 +204,10 @@ public class WeatherAPI implements iAPI {
         }
     }
     
+    /**
+     * Get temperature unit corresponding to unit system
+     * @return String temperature unit
+     */
     public String getUnitTemp() {
         switch(units) {
             case "imperial":
@@ -203,6 +219,10 @@ public class WeatherAPI implements iAPI {
         }
     }
 
+    /**
+     * Calls API to retrieve weather data to use
+     * @return boolean whether call was successful
+     */
     public boolean getData() {
         try {
             this.wd = getCurrentWeather(locationActive);
@@ -217,7 +237,7 @@ public class WeatherAPI implements iAPI {
             return false;
         }
     }
-    
+
     @Override
     public WeatherData getCurrentWeather(String loc) {
         try {
@@ -278,6 +298,7 @@ public class WeatherAPI implements iAPI {
         return getForecastHourly(coords.getKey(), coords.getValue());
     }
     
+    @Override
     public ForecastDataDaily getForecastDaily(String loc) {
         try {
             Pair<Double, Double> coords = getLocation(loc);

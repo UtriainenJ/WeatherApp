@@ -10,15 +10,13 @@ public interface iReadAndWriteToFile {
     /**
      * Reads JSON from file
      * @return WeatherAPI object read from file
-     * @throws IOException if the method e.g, cannot find the file.
      */
-    public WeatherAPI readFromFile() throws IOException;
+    public WeatherAPI readFromFile();
 
     /**
      * Write the WeatherAPI data to file
      * @param api WeatherAPI object
      * @return true if the write was successful, otherwise false.
-     * @throws IOException if the method e.g., cannot write to a file.
      */
-    public boolean writeToFile(WeatherAPI api) throws IOException;
+    public boolean writeToFile(WeatherAPI api);
 }

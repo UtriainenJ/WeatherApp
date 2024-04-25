@@ -7,14 +7,13 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- *
+ * Used for storing and getting data from daily forecasts (max 16 days)
  * @author jerri
  * https://openweathermap.org/forecast16
  */
 public class ForecastDataDaily {
     private static final String METRIC = "metric";    
     private static String units;
-    private static final int FIN_OFFSET = 10800;
     
     private City city;
     private String cod;
@@ -22,50 +21,49 @@ public class ForecastDataDaily {
     private Integer cnt;
     private List<WeatherEntry> list;
     
+    /**
+     * Set units ("imperial" or "metric")
+     * @param str unit
+     */
     public void setUnits(String str) {
         ForecastDataDaily.units = str;
     }
 
+    /**
+     * Get city object
+     * @return City object
+     */
     public City getCity() {
         return city == null? new City() : city;
     }
 
-    public void setCity(City city) {
-        this.city = city;
-    }
-
+    /**
+     * Get http code
+     * @return String http code
+     */
     public String getCod() {
         return cod;
     }
 
-    public void setCod(String cod) {
-        this.cod = cod;
-    }
-
-    public Double getMessage() {
-        return message;
-    }
-
-    public void setMessage(Double message) {
-        this.message = message;
-    }
-
+    /**
+     * Get count of days
+     * @return Integer count of days
+     */
     public Integer getCnt() {
         return cnt;
     }
 
-    public void setCnt(Integer cnt) {
-        this.cnt = cnt;
-    }
-
+    /**
+     * Get List of days' weather info
+     * @return list
+     */
     public List<WeatherEntry> getList() {
         return list;
     }
-
-    public void setList(List<WeatherEntry> list) {
-        this.list = list;
-    }
     
+    /**
+     * Contains info on city
+     */
     public static class City {
         private Integer id;
         private String name;
@@ -74,73 +72,68 @@ public class ForecastDataDaily {
         private Integer population;
         private Integer timezone;
 
-        public String getId() {
-            return id == null? "null" : String.valueOf(id);
-        }
-
-        public void setId(Integer id) {
-            this.id = id;
-        }
-
+        /**
+         * Get name of city
+         * @return
+         */
         public String getName() {
             return name == null? "null" : name;
         }
 
-        public void setName(String name) {
-            this.name = name;
-        }
-
+        /**
+         * Get coordinates object
+         * @return Coord object
+         */
         public Coord getCoord() {
             return coord;
         }
 
-        public void setCoord(Coord coord) {
-            this.coord = coord;
-        }
-
+        /**
+         * Get country code
+         * @return String country code
+         */
         public String getCountry() {
             return country;
         }
 
-        public void setCountry(String country) {
-            this.country = country;
-        }
-
+        /**
+         * Get city population
+         * @return String population
+         */
         public String getPopulation() {
             return population == null? "0" : String.valueOf(population);
         }
 
-        public void setPopulation(Integer population) {
-            this.population = population;
-        }
-
+        /**
+         * Get timezone, shift in seconds from unix UTC
+         * @return
+         */
         public Integer getTimezone() {
             return timezone;
         }
-
-        public void setTimezone(Integer timezone) {
-            this.timezone = timezone;
-        }
     }
 
+    /**
+     * Class city containing coordinate data
+     */
     public static class Coord {
         private Double lon;
         private Double lat;
 
+        /**
+         * Get longitude
+         * @return Double longitude
+         */
         public Double getLon() {
             return lon;
         }
 
-        public void setLon(Double lon) {
-            this.lon = lon;
-        }
-
+        /**
+         * Get latitude
+         * @return Double latitude
+         */
         public Double getLat() {
             return lat;
-        }
-
-        public void setLat(Double lat) {
-            this.lat = lat;
         }
     }
 
@@ -161,110 +154,114 @@ public class ForecastDataDaily {
         private Double rain;
         private Double snow;
 
+        /**
+         * Get time of day of api call, unix UTC
+         * @return
+         */
         public String getDt() {
             return dt == null? "null" : String.valueOf(dt);
         }
 
-        public void setDt(Long dt) {
-            this.dt = dt;
-        }
-
+        /**
+         * Get time of sunrise, unix UTC
+         * @return
+         */
         public Long getSunrise() {
             return sunrise;
         }
 
-        public void setSunrise(Long sunrise) {
-            this.sunrise = sunrise;
-        }
-
+        /**
+         * Get time of sunset, unix UTC
+         * @return
+         */
         public Long getSunset() {
             return sunset;
         }
 
-        public void setSunset(Long sunset) {
-            this.sunset = sunset;
-        }
-
+        /**
+         * Get temperature object
+         * @return Temperature object
+         */
         public Temperature getTemp() {
             return temp == null? new Temperature() : temp;
         }
 
-        public void setTemp(Temperature temp) {
-            this.temp = temp;
-        }
-
+        /**
+         * Get feels like object
+         * @return Temperature feels like object
+         */
         public Temperature getFeels_like() {
             return feels_like == null? new Temperature() : feels_like;
         }
 
-        public void setFeels_like(Temperature feels_like) {
-            this.feels_like = feels_like;
-        }
-
+        /**
+         * Get air pressure
+         * @return Integer air pressure
+         */
         public Integer getPressure() {
             return pressure;
         }
 
-        public void setPressure(Integer pressure) {
-            this.pressure = pressure;
-        }
-
+        /**
+         * Get humidity
+         * @return Integer humidity
+         */
         public Integer getHumidity() {
             return humidity;
         }
 
-        public void setHumidity(Integer humidity) {
-            this.humidity = humidity;
-        }
-
+        /**
+         * Get weather descriptors
+         * @return List collection of weather information
+         */
         public List<Weather> getWeather() {
             return weather;
         }
 
-        public void setWeather(List<Weather> weather) {
-            this.weather = weather;
-        }
-
+        /**
+         * Get wind speed
+         * @return String wind speed (m/s or mph)
+         */
         public String getSpeed() {
             return speed == null? "0" : String.format("%.0f", speed);
         }
 
-        public void setSpeed(Double speed) {
-            this.speed = speed;
-        }
-
+        /**
+         * Get wind direction deviation from 0 degrees
+         * @return Integer degrees
+         */
         public Integer getDeg() {
             return deg;
         }
 
-        public void setDeg(Integer deg) {
-            this.deg = deg;
-        }
-
+        /**
+         * Get wind gust
+         * @return String wind gust (m/s or mph)
+         */
         public String getGust() {
             return gust == null? "0" : String.format(Locale.US, "%.0f", gust);
         }
 
-        public void setGust(Double gust) {
-            this.gust = gust;
-        }
-
+        /**
+         * Get cloud coverage (0-100%)
+         * @return String cloud coverage
+         */
         public String getClouds() {
             return clouds == null? "0" : String.valueOf(clouds);
         }
 
-        public void setClouds(Integer clouds) {
-            this.clouds = clouds;
-        }
-
+        /**
+         * Get probability of precipitation
+         * @return String risk of rain
+         */
         public String getPop() {
             return pop == null? "0" : String.format(Locale.US, "%.0f",100*pop);
         }
 
-        public void setPop(Double pop) {
-            this.pop = pop;
-        }
-
+        /**
+         * Get rain amount in mm or inches
+         * @return String rain amount
+         */
         public String getRain() {
             if(METRIC.equals(units)) {
                 return rain == null? "0" : String.format("%.1f", rain);
@@ -272,10 +269,10 @@ public class ForecastDataDaily {
             return rain == null? "0" : String.format(Locale.US, "%.1f",rain/25.4);
         }
 
-        public void setRain(Double rain) {
-            this.rain = rain;
-        }
-
+        /**
+         * Get snow amount in mm or inches
+         * @return String snow amount
+         */
         public String getSnow() {
             if(METRIC.equals(units)) {
                 return snow == null? "0" : String.format("%.1f", snow);
@@ -283,10 +280,10 @@ public class ForecastDataDaily {
             return snow == null? "0" : String.format(Locale.US, "%.1f",snow/25.4);
         }
 
-        public void setSnow(Double snow) {
-            this.snow = snow;
-        }
-
+        /**
+         * Get weekday (Mon, Tue, Wed, ...)
+         * @return String weekday
+         */
         public String getWeekday() {
             LocalDateTime ldt = epochToDateTime(dt);
             String day = ldt.getDayOfWeek().toString();
@@ -295,6 +292,10 @@ public class ForecastDataDaily {
             return dayShort;
         }
 
+        /**
+         * Get data in format 'date'.'month'
+         * @return String calendar date
+         */
         public String getDate() {
             LocalDateTime ldt = epochToDateTime(dt);
             return ldt.getDayOfMonth() + "." + ldt.getMonthValue();
@@ -302,12 +303,15 @@ public class ForecastDataDaily {
         
         private static LocalDateTime epochToDateTime(long epochSeconds) {
             Instant instant = Instant.ofEpochSecond(epochSeconds);
-            ZoneOffset zoneOffset = ZoneOffset.ofTotalSeconds(FIN_OFFSET);
+            ZoneOffset zoneOffset = ZoneOffset.ofTotalSeconds(0);
             LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zoneOffset);
             return localDateTime;
         }
     }
 
+    /**
+     * Class containing temperature info on different times of day
+     */
     public static class Temperature {
         private Double day;
         private Double min;
@@ -316,91 +320,94 @@ public class ForecastDataDaily {
         private Double eve;
         private Double morn;
 
+        /**
+         * Get temperature at 12.00 local time
+         * @return String temp
+         */
         public String getDay() {
             return day == null? "null" : String.format("%.0f", day);
         }
 
-        public void setDay(Double day) {
-            this.day = day;
-        }
-
+        /**
+         * Get minimum temp during day
+         * @return String min temp
+         */
         public String getMin() {
             return min == null? "null" : String.format("%.0f", min);
         }
 
-        public void setMin(Double min) {
-            this.min = min;
-        }
-
+        /**
+         * Get maximum temp during day
+         * @return String max temp
+         */
         public String getMax() {
             return max == null? "null" : String.format("%.0f", max);
         }
-
-        public void setMax(Double max) {
-            this.max = max;
-        }
-
+        
+        /**
+         * Get temperature at 00:00 local time
+         * @return
+         */
         public String getNight() {
             return night == null? "null" : String.format("%.0f", night);
         }
-
-        public void setNight(Double night) {
-            this.night = night;
-        }
-
+        
+        /**
+         * Get temperature at 18:00 local time
+         * @return
+         */
         public String getEve() {
             return eve == null? "null" : String.format("%.0f", eve);
         }
-
-        public void setEve(Double eve) {
-            this.eve = eve;
-        }
-
+        
+        /**
+         * Get temperature at 06:00 local time
+         * @return
+         */
         public String getMorn() {
             return morn == null? "null" : String.format("%.0f", morn);
         }
-
-        public void setMorn(Double morn) {
-            this.morn = morn;
-        }
     }
 
+    /**
+     * Class containing weather data
+     */
     public static class Weather {
         private Integer id;
         private String main;
         private String description;
         private String icon;
 
+        /**
+         * Get weather ID
+         * @return Integer weather ID
+         */
         public Integer getId() {
             return id;
         }
 
-        public void setId(Integer id) {
-            this.id = id;
-        }
-
+        /**
+         * Get weather descriptor
+         * @return String descriptor
+         */
         public String getMain() {
             return main;
         }
 
-        public void setMain(String main) {
-            this.main = main;
-        }
-
+        /**
+         * get more precise weather descriptor
+         * @return String description
+         */
         public String getDescription() {
             return description;
         }
 
-        public void setDescription(String description) {
-            this.description = description;
-        }
-
+        /**
+         * Get weather icon ID
+         * @return String icon ID
+         */
         public String getIcon() {
             return icon;
-        }
-
-        public void setIcon(String icon) {
-            this.icon = icon;
         }
     }
 }
