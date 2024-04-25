@@ -393,13 +393,13 @@ public class ForecastDataHourly {
 
         /**
          * Get rain amount in one hour, mm or inches
-         * @return String rain amount
+         * @return double rain amount
          */
-        public String get1h() {
+        public double get1h() {
             if(METRIC.equals(units)) {
-                return _1h == null? "0" : String.format(Locale.US, "%.1f", _1h);
+                return _1h == null? 0.0 : _1h;
             }
-            return _1h == null? "0" : String.format(Locale.US, "%.1f",_1h/25.4);
+            return _1h == null? 0.0 : (_1h/25.4);
         }
     }
     

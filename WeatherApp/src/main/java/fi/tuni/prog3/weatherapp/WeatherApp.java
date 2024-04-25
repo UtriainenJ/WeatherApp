@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import static java.lang.Math.round;
+import java.util.Locale;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -829,7 +830,9 @@ public class WeatherApp extends Application {
         // Air quality, rain and wind bar
         currentAirQualityField.setText(weather.getAirQuality());
         currentRainIcon.setImage(getIcon("rain"));
-        currentRainField.setText(weather.getRain().get1h());
+        double rainValue = weather.getRain().get1h();
+        String rain = String.format(Locale.US, "%.1f", rainValue);
+        currentRainField.setText(rain);
         currentRainUnitField.setText(api.getUnitRain());
         currentWindIcon.setImage(getIcon("wind"));
         currentWindField.setText(weather.getWind().getSpeed());
@@ -848,23 +851,34 @@ public class WeatherApp extends Application {
             int forecastIndex = 24 * dayIndex + hourIndex - currentHour;
             if ((forecastIndex > 0) & (forecastIndex < forecast.size())) {
                 var forecastHour = forecast.get(forecastIndex);
-                String rainStr = forecastHour.getRain().get1h();
-                double rainValue = Double.parseDouble(rainStr);
-                if (api.getUnit().equals("imperial")) { // Convert to mm
-                    rainValue = 25.4 * rainValue;
-                }
-                
-                // Check rain intensity
-                if (rainValue == 0) { // No rain
-                    style = styleRain[0];
-                } else if (rainValue < 2.5) { // Light rain
-                    style = styleRain[1];
-                } else if (rainValue < 10) { // Moderate rain
-                    style = styleRain[2];
-                } else if (rainValue < 50) { // Heavy rain
-                    style = styleRain[3];
-                } else { // Violent rain
-                    style = styleRain[4];
+                double rainValue = forecastHour.getRain().get1h();
+                String unitSystem = api.getUnit();
+                if (unitSystem.equals("Metric")) { // Rain measured in mm
+                    // Check rain intensity
+                    if (rainValue == 0.0) { // No rain
+                        style = styleRain[0];
+                    } else if (rainValue < 2.5) { // Light rain
+                        style = styleRain[1];
+                    } else if (rainValue < 10) { // Moderate rain
+                        style = styleRain[2];
+                    } else if (rainValue < 50) { // Heavy rain
+                        style = styleRain[3];
+                    } else { // Violent rain
+                        style = styleRain[4];
+                    }
+                } else { // Rain (probably) measured in inches
+                    // Check rain intensity
+                    if (rainValue == 0.0) { // No rain
+                        style = styleRain[0];
+                    } else if (rainValue < 0.098) { // Light rain
+                        style = styleRain[1];
+                    } else if (rainValue < 0.39) { // Moderate rain
+                        style = styleRain[2];
+                    } else if (rainValue < 2.0) { // Heavy rain
+                        style = styleRain[3];
+                    } else { // Violent rain
+                        style = styleRain[4];
+                    }
                 }
             } else {
                 style = styleNoData;
@@ -905,7 +919,9 @@ public class WeatherApp extends Application {
             arrayHourLabel[index].setText(forecastHour.getHour());
             arrayHourTemp[index].setText(forecastHour.getMain().getTemp());
             arrayHourWind[index].setText(forecastHour.getWind().getSpeed());
-            arrayHourRainStat[index].setText(forecastHour.getRain().get1h());
+            double rainValue = forecastHour.getRain().get1h();
+            String rainString = String.format(Locale.US, "%.1f", rainValue);
+            arrayHourRainStat[index].setText(rainString);
             arrayHourRainPerc[index].setText(forecastHour.getPop());
             arrayHours[index].setVisible(true);
         } else { // Forecast doesn't go this far (forward or back)

@@ -354,24 +354,26 @@ public class WeatherData {
 
         /**
          * Get rain data for one hour
-         * @return String rain amount 1h
+         * @return double rain amount 1h
          */
-        public String get1h() {
+        public double get1h() {
             if(METRIC.equals(units)) {
-                return _1h == null? "0" : String.format(Locale.US, "%.1f", _1h);
+                return _1h == null? 0.0 : _1h;
+            } else {
+                return _1h == null? 0.0 : (_1h/25.4);
             }
-            return _1h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }
 
         /**
          * Get rain data for three hours
-         * @return String rain amount 3h
+         * @return double rain amount 3h
          */
-        public String get3h() {
+        public double get3h() {
             if(METRIC.equals(units)) {
-                return _3h == null? "0" : String.format(Locale.US, "%.1f", _3h);
+                return _3h == null? 0.0 : _3h;
+            } else {
+                return _3h == null? 0.0 : (_3h/25.4);
             }
-            return _3h == null? "0" : String.format(Locale.US, "%.2f",_1h/25.4);
         }
     }
 
