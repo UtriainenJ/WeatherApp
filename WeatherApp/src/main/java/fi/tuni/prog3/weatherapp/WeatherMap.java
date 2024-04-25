@@ -10,8 +10,8 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 /**
- *
- * @author jerri
+ * Class used for handling map API calls, zooming, and moving.
+ * @author Jerri Tarpio
  */
 public class WeatherMap {
     private static String API_KEY;
@@ -26,6 +26,9 @@ public class WeatherMap {
     private static int Y;
     private static String MODE;
 
+    /**
+     * Call init() always before using other methods
+     */
     public static void init() {
         WeatherMap.ZOOM = 0;
         WeatherMap.X = 0;
@@ -36,14 +39,26 @@ public class WeatherMap {
         getImg();
     }
     
+    /**
+     * Check if able to zoom in more
+     * @return boolean true if able to
+     */
     public static boolean canZoomIn() {
         return ZOOM != MAX_ZOOM;
     }
     
+    /**
+     * Check if able to zoom out more
+     * @return boolean true if able to
+     */
     public static boolean canZoomOut() {
         return ZOOM != MIN_ZOOM;
     }
     
+    /**
+     * Zoom into map
+     * @return true if new API image call worked
+     */
     public static boolean zoomIn() {
         if(ZOOM >= MAX_ZOOM) {
             return false;
@@ -56,6 +71,10 @@ public class WeatherMap {
         return getImg();
     }
     
+    /**
+     * Zoom out map
+     * @return boolean true if new API image call worked
+     */
     public static boolean zoomOut() {
         if(ZOOM <= MIN_ZOOM) {
             return false;
@@ -68,6 +87,10 @@ public class WeatherMap {
         return getImg();
     }
     
+    /**
+     * Move map upwards
+     * @return boolean true if new API image call worked
+     */
     public static boolean moveUp() {
         if(Y-1 < MIN_COORD) {
             Y = MAX_COORD;
@@ -77,6 +100,10 @@ public class WeatherMap {
         return getImg();
     }
 
+    /**
+     * Move map downwards
+     * @return boolean true if new API image call worked
+     */
     public static boolean moveDown() {
         if(Y+1 > MAX_COORD) {
             Y = MIN_COORD;
@@ -86,6 +113,10 @@ public class WeatherMap {
         return getImg();
     }
     
+    /**
+     * Move map right
+     * @return boolean true if new API image call worked
+     */
     public static boolean moveRight() {
         if(X+1 > MAX_COORD) {
             X = MIN_COORD;
@@ -94,6 +125,11 @@ public class WeatherMap {
         }
         return getImg();
     }
+    
+    /**
+     * Move map left
+     * @return boolean true if new API image call worked
+     */
     public static boolean moveLeft() {
         if(X-1 < MIN_COORD) {
             X = MAX_COORD;
@@ -103,6 +139,11 @@ public class WeatherMap {
         return getImg();
     }
     
+    /**
+     * Set map mode: (Rain, Temperature, Wind, Clouds)
+     * @param mode
+     * @return boolean true if new API image call worked
+     */
     public static boolean setMode(String mode) {
         switch(mode) {
             case "Rain":
@@ -118,10 +159,18 @@ public class WeatherMap {
         }
     }
     
+    /**
+     * Get filename of base map that is stored locally
+     * @return String base map filename
+     */
     public static String getBaseFilename() {
         return String.format("map/%d%d%d.png", ZOOM, X, Y);
     }
     
+    /**
+     * Get filename where API weather maps are saved
+     * @return String weather map filename
+     */
     public static String getFileName() {
         return FILE_NAME;
     }

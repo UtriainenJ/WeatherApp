@@ -54,7 +54,6 @@ public class WeatherApp extends Application {
     private final double rainMeterHeight = 20;
     private final double mapHeight = 240;
     private final String tempFileName = "temp.json";
-    private final String mapFileName = "map.png";
     
     // Cell styles
     private final String styleYellow = "-fx-background-color: #fae49f;";
@@ -951,16 +950,30 @@ public class WeatherApp extends Application {
     private void updateMaps() {
         Image mapTextureWeather;
         Image mapTextureBase;
+        
+        boolean validWeather = true;
+        boolean validBase = true;
+        
         try {
             final InputStream mapFile = new DataInputStream(
-                    new FileInputStream(mapFileName));
+                    new FileInputStream(WeatherMap.getFileName()));
             mapTextureWeather = new Image(mapFile);
-            mapTextureBase = new Image(
-                    new FileInputStream(WeatherMap.getBaseFilename()));
         } catch (IOException exception) {
+            mapTextureWeather = null;
+            validWeather = false;
+        }
+        try {
+            mapTextureBase = new Image(
+                    new FileInputStream(WeatherMap.getBaseFilename()));            
+        } catch (IOException exception) {
+            mapTextureBase = null;
+            validBase = false;
+        }
+        if(!validWeather && !validBase) {
             mapTextureBase = getIcon("default");
             mapTextureWeather = getIcon("default");
         }
+        
         mapImageBase.setImage(mapTextureBase);
         mapImage.setImage(mapTextureWeather);
         mapImage.setOpacity(0.7);
