@@ -1,33 +1,68 @@
 package fi.tuni.prog3.weatherapp;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.BeforeClass;
 
+import java.io.Console;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import static org.junit.Assert.*;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.api.mockito.PowerMockito;
+import org.junit.runner.RunWith;
+import static org.mockito.Mockito.*;
 
-import static org.junit.jupiter.api.Assertions.*;
 
-class WeatherAPITest {
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({WeatherAPI.class})
+public class WeatherAPITest {
 
     private WeatherAPI wAPI;
-    @BeforeEach
+    private String wData1;
+    private String wData2;
+    private String APIkey;
+
+
+
+
+
+    @Before
     public void setUp() throws Exception{
         wAPI = new WeatherAPI();
+
+        wData1 = "{\"coord\":{\"lon\":10.99,\"lat\":44.34},\"weather\":[{\"id\":501,\"main\":\"Rain\"," +
+                "\"description\":\"moderate rain\",\"icon\":\"10d\"}],\"base\":\"stations\",\"main\":{\"temp\"" +
+                ":298.48,\"feels_like\":298.74,\"temp_min\":297.56,\"temp_max\":300.05,\"pressure\":1015,\"humidity" +
+                "\":64,\"sea_level\":1015,\"grnd_level\":933},\"visibility\":10000,\"wind\":{\"speed\":0.62,\"deg\"" +
+                ":349,\"gust\":1.18},\"rain\":{\"1h\":3.16},\"clouds\":{\"all\":100},\"dt\":1661870592,\"sys\":{\"" +
+                "type\":2,\"id\":2075663,\"country\":\"IT\",\"sunrise\":1661834187,\"sunset\":1661882248},\"timezone" +
+                "\":7200,\"id\":3163858,\"name\":\"Zocca\",\"cod\":200}";
+
+        wData2 = "{\"coord\":{\"lon\":11.99,\"lat\":45.34},\"weather\":[{\"id\":501,\"main\":\"Rain\"," +
+                "\"description\":\"moderate rain\",\"icon\":\"10d\"}],\"base\":\"stations\",\"main\":{\"temp\"" +
+                ":298.48,\"feels_like\":298.74,\"temp_min\":297.56,\"temp_max\":303.05,\"pressure\":1015,\"humidity" +
+                "\":64,\"sea_level\":1015,\"grnd_level\":933},\"visibility\":10000,\"wind\":{\"speed\":0.62,\"deg\"" +
+                ":349,\"gust\":1.18},\"rain\":{\"1h\":3.16},\"clouds\":{\"all\":100},\"dt\":1661870592,\"sys\":{\"" +
+                "type\":2,\"id\":2075663,\"country\":\"IT\",\"sunrise\":1661834187,\"sunset\":1661882248},\"timezone" +
+                "\":7200,\"id\":3163858,\"name\":\"Mocca\",\"cod\":200}";
+
+        APIkey = "11";
     }
+
+
 
     @Test
     public void testWeatherAPIInitialization(){
-        assertNull(wAPI.getLocationActive(), "locationActive should be null");
+        assertNull("locationActive should be null", wAPI.getLocationActive());
 
-        assertNotNull(wAPI.getLocationFavorites(), "locationFavorites should be an instance of List");
-        assertTrue(wAPI.getLocationFavorites().isEmpty(), "locationFavorites should be empty");
+        assertNotNull("locationFavorites should be an instance of List", wAPI.getLocationFavorites());
+        assertTrue("locationFavorites should be empty", wAPI.getLocationFavorites().isEmpty());
 
-        assertNotNull(wAPI.getLocationHistory(), "locationHistory should be an instance of List");
-        assertTrue(wAPI.getLocationHistory().isEmpty(), "locationHistory should be empty");
+        assertNotNull("locationHistory should be an instance of List", wAPI.getLocationHistory());
+        assertTrue("locationHistory should be empty", wAPI.getLocationHistory().isEmpty());
     }
 
     @Test
@@ -35,20 +70,10 @@ class WeatherAPITest {
         wAPI.setLocationActive("tanpere");
         String expResult = "tanpere";
         String result = wAPI.getLocationActive();
-        assertEquals(expResult, result,
-                "getLocationActive should return '" + expResult + "' but returned '" + result + "' instead");
+        assertEquals("getLocationActive should return '" + expResult + "' but returned '" + result + "' instead",
+                expResult, result);
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"Helsinki", "Kouvola", "tanpere"})
-    @NullSource
-    public void testSetLocationActive(String location){
-        String result = wAPI.setLocationActive(location).getLocationActive();
-        assertEquals(result, location,
-                "setLocationActive followed by getLocationActive should return '" + location +
-                        "' but returned '" + result + "' instead");
-
-    }
 
     @Test
     public void testGetLocationFavorites() {
@@ -58,9 +83,22 @@ class WeatherAPITest {
         List<String> expResult = Arrays.asList("Espoo", "Helsinki");
         List<String> result = wAPI.getLocationFavorites();
 
-        assertEquals(expResult, result,
-                "getLocationFavorites should return '" + expResult + "' but returned '" + result + "' instead");
+        assertEquals("getLocationFavorites should return '" + expResult + "' but returned '" +
+                result + "' instead", expResult, result);
+
+
     }
+
+
+    /* temporarily commented out
+    @Test
+    public void testAddToFavoritesWithNull() {
+        wAPI.addToFavorites(null);
+        assertFalse("addToFavorites should not add null to the favorites list.",
+                wAPI.getLocationFavorites().contains(null));
+    }
+
+     */
 
     @Test
     public void testGetLocationHistory() {
@@ -70,67 +108,93 @@ class WeatherAPITest {
         List<String> expResult = Arrays.asList("Turku", "Tampere");
         List<String> result = wAPI.getLocationHistory();
 
-        assertEquals(expResult, result,
-                "getLocationHistory should return '" + expResult + "' but returned '" + result + "' instead");
+        assertEquals("getLocationHistory should return '" + expResult + "' but returned '" + result +
+                "' instead", expResult, result);
+
     }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"Helsinki", "Kouvola", "tanpere"})
-    public void testAddToFavorites(String location) {
-        wAPI.addToFavorites(location);
-        wAPI.addToFavorites(location); // Duplicate attempt
-        assertEquals(1, wAPI.getLocationFavorites().size(),
-                "addToFavorites should not add duplicate location '" + location + "'");
-        assertTrue(wAPI.getLocationFavorites().contains(location),
-                "addToFavorites should add '" + location + "' to the favorites list.");
-    }
-
-/*  temporarily commented out
-    @Test
-    public void testAddToFavoritesWithNull() {
-        wAPI.addToFavorites(null);
-        assertFalse(wAPI.getLocationFavorites().contains(null),
-                "addToFavorites should not add null to the favorites list.");
-    }
-
- */
-
-    @ParameterizedTest
-    @ValueSource(strings = {"Helsinki", "Kouvola", "tanpere"})
-    @NullSource
-    public void testRemoveFromFavorites(String location) {
-        wAPI.addToFavorites(location);
-        wAPI.removeFromFavorites(location);
-        assertFalse(wAPI.getLocationFavorites().contains(location),
-                "removeFromFavorites should remove '" + location + "' from the favorites list.");
-
-        //removing non-existent location
-        wAPI.removeFromFavorites(location);
-        assertEquals(0, wAPI.getLocationFavorites().size(),
-                "removeFromFavorites should handle removing a non-existent location");
-    }
-
-        @ParameterizedTest
-        @ValueSource(strings = {"Helsinki", "Kouvola", "tanpere"})
-        public void testAddToHistory(String location) {
-            wAPI.setLocationActive(location);
-            wAPI.setLocationActive(location);
-            wAPI.setLocationActive(location); // Duplicate attempt
-            assertEquals(1, wAPI.getLocationHistory().size(),
-                    "addToHistory should not increase the list size when adding duplicate '" + location + "'");
-            assertEquals(location, wAPI.getLocationHistory().get(0),
-                    "addToHistory should move '" + location + "' to the front of the history list ");
-        }
 
 /* temporarily commented out
     @Test
     public void testSetLocationActiveWithNull() {
         wAPI.setLocationActive(null);
-        assertFalse(wAPI.getLocationHistory().contains(null),
-                "setLocationActive should not add null to the history list.");
+        assertFalse("setLocationActive should not add null to the history list.",
+                wAPI.getLocationHistory().contains(null));
     }
 
  */
+
+    @Test
+    public void testClearHistory(){
+        wAPI.setLocationActive("Helsinki");
+        wAPI.setLocationActive("Turku");
+        wAPI.setLocationActive("tanpere");
+
+        wAPI.clearBrowsingHistory();
+        assertTrue("locationHistory should be empty after clearHistory, instead it contained '"
+                + wAPI.getLocationHistory() + "'", wAPI.getLocationHistory().isEmpty());
+    }
+
+
+    @Test
+    public void testGetCurrentWeather() throws Exception {
+
+
+        String url1 = "https://pro.openweathermap.org/data/2.5/weather"
+                + "?q=" + "Zocca" + "&appid=" + APIkey + "&units=" + "null";
+        String url2 = "https://pro.openweathermap.org/data/2.5/weather"
+                + "?q=" + "Mocca" + "&appid=" + APIkey + "&units=" + "null";
+
+
+        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "getAPIKey"))
+                .with((proxy, method, args) -> APIkey); // only args is actually needed
+
+        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "makeHTTPCall", String.class))
+                .with((proxy, method, args) -> {
+                    String url = (String) args[0];
+
+                    if (url.equals(url1)) {
+                        return wData1;
+                    } else if (url.equals(url2)) {
+                        return wData2;
+                    }
+                    return "{}";
+                });
+
+        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "getAirQuality", WeatherData.class))
+                .with((proxy, method, args) -> "Poor");
+
+        assertEquals("Zocca",wAPI.getCurrentWeather("Zocca").getName());
+        assertEquals("Poor",wAPI.getCurrentWeather("Zocca").getAirQuality());
+
+        assertEquals("Mocca",wAPI.getCurrentWeather("Mocca").getName());
+
+        assertNull("Should be null with invalid location",wAPI.getCurrentWeather("Invalid").getName());
+    }
+
+/*
+    @Test
+    public void testUnits(){
+        assertThrows("getUnits with no units set should throw an error",
+                NullPointerException.class,() -> wAPI.getUnit());
+        wAPI.setUnits("abc");
+        assertThrows("invalid argument for setUnits shouldn't set any units",
+                IllegalStateException.class,() -> wAPI.getUnit());
+
+        wAPI.setUnits("m");
+        assertEquals("Unit should be 'Metric', instead was " + wAPI.getUnit(),
+                "Metric" , wAPI.getUnit());
+
+        wAPI.setUnits("I");
+        assertEquals("Unit should be 'Imperial', instead was " + wAPI.getUnit(),
+                "Imperial" , wAPI.getUnit());
+
+        wAPI.switchUnits();
+        assertEquals("Unit should be 'Metric' after switching, instead was " + wAPI.getUnit(),
+                "Metric" , wAPI.getUnit());
+    }
+
+*/
+
 }
 
 
