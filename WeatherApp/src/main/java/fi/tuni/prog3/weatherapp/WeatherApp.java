@@ -99,7 +99,6 @@ public class WeatherApp extends Application {
     // Class entities
     private StorageSystem ss;
     private WeatherAPI api;
-    private WeatherMap map;
     
     // UI containers
     private Stage mainWindow;

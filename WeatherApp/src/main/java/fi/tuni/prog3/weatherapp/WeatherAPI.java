@@ -13,11 +13,10 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- *
+ * Used for interacting with openweathermap.org weather API.
  * @author jerri
  */
 public class WeatherAPI implements iAPI {
-    
     private String locationActive;
     private String units;
     private List<String> locationFavorites;
@@ -26,6 +25,10 @@ public class WeatherAPI implements iAPI {
     private transient ForecastDataHourly fdh;
     private transient ForecastDataDaily fdd;
 
+    /**
+     * Constructor. Default location is Raisio, and default unit is metric.
+     * @throws Exception
+     */
     public WeatherAPI() throws Exception {
         this.locationActive = "Raisio";
         this.units = "metric";
@@ -33,52 +36,96 @@ public class WeatherAPI implements iAPI {
         this.locationHistory = new ArrayList<>();
     }
 
+    /**
+     * Set a location as active before calling API
+     * @param loc location
+     * @return this
+     */
     public WeatherAPI setLocationActive(String loc) {
         addToHistory(loc);
         this.locationActive = loc;
         return this;
     }
 
+    /**
+     * Get active location
+     * @return String active location
+     */
     public String getLocationActive() {
         return locationActive;
     }
 
+    /**
+     * Get favourited locations
+     * @return List of favourites
+     */
     public List<String> getLocationFavorites() {
         return locationFavorites;
     }
 
+    /**
+     * Get searched locations
+     * @return History list
+     */
     public List<String> getLocationHistory() {
         return locationHistory;
     }
    
+    /**
+     * Add location to favourites
+     * @param loc location
+     */
     public void addToFavorites(String loc) {
         if(!locationFavorites.contains(loc)) {
             locationFavorites.add(0, loc);
         }
     }
     
+    /**
+     * Remove location from favourites
+     * @param loc location
+     */
     public void removeFromFavorites(String loc) {
         if(locationFavorites.contains(loc)) {
             locationFavorites.remove(loc);
         }
     }
  
+    /**
+     * Clear location history
+     */
     public void clearBrowsingHistory() {
         this.locationHistory.clear();
     }
     
+    /**
+     * Get WeatherData object
+     * @return WeatherData
+     */
     public WeatherData getWeather() {
         return wd;
     }
     
+    /**
+     * Get ForecastDataHourly object
+     * @return ForecastDataHourly
+     */
     public ForecastDataHourly getForecastHourly() {
         return fdh;
     }
     
+    /**
+     * Get ForecastDataDaily object
+     * @return ForecastDataDaily
+     */
     public ForecastDataDaily getForecastDaily() {
         return fdd;
     }
     
+    /**
+     * Set units used by entire program, metric or imperial
+     * @param unitSystem
+     */
     public void setUnits(String unitSystem) {
         switch(unitSystem.toLowerCase()) {
             case "m":
@@ -101,6 +148,9 @@ public class WeatherAPI implements iAPI {
         }
     }
     
+    /**
+     * Change from imperial to metric or vice versa
+     */
     public void switchUnits() {
         if("metric".equals(units)) {
             setUnits("imperial");
@@ -109,6 +159,10 @@ public class WeatherAPI implements iAPI {
         }
     }
 
+    /**
+     * Get unit name
+     * @return String unit name
+     */
     public String getUnit() {
         switch(units) {
             case "imperial":
@@ -120,6 +174,10 @@ public class WeatherAPI implements iAPI {
         }
     }
     
+    /**
+     * Get wind speed unit corresponding to unit system
+     * @return String wind speed unit
+     */
     public String getUnitWind() {
         switch(units) {
             case "imperial":
@@ -131,6 +189,10 @@ public class WeatherAPI implements iAPI {
         }
     }
     
+    /**
+     * Get rain amount unit corresponding to unit system
+     * @return String rain amount unit
+     */
     public String getUnitRain() {
         switch(units) {
             case "imperial":
@@ -142,6 +204,10 @@ public class WeatherAPI implements iAPI {
         }
     }
     
+    /**
+     * Get temperature unit corresponding to unit system
+     * @return String temperature unit
+     */
     public String getUnitTemp() {
         switch(units) {
             case "imperial":
@@ -153,6 +219,10 @@ public class WeatherAPI implements iAPI {
         }
     }
 
+    /**
+     * Calls API to retrieve weather data to use
+     * @return boolean whether call was successful
+     */
     public boolean getData() {
         try {
             this.wd = getCurrentWeather(locationActive);
@@ -167,7 +237,7 @@ public class WeatherAPI implements iAPI {
             return false;
         }
     }
-    
+
     @Override
     public WeatherData getCurrentWeather(String loc) {
         try {
@@ -228,6 +298,7 @@ public class WeatherAPI implements iAPI {
         return getForecastHourly(coords.getKey(), coords.getValue());
     }
     
+    @Override
     public ForecastDataDaily getForecastDaily(String loc) {
         try {
             Pair<Double, Double> coords = getLocation(loc);

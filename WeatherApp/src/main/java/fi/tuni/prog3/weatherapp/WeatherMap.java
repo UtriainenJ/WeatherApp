@@ -92,7 +92,6 @@ public class WeatherMap {
         } else {
             X++;
         }
-        System.out.println(String.valueOf(ZOOM)+String.valueOf(X)+String.valueOf(Y));
         return getImg();
     }
     public static boolean moveLeft() {
@@ -101,7 +100,6 @@ public class WeatherMap {
         } else {
             X--;
         }
-        System.out.println(String.valueOf(ZOOM)+String.valueOf(X)+String.valueOf(Y));
         return getImg();
     }
     
@@ -124,9 +122,12 @@ public class WeatherMap {
         return String.format("map/%d%d%d.png", ZOOM, X, Y);
     }
     
+    public static String getFileName() {
+        return FILE_NAME;
+    }
+    
     private static int getMaxCoord(int z) {
-        if(z <= 1) return z;
-        else return (int) Math.pow(2, z) - 1;
+        return (int) Math.pow(2, z) - 1;
     }
     
     private static boolean getImg() {
