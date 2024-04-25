@@ -121,6 +121,7 @@ public class WeatherApp extends Application {
     private ImageView currentRainIcon;
     private ImageView currentWindIcon;
     private ImageView mapImage;
+    private ImageView mapImageBase;
     private Label cityLabel;
     private Label currentTempField;
     private Label currentTempUnitField;
@@ -476,8 +477,12 @@ public class WeatherApp extends Application {
         mapImage = new ImageView();
         mapImage.setPreserveRatio(true);
         mapImage.setFitHeight(mapHeight);
-        var mapContainer = new Label();
-        mapContainer.setGraphic(mapImage);
+        mapImageBase = new ImageView();
+        mapImageBase.setPreserveRatio(true);
+        mapImageBase.setFitHeight(mapHeight);
+
+        var mapContainer = new StackPane();
+        mapContainer.getChildren().addAll(mapImageBase, mapImage);
         mapContainer.setPadding(new Insets(25, 40, 25, 40));
         
         // Controls for moving and zooming
@@ -490,7 +495,7 @@ public class WeatherApp extends Application {
         moveButtonRight.setMinSize(moveButtonLength, moveButtonWidth);
         var moveButtonDown = new Button("|\nv");
         moveButtonDown.setOnAction((event) -> {
-            WeatherMap.moveUp();
+            WeatherMap.moveDown();
             updateMaps();
         });
         moveButtonDown.setTextAlignment(TextAlignment.CENTER);
@@ -504,7 +509,7 @@ public class WeatherApp extends Application {
         moveButtonLeft.setMinSize(moveButtonLength, moveButtonWidth);
         var moveButtonUp = new Button("^\n|");
         moveButtonUp.setOnAction((event) -> {
-            WeatherMap.moveDown();
+            WeatherMap.moveUp();
             updateMaps();
         });
         moveButtonUp.setTextAlignment(TextAlignment.CENTER);
@@ -945,15 +950,21 @@ public class WeatherApp extends Application {
      * Updates the Maps panel.
      */
     private void updateMaps() {
-        Image mapTexture;
+        Image mapTextureWeather;
+        Image mapTextureBase;
         try {
             final InputStream mapFile = new DataInputStream(
                     new FileInputStream(mapFileName));
-            mapTexture = new Image(mapFile);
+            mapTextureWeather = new Image(mapFile);
+            mapTextureBase = new Image(
+                    new FileInputStream(WeatherMap.getBaseFilename()));
         } catch (IOException exception) {
-            mapTexture = getIcon("default");
+            mapTextureBase = getIcon("default");
+            mapTextureWeather = getIcon("default");
         }
-        mapImage.setImage(mapTexture);
+        mapImageBase.setImage(mapTextureBase);
+        mapImage.setImage(mapTextureWeather);
+        mapImage.setOpacity(0.7);
     }
     
     /**

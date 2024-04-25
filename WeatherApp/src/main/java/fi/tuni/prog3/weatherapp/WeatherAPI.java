@@ -13,57 +13,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- * A WeatherAPI object is used to get weather info on cities.
- * Preferred method of getting weather info is with getData(*cityname*).
- * Cities looked up with getData(*cityname*) get saved in browsing history,
- * and the last one looked up gets saved as the active city.
- * 
- * Browsing history can be deleted.
- * You can add and remove cities from favourites.
- * 
- * Interpreting the given results:
- * 
- * WeatherData object data corresponds to this link's fields:
- * https://openweathermap.org/current
- * 
- * Same with ForecastData:
- * https://openweathermap.org/forecast5
- * 
- * with getData() pair you can use .getKey() to access the WeatherData object,
- * and .getValue() to access the ForecastData object.
- * 
- * 
- *  **Use example:**
- * 
- *  **loading WeatherAPI from file**
- * 
- * StorageSystem ss = new StorageSystem("temp.json");
- * WeatherAPI api = ss.readFromFile();
- * 
- *  **getting location info by city name, this saves the city to history,**
- *  **and sets the most recent one as active.**
- * 
- * Pair<WeatherData, ForecastData> nyc = api.getData("New York City");
- * var hervanta = api.getData("Hervanta");
- * 
- * **calling getCurrentWeather() or getForecast() does not do saving to history.**
- * **you can use coordinates or city name.**
- * 
- * WeatherData vaasaW = api.getCurrentWeather(63.096, 21.61577);
- * WeatherData osloW = api.getCurrentWeather("Oslo");
- * 
- * ForecastData tampereF = api.getForecast("Tampere");
- * ForecastData toijalaF = api.getForecast(61.166666, 23.86749653);
- * 
- *  **deleting browsing history:**
- * api.clearBrowsingHistory();
- * 
- *  **adding and removing from favorites:**
- * api.addToFavorites(nyc.getKey().getName());
- * api.removeFromFavorites(hervanta.getKey().getName());
- */
-
-/**
  *
  * @author jerri
  */

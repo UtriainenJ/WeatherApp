@@ -16,7 +16,7 @@ import okhttp3.ResponseBody;
 public class WeatherMap {
     private static String API_KEY;
     private static final String FILE_NAME = "map.png";
-    private static final int MAX_ZOOM = 4;
+    private static final int MAX_ZOOM = 3;
     private static final int MIN_ZOOM = 0;
     private static final int MIN_COORD = 0;
     private static int MAX_COORD;
@@ -92,6 +92,7 @@ public class WeatherMap {
         } else {
             X++;
         }
+        System.out.println(String.valueOf(ZOOM)+String.valueOf(X)+String.valueOf(Y));
         return getImg();
     }
     public static boolean moveLeft() {
@@ -100,6 +101,7 @@ public class WeatherMap {
         } else {
             X--;
         }
+        System.out.println(String.valueOf(ZOOM)+String.valueOf(X)+String.valueOf(Y));
         return getImg();
     }
     
@@ -118,9 +120,13 @@ public class WeatherMap {
         }
     }
     
+    public static String getBaseFilename() {
+        return String.format("map/%d%d%d.png", ZOOM, X, Y);
+    }
+    
     private static int getMaxCoord(int z) {
         if(z <= 1) return z;
-        return z*z-1;
+        else return (int) Math.pow(2, z) - 1;
     }
     
     private static boolean getImg() {
@@ -145,10 +151,10 @@ public class WeatherMap {
 
     private static boolean saveImgToFile(ResponseBody rb) {
         try {
-            byte[] image = rb.bytes();
-        
+            byte[] imageWeather = rb.bytes();
+            
             FileOutputStream fos = new FileOutputStream(FILE_NAME);
-            fos.write(image);
+            fos.write(imageWeather);
             fos.close();
             return true;
         } catch (IOException ex) {
