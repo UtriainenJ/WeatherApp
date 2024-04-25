@@ -514,19 +514,39 @@ public class WeatherApp extends Application {
         moveButtonUp.setTextAlignment(TextAlignment.CENTER);
         moveButtonUp.setMinSize(moveButtonWidth, moveButtonLength);
         var zoomButtonIn = new Button("+");
+        var zoomButtonOut = new Button("-");
         zoomButtonIn.setOnAction((event) -> {
-            WeatherMap.zoomIn();
+            // If zoom in allowed, zoom in
+            if (WeatherMap.canZoomIn()) WeatherMap.zoomIn();
+            
+            // Disable zoom in button if cannot zoom in
+            zoomButtonIn.setDisable(!WeatherMap.canZoomIn());
+            
+            // Enable zoom out button, as we have just zoomed in
+            zoomButtonOut.setDisable(false);
+            
+            // Update graphics
+            updateMaps();
+        });
+        zoomButtonOut.setOnAction((event) -> {
+            // If zoom out allowed, zoom out
+            if (WeatherMap.canZoomOut()) WeatherMap.zoomOut();
+            
+            // Disable zoom out button if cannot zoom out
+            zoomButtonOut.setDisable(!WeatherMap.canZoomOut());
+            
+            // Enable zoom in button, as we have just zoomed out
+            zoomButtonIn.setDisable(false);
+            
+            // Update graphics
             updateMaps();
         });
         zoomButtonIn.setTextAlignment(TextAlignment.CENTER);
-        zoomButtonIn.setMinSize(moveButtonLength, moveButtonLength / 2);
-        var zoomButtonOut = new Button("-");
-        zoomButtonOut.setOnAction((event) -> {
-            WeatherMap.zoomOut();
-            updateMaps();
-        });
         zoomButtonOut.setTextAlignment(TextAlignment.CENTER);
+        zoomButtonIn.setMinSize(moveButtonLength, moveButtonLength / 2);
         zoomButtonOut.setMinSize(moveButtonLength, moveButtonLength / 2);
+        zoomButtonIn.setDisable(!WeatherMap.canZoomIn());
+        zoomButtonOut.setDisable(!WeatherMap.canZoomOut());
         var zoomButtons = new VBox(zoomButtonIn, zoomButtonOut);
         zoomButtons.setAlignment(Pos.CENTER);
         var moveButtonContainer = new GridPane();
