@@ -42,7 +42,6 @@ public class WeatherAPI implements iAPI {
      * @return this
      */
     public WeatherAPI setLocationActive(String loc) {
-        addToHistory(loc);
         this.locationActive = loc;
         return this;
     }
@@ -231,6 +230,7 @@ public class WeatherAPI implements iAPI {
             this.wd.setUnits(units);
             this.fdh.setUnits(units);
             this.fdd.setUnits(units);
+            addToHistory(wd.getName());
             return true;
         } catch (Exception ex) {
             System.out.println(ex);
