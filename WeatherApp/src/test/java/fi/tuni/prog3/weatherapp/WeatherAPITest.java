@@ -28,6 +28,8 @@ public class WeatherAPITest {
     private String hData2;
     private String APIkey;
     private String locData;
+    private String dData;
+    private String aData;
 
 
 
@@ -41,6 +43,9 @@ public class WeatherAPITest {
         hData1 = FileUtil.readJsonLines(mockDataPath).get(2);
         hData2 = FileUtil.readJsonLines(mockDataPath).get(3);
         locData = FileUtil.readJsonLines(mockDataPath).get(4);
+        dData = FileUtil.readJsonLines(mockDataPath).get(5);
+        aData = FileUtil.readJsonLines(mockDataPath).get(6);
+
 
         APIkey = "11";
 
@@ -58,7 +63,8 @@ public class WeatherAPITest {
                     } else if (url.equals(url2)) {
                         return data2;
                     }
-                    return "{}";
+                    else
+                        throw new IllegalArgumentException("Error getting api response.");
                 });
     }
     private void mockHTTPCall(String url, String data){
@@ -67,7 +73,8 @@ public class WeatherAPITest {
                     if (url.equals((String) args[0])) {
                         return data;
                     }
-                    return "{}";
+                    else
+                        throw new IllegalArgumentException("Error getting api response.");
                 });
     }
 
@@ -175,11 +182,18 @@ public class WeatherAPITest {
 
         assertEquals("Zocca",wAPI.getCurrentWeather("Zocca").getName());
         assertEquals("Poor",wAPI.getCurrentWeather("Zocca").getAirQuality());
-
         assertEquals("Sant'Angelo di Piove di Sacco",
                 wAPI.getCurrentWeather("Sant'Angelo di Piove di Sacco").getName());
+        assertThrows(IllegalArgumentException.class, () -> wAPI.getCurrentWeather("Kempele"));
+    }
 
-        assertNull("Should be null with invalid location",wAPI.getCurrentWeather("Invalid").getName());
+    @Test
+    public void testAPIError(){
+        mockHTTPCall("http://www.yle.fi/~ransu", cData1);
+        assertThrows(IllegalArgumentException.class, () -> wAPI.getCurrentWeather("Zocca"));
+
+        mockHTTPCall("www.abc.de", "www.efg.ij", hData1, hData2);
+        assertThrows(IllegalArgumentException.class, () -> wAPI.getCurrentWeather("Zocca"));
     }
 
 
@@ -203,7 +217,7 @@ public class WeatherAPITest {
         assertEquals("Zocca",wAPI.getCurrentWeather(lat1,lon1 ).getName());
         assertEquals("Poor",wAPI.getCurrentWeather(lat1,lon1).getAirQuality());
         assertEquals("Sant'Angelo di Piove di Sacco", wAPI.getCurrentWeather(lat2,lon2).getName());
-
+        assertThrows(IllegalArgumentException.class, () -> wAPI.getCurrentWeather(10,13));
     }
     @Test
     public void testGetCurrentWeatherInvalidCoords(){
@@ -283,7 +297,35 @@ public class WeatherAPITest {
     }
 
     @Test
+    public void testGetAirQuality(){
+        double lat = 44.3472;
+        double lon = 10.9904;
+        String url = "http://api.openweathermap.org/data/2.5/air_pollution"
+                + "?lat=" + String.format(Locale.US,"%.4f",lat) + "&lon=" +
+                String.format(Locale.US,"%.4f",lon) + "&appid=" + APIkey;
+
+        mockHTTPCall(url, aData);
+
+
+    }
+
+    @Test
     public void testGetForecastDaily(){
+        String loc = "Zocca";
+
+        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "getLocation"))
+                .with((proxy, method, args) -> (new Pair<>(44.3472,10.9904)));
+
+        String url = "https://api.openweathermap.org/data/2.5/forecast/daily"
+                + "?lat=" + 44.3472 + "&lon=" + 10.9904
+                + "&appid=" + APIkey + "&units=null";
+
+        mockHTTPCall(url,dData);
+
+        ForecastDataDaily.WeatherEntry result = wAPI.getForecastDaily(loc).getList().get(0);
+        assertNotNull(result);
+        assertEquals("26.4", result.getDate());
+        assertEquals("3", result.getGust());
 
     }
 
