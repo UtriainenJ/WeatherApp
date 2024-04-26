@@ -112,7 +112,6 @@ public class WeatherApp extends Application {
     private HBox fcDaysBar;
     private HBox fcHoursBar;
     private VBox forecastPanel;
-    private VBox historyPanel;
     private VBox mapsPanel;
     
     // UI elements
@@ -457,14 +456,6 @@ public class WeatherApp extends Application {
     }
     
     /**
-     * Placeholder for the History panel
-     */
-    private void buildHistoryPanel() {
-        historyPanel = new VBox();
-        historyPanel.getChildren().add(new Label("History"));
-    }
-    
-    /**
      * Builds the Maps panel.
      * This is an option for the bottom half of the main window.
      */
@@ -693,6 +684,9 @@ public class WeatherApp extends Application {
         searchWindow = new Stage();
         searchWindow.setScene(new Scene(searchLayout));
         
+        // Window title
+        searchWindow.setTitle("WeatherApp | Search");
+        
         // Label and close button at the top
         var searchLabel = new Label("Search");
         searchLabel.setFont(new Font("C059 Bold", 24));
@@ -770,6 +764,9 @@ public class WeatherApp extends Application {
      * Builds all windows and elements of the GUI.
      */
     private void buildUI() {
+        // Window title
+        mainWindow.setTitle("WeatherApp | Main");
+        
         // Vertical main layout
         mainLayout = new VBox();
         mainWindow.setScene(new Scene(mainLayout));
@@ -785,18 +782,15 @@ public class WeatherApp extends Application {
         // Horizontal bar with three buttons
         var forecastButton = new Button("Forecast");
         forecastButton.setOnAction((event) -> {selectPanel(forecastPanel);});
-        var historyButton = new Button("History");
-        historyButton.setOnAction((event) -> {selectPanel(historyPanel);});
         var mapsButton = new Button("Maps");
         mapsButton.setOnAction((event) -> {selectPanel(mapsPanel);});
-        midBar = new HBox(forecastButton, historyButton, mapsButton);
+        midBar = new HBox(forecastButton, mapsButton);
         mainLayout.getChildren().add(midBar);
         
         // Bottom part of window, initially Forecast panel
         buildForecastPanel();
-        buildHistoryPanel();
         buildMapsPanel();
-        basePanel = new StackPane(forecastPanel, historyPanel, mapsPanel);
+        basePanel = new StackPane(forecastPanel, mapsPanel);
         mainLayout.getChildren().add(basePanel);
         selectPanel(forecastPanel);
         
