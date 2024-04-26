@@ -26,7 +26,7 @@ public class StorageSystemTest {
     private String filename = "testFile.json";
 
     /**
-     * setup to make tests work
+     * Setup to make tests work
      */
     @Before
     public void setUp() throws IOException {
@@ -39,7 +39,7 @@ public class StorageSystemTest {
     }
 
     /**
-     * deletes the temporary file
+     * Deletes the temporary file
      */
     @After
     public void tearDown() {
@@ -62,7 +62,7 @@ public class StorageSystemTest {
     }
 
     /**
-     * tests WriteToFile
+     * Tests WriteToFile
      */
     @Test
     public void testWriteToFile() throws Exception {

@@ -30,7 +30,7 @@ public class WeatherAPIParameterizedTest {
     }
 
     /**
-     * sets parameters for each test
+     * Sets parameters for each test
      */
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
@@ -41,7 +41,7 @@ public class WeatherAPIParameterizedTest {
 
 
     /**
-     * sets up weather Data without a different file and initializes weatherAPI
+     * Sets up weather Data without a different file and initializes weatherAPI
      */
     @Before
     public void setUp() throws Exception{
