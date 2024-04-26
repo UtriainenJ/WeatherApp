@@ -50,7 +50,6 @@ public class WeatherAPITest {
         APIkey = "11";
 
         mockGetAPIKey();
-        mockGetAirQuality(); // mock value used for testing other methods, airquality is tested separately
     }
 
     private void mockHTTPCall(String url1, String url2, String data1, String data2){
@@ -84,10 +83,6 @@ public class WeatherAPITest {
                 .with((proxy, method, args) -> APIkey); // only args is actually needed
     }
 
-    private void mockGetAirQuality(){
-        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "getAirQuality", WeatherData.class))
-                .with((proxy, method, args) -> "Poor");
-    }
 
 
     @Test
@@ -178,6 +173,9 @@ public class WeatherAPITest {
         String url2 = "https://pro.openweathermap.org/data/2.5/weather"
                 + "?q=" + "Sant'Angelo di Piove di Sacco" + "&appid=" + APIkey + "&units=" + "null";
 
+        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "getAirQuality", WeatherData.class))
+                .with((proxy, method, args) -> "Poor");
+
         mockHTTPCall(url1, url2, cData1, cData2);
 
         assertEquals("Zocca",wAPI.getCurrentWeather("Zocca").getName());
@@ -185,6 +183,8 @@ public class WeatherAPITest {
         assertEquals("Sant'Angelo di Piove di Sacco",
                 wAPI.getCurrentWeather("Sant'Angelo di Piove di Sacco").getName());
         assertThrows(IllegalArgumentException.class, () -> wAPI.getCurrentWeather("Kempele"));
+
+
     }
 
     @Test
@@ -211,6 +211,9 @@ public class WeatherAPITest {
         String url2 = "https://pro.openweathermap.org/data/2.5/weather"
                 + "?lat=" + String.format(Locale.US,"%.4f",lat2) + "&lon=" +
                 String.format(Locale.US,"%.4f",lon2) + "&appid=" + APIkey + "&units=" + "null";
+
+        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "getAirQuality", WeatherData.class))
+                .with((proxy, method, args) -> "Poor");
 
         mockHTTPCall(url1, url2, cData1, cData2);
 
@@ -313,12 +316,12 @@ public class WeatherAPITest {
     public void testGetForecastDaily(){
         String loc = "Zocca";
 
-        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "getLocation"))
-                .with((proxy, method, args) -> (new Pair<>(44.3472,10.9904)));
-
         String url = "https://api.openweathermap.org/data/2.5/forecast/daily"
                 + "?lat=" + 44.3472 + "&lon=" + 10.9904
                 + "&appid=" + APIkey + "&units=null";
+
+        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "getLocation"))
+                .with((proxy, method, args) -> (new Pair<>(44.3472,10.9904)));
 
         mockHTTPCall(url,dData);
 
@@ -330,14 +333,40 @@ public class WeatherAPITest {
     }
 
 
-/*
     @Test
     public void testUnits(){
-        assertThrows("getUnits with no units set should throw an error",
-                NullPointerException.class,() -> wAPI.getUnit());
-        wAPI.setUnits("abc");
-        assertThrows("invalid argument for setUnits shouldn't set any units",
-                IllegalStateException.class,() -> wAPI.getUnit());
+        wAPI.setLocationActive("Zocca");
+
+        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "getLocation"))
+                .with((proxy, method, args) -> (new Pair<>(44.3472,10.9904)));
+        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "getAirQuality", WeatherData.class))
+                .with((proxy, method, args) -> "Poor");
+
+        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "makeHTTPCall", String.class))
+                .with((proxy, method, args) -> {
+                    String url = (String) args[0];
+
+                    if (url.contains("weather")) {
+                        return cData1;
+                    } else if (url.contains("hourly")) {
+                        return hData1;
+                    }
+                    else if (url.contains("daily")){
+                        return dData;
+                    }
+                    else
+                        throw new IllegalArgumentException("Error getting api response.");
+                });
+
+        wAPI.getData();
+
+        wAPI.getWeather().setUnits("m");
+        wAPI.getForecastDaily().setUnits("m");
+        wAPI.getForecastHourly().setUnits("m");
+        assertNotNull(wAPI.getWeather());
+        assertNotNull(wAPI.getForecastDaily());
+        assertNotNull(wAPI.getForecastHourly());
+
 
         wAPI.setUnits("m");
         assertEquals("Unit should be 'Metric', instead was " + wAPI.getUnit(),
@@ -352,7 +381,7 @@ public class WeatherAPITest {
                 "Metric" , wAPI.getUnit());
     }
 
-*/
+
 
 }
 
