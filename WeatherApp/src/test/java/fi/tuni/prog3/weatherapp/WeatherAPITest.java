@@ -64,8 +64,8 @@ public class WeatherAPITest {
      * @param data2 second data option
      */
     private void mockHTTPCall(String url1, String url2, String data1, String data2){
-        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "makeHTTPCall", String.class))
-                .with((proxy, method, args) -> {
+        PowerMockito.replace(PowerMockito.method(WeatherAPI.class,
+                "makeHTTPCall", String.class)).with((proxy, method, args) -> {
                     String url = (String) args[0];
 
                     if (url.equals(url1)) {
@@ -74,7 +74,8 @@ public class WeatherAPITest {
                         return data2;
                     }
                     else
-                        throw new IllegalArgumentException("Error getting api response.");
+                        throw new IllegalArgumentException("Error getting api"
+                                + "response.");
                 });
     }
 
@@ -85,13 +86,14 @@ public class WeatherAPITest {
      * @param data first data option
      */
     private void mockHTTPCall(String url, String data){
-        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "makeHTTPCall", String.class))
-                .with((proxy, method, args) -> {
+        PowerMockito.replace(PowerMockito.method(WeatherAPI.class,
+                "makeHTTPCall", String.class)).with((proxy, method, args) -> {
                     if (url.equals((String) args[0])) {
                         return data;
                     }
                     else
-                        throw new IllegalArgumentException("Error getting api response.");
+                        throw new IllegalArgumentException("Error getting api"
+                                + "response.");
                 });
     }
 
@@ -100,8 +102,9 @@ public class WeatherAPITest {
      * Replaces getAPIKey() and returns the testing key
      */
     private void mockGetAPIKey(){
+        // only args is actually needed
         PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "getAPIKey"))
-                .with((proxy, method, args) -> APIkey); // only args is actually needed
+                .with((proxy, method, args) -> APIkey);
     }
 
 
@@ -110,13 +113,18 @@ public class WeatherAPITest {
      */
     @Test
     public void testWeatherAPIInitialization(){
-        assertNull("locationActive should be null", wAPI.getLocationActive());
+        assertNotNull("locationActive should never be null",
+                wAPI.getLocationActive());
 
-        assertNotNull("locationFavorites should be an instance of List", wAPI.getLocationFavorites());
-        assertTrue("locationFavorites should be empty", wAPI.getLocationFavorites().isEmpty());
+        assertNotNull("locationFavorites should be an instance of List",
+                wAPI.getLocationFavorites());
+        assertTrue("locationFavorites should be empty",
+                wAPI.getLocationFavorites().isEmpty());
 
-        assertNotNull("locationHistory should be an instance of List", wAPI.getLocationHistory());
-        assertTrue("locationHistory should be empty", wAPI.getLocationHistory().isEmpty());
+        assertNotNull("locationHistory should be an instance of List",
+                wAPI.getLocationHistory());
+        assertTrue("locationHistory should be empty",
+                wAPI.getLocationHistory().isEmpty());
     }
 
     /**
@@ -127,8 +135,8 @@ public class WeatherAPITest {
         wAPI.setLocationActive("tanpere");
         String expResult = "tanpere";
         String result = wAPI.getLocationActive();
-        assertEquals("getLocationActive should return '" + expResult + "' but returned '" + result + "' instead",
-                expResult, result);
+        assertEquals("getLocationActive should return '" + expResult
+                + "' but returned '" + result + "' instead", expResult, result);
     }
 
 
@@ -143,23 +151,23 @@ public class WeatherAPITest {
         List<String> expResult = Arrays.asList("Espoo", "Helsinki");
         List<String> result = wAPI.getLocationFavorites();
 
-        assertEquals("getLocationFavorites should return '" + expResult + "' but returned '" +
-                result + "' instead", expResult, result);
+        assertEquals("getLocationFavorites should return '" + expResult
+                + "' but returned '" + result + "' instead", expResult, result);
     }
 
     /**
-     * Tests addToHistory indirectly via setLocation active and getLocationHistory
+     * Tests addToHistory and getLocationHistory
      */
     @Test
     public void testGetLocationHistory() {
-        wAPI.setLocationActive("Tampere");
-        wAPI.setLocationActive("Turku");
+        wAPI.addToHistory("Tampere");
+        wAPI.addToHistory("Turku");
 
         List<String> expResult = Arrays.asList("Turku", "Tampere");
         List<String> result = wAPI.getLocationHistory();
 
-        assertEquals("getLocationHistory should return '" + expResult + "' but returned '" + result +
-                "' instead", expResult, result);
+        assertEquals("getLocationHistory should return '" + expResult
+                + "' but returned '" + result + "' instead", expResult, result);
     }
 
     /**
@@ -172,8 +180,9 @@ public class WeatherAPITest {
         wAPI.setLocationActive("tanpere");
 
         wAPI.clearBrowsingHistory();
-        assertTrue("locationHistory should be empty after clearHistory, instead it contained '"
-                + wAPI.getLocationHistory() + "'", wAPI.getLocationHistory().isEmpty());
+        assertTrue("locationHistory should be empty after clearHistory,"
+                + "instead it contained '" + wAPI.getLocationHistory() + "'",
+                wAPI.getLocationHistory().isEmpty());
     }
 
 
@@ -183,20 +192,23 @@ public class WeatherAPITest {
     @Test
     public void testGetCurrentWeather(){
         String url1 = "https://pro.openweathermap.org/data/2.5/weather"
-                + "?q=" + "Zocca" + "&appid=" + APIkey + "&units=" + "null";
+                + "?q=" + "Zocca" + "&appid=" + APIkey + "&units=metric";
         String url2 = "https://pro.openweathermap.org/data/2.5/weather"
-                + "?q=" + "Sant'Angelo di Piove di Sacco" + "&appid=" + APIkey + "&units=" + "null";
+                + "?q=" + "Sant'Angelo di Piove di Sacco" + "&appid=" + APIkey
+                + "&units=metric";
 
-        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "getAirQuality", WeatherData.class))
+        PowerMockito.replace(PowerMockito.method(WeatherAPI.class,
+                "getAirQuality", WeatherData.class))
                 .with((proxy, method, args) -> "Poor");
 
         mockHTTPCall(url1, url2, cData1, cData2);
 
-        assertEquals("Zocca",wAPI.getCurrentWeather("Zocca").getName());
-        assertEquals("Poor",wAPI.getCurrentWeather("Zocca").getAirQuality());
+        assertEquals("Zocca", wAPI.getCurrentWeather("Zocca").getName());
+        assertEquals("Poor", wAPI.getCurrentWeather("Zocca").getAirQuality());
         assertEquals("Sant'Angelo di Piove di Sacco",
                 wAPI.getCurrentWeather("Sant'Angelo di Piove di Sacco").getName());
-        assertThrows(IllegalArgumentException.class, () -> wAPI.getCurrentWeather("Kempele"));
+        assertThrows(IllegalArgumentException.class,
+                () -> wAPI.getCurrentWeather("Kempele"));
     }
 
     /**
@@ -205,10 +217,12 @@ public class WeatherAPITest {
     @Test
     public void testAPIError(){
         mockHTTPCall("http://www.yle.fi/~ransu", cData1);
-        assertThrows(IllegalArgumentException.class, () -> wAPI.getCurrentWeather("Zocca"));
+        assertThrows(IllegalArgumentException.class,
+                () -> wAPI.getCurrentWeather("Zocca"));
 
         mockHTTPCall("www.abc.de", "www.efg.ij", hData1, hData2);
-        assertThrows(IllegalArgumentException.class, () -> wAPI.getCurrentWeather("Zocca"));
+        assertThrows(IllegalArgumentException.class,
+                () -> wAPI.getCurrentWeather("Zocca"));
     }
 
     /**
@@ -222,22 +236,27 @@ public class WeatherAPITest {
         double lat2 = 45.34;
 
         String url1 = "https://pro.openweathermap.org/data/2.5/weather"
-                + "?lat=" + String.format(Locale.US,"%.4f",lat1) + "&lon=" +
-                String.format(Locale.US,"%.4f",lon1) + "&appid=" + APIkey + "&units=" + "null";
+                + "?lat=" + String.format(Locale.US,"%.4f",lat1) + "&lon="
+                + String.format(Locale.US,"%.4f",lon1) + "&appid=" + APIkey
+                +"&units=metric";
 
         String url2 = "https://pro.openweathermap.org/data/2.5/weather"
-                + "?lat=" + String.format(Locale.US,"%.4f",lat2) + "&lon=" +
-                String.format(Locale.US,"%.4f",lon2) + "&appid=" + APIkey + "&units=" + "null";
+                + "?lat=" + String.format(Locale.US,"%.4f",lat2) + "&lon="
+                + String.format(Locale.US,"%.4f",lon2) + "&appid=" + APIkey
+                + "&units=metric";
 
-        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "getAirQuality", WeatherData.class))
+        PowerMockito.replace(PowerMockito.method(WeatherAPI.class,
+                "getAirQuality", WeatherData.class))
                 .with((proxy, method, args) -> "Poor");
 
         mockHTTPCall(url1, url2, cData1, cData2);
 
         assertEquals("Zocca",wAPI.getCurrentWeather(lat1,lon1 ).getName());
         assertEquals("Poor",wAPI.getCurrentWeather(lat1,lon1).getAirQuality());
-        assertEquals("Sant'Angelo di Piove di Sacco", wAPI.getCurrentWeather(lat2,lon2).getName());
-        assertThrows(IllegalArgumentException.class, () -> wAPI.getCurrentWeather(10,13));
+        assertEquals("Sant'Angelo di Piove di Sacco",
+                wAPI.getCurrentWeather(lat2,lon2).getName());
+        assertThrows(IllegalArgumentException.class,
+                () -> wAPI.getCurrentWeather(10,13));
     }
 
     /**
@@ -248,14 +267,16 @@ public class WeatherAPITest {
         double lat = 91.0; // Invalid latitude
         double lon = -74.0060; // Valid longitude
 
-        assertThrows("Should throw an exception with invalid coords", IllegalStateException.class,
-                () -> wAPI.getCurrentWeather(lat,lon ));
+        assertThrows("Should throw an exception with invalid coords",
+                IllegalStateException.class, () ->
+                        wAPI.getCurrentWeather(lat,lon));
 
         double lat2 = 90.0; // Edge case
         double lon2 = -180.0060;
 
-        assertThrows("Should throw an exception with invalid coords", IllegalStateException.class,
-                () -> wAPI.getCurrentWeather(lat2, lon2));
+        assertThrows("Should throw an exception with invalid coords",
+                IllegalStateException.class, () ->
+                        wAPI.getCurrentWeather(lat2, lon2));
     }
 
     /**
@@ -270,11 +291,11 @@ public class WeatherAPITest {
 
         String url1 = "https://pro.openweathermap.org/data/2.5/forecast/hourly"
                     + "?lat=" + String.format(Locale.US,"%.4f",lat1) + "&lon=" +
-                String.format(Locale.US,"%.4f",lon1) + "&appid=" + APIkey + "&units=null";
+                String.format(Locale.US,"%.4f",lon1) + "&appid=" + APIkey + "&units=metric";
 
         String url2 = "https://pro.openweathermap.org/data/2.5/forecast/hourly"
                 + "?lat=" + String.format(Locale.US,"%.4f",lat2) + "&lon=" +
-                String.format(Locale.US,"%.4f",lon2) + "&appid=" + APIkey + "&units=null";
+                String.format(Locale.US,"%.4f",lon2) + "&appid=" + APIkey + "&units=metric";
 
         mockHTTPCall(url1, url2, hData1, hData2);
 
@@ -351,7 +372,7 @@ public class WeatherAPITest {
 
         String url = "https://api.openweathermap.org/data/2.5/forecast/daily"
                 + "?lat=" + 44.3472 + "&lon=" + 10.9904
-                + "&appid=" + APIkey + "&units=null";
+                + "&appid=" + APIkey + "&units=metric";
 
         PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "getLocation"))
                 .with((proxy, method, args) -> (new Pair<>(44.3472,10.9904)));

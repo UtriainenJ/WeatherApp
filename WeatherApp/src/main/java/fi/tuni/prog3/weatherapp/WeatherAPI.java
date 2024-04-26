@@ -414,7 +414,7 @@ public class WeatherAPI implements iAPI {
         return lat < -90 || lat > 90 || lon < -180 || lon > 180;
     }
     
-    private void addToHistory(String loc) {
+    public void addToHistory(String loc) {
         if(!locationHistory.contains(loc)) {
             locationHistory.add(0, loc);
         } else {

@@ -105,19 +105,38 @@ public class WeatherAPIParameterizedTest {
                 0, wAPI.getLocationFavorites().size());
     }
 
-
     /**
      * Tests addToHistory
      */
-    @Test
-    public void testAddToHistory() {
-        wAPI.setLocationActive(location);
-        wAPI.setLocationActive(location);
-        wAPI.setLocationActive(location); // Duplicate attempt
-        assertEquals("addToHistory should not increase the list size when adding duplicate '" + location + "'",
-                1, wAPI.getLocationHistory().size());
-        assertEquals("addToHistory should move '" + location + "' to the front of the history list ",
-                location, wAPI.getLocationHistory().get(0));
+    public void testAddToHistory(){
+        int initialSize = wAPI.getLocationHistory().size();
+        int targetSize = initialSize;
+        String loc1 = "Helsinki";
+        String loc2 = "Raisio";
+        
+        // Add new location 1
+        wAPI.addToHistory(loc1);
+        targetSize++;
+        assertEquals("addToHistory should increase the list size when adding a new location '" + loc1 + "'",
+            targetSize, wAPI.getLocationHistory().size());
+        assertEquals("addToHistory should move '" + loc1 + "' to the front of the history list ",
+            loc1, wAPI.getLocationHistory().get(0));
+        
+        // Add new location 2
+        wAPI.addToHistory(loc2);
+        targetSize++;
+        assertEquals("addToHistory should increase the list size when adding a new location '" + loc2 + "'",
+            targetSize, wAPI.getLocationHistory().size());
+        assertEquals("addToHistory should move '" + loc2 + "' to the front of the history list ",
+            loc2, wAPI.getLocationHistory().get(0));
+        
+        // Add duplicate location
+        wAPI.addToHistory(loc1);
+        targetSize = targetSize;
+        assertEquals("addToHistory should not increase the list size when adding duplicate '" + loc1 + "'",
+            targetSize, wAPI.getLocationHistory().size());
+        assertEquals("addToHistory should move '" + loc1 + "' to the front of the history list ",
+            loc1, wAPI.getLocationHistory().get(0));
     }
 }
 
