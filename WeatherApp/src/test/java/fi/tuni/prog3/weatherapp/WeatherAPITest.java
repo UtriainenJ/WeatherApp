@@ -3,18 +3,17 @@ package fi.tuni.prog3.weatherapp;
 import javafx.util.Pair;
 import org.junit.Test;
 import org.junit.Before;
-
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-
-import static org.junit.Assert.*;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.api.mockito.PowerMockito;
 import org.junit.runner.RunWith;
+
+import static org.junit.Assert.*;
+
 
 
 @RunWith(PowerMockRunner.class)
@@ -37,6 +36,7 @@ public class WeatherAPITest {
     public void setUp() throws Exception{
         wAPI = new WeatherAPI();
 
+        // in @before instead of @beforeclass due to powermock limitations
         String mockDataPath = "src/test/java/fi/tuni/prog3/weatherapp/mockData.json";
         cData1 = FileUtil.readJsonLines(mockDataPath).get(0);
         cData2 = FileUtil.readJsonLines(mockDataPath).get(1);
@@ -45,7 +45,6 @@ public class WeatherAPITest {
         locData = FileUtil.readJsonLines(mockDataPath).get(4);
         dData = FileUtil.readJsonLines(mockDataPath).get(5);
         aData = FileUtil.readJsonLines(mockDataPath).get(6);
-
 
         APIkey = "11";
 
@@ -116,20 +115,7 @@ public class WeatherAPITest {
 
         assertEquals("getLocationFavorites should return '" + expResult + "' but returned '" +
                 result + "' instead", expResult, result);
-
-
     }
-
-
-    /* temporarily commented out
-    @Test
-    public void testAddToFavoritesWithNull() {
-        wAPI.addToFavorites(null);
-        assertFalse("addToFavorites should not add null to the favorites list.",
-                wAPI.getLocationFavorites().contains(null));
-    }
-
-     */
 
     @Test
     public void testGetLocationHistory() {
@@ -141,18 +127,7 @@ public class WeatherAPITest {
 
         assertEquals("getLocationHistory should return '" + expResult + "' but returned '" + result +
                 "' instead", expResult, result);
-
     }
-
-/* temporarily commented out
-    @Test
-    public void testSetLocationActiveWithNull() {
-        wAPI.setLocationActive(null);
-        assertFalse("setLocationActive should not add null to the history list.",
-                wAPI.getLocationHistory().contains(null));
-    }
-
- */
 
     @Test
     public void testClearHistory(){
@@ -183,8 +158,6 @@ public class WeatherAPITest {
         assertEquals("Sant'Angelo di Piove di Sacco",
                 wAPI.getCurrentWeather("Sant'Angelo di Piove di Sacco").getName());
         assertThrows(IllegalArgumentException.class, () -> wAPI.getCurrentWeather("Kempele"));
-
-
     }
 
     @Test
@@ -294,9 +267,7 @@ public class WeatherAPITest {
                             return new ForecastDataHourly();
                         });
 
-        ForecastDataHourly result = wAPI.getForecastHourly(loc);
-
-
+        wAPI.getForecastHourly(loc);
     }
 
     @Test
@@ -308,8 +279,6 @@ public class WeatherAPITest {
                 String.format(Locale.US,"%.4f",lon) + "&appid=" + APIkey;
 
         mockHTTPCall(url, aData);
-
-
     }
 
     @Test
@@ -329,9 +298,7 @@ public class WeatherAPITest {
         assertNotNull(result);
         assertEquals("26.4", result.getDate());
         assertEquals("3", result.getGust());
-
     }
-
 
     @Test
     public void testUnits(){
@@ -380,9 +347,6 @@ public class WeatherAPITest {
         assertEquals("Unit should be 'Metric' after switching, instead was " + wAPI.getUnit(),
                 "Metric" , wAPI.getUnit());
     }
-
-
-
 }
 
 
