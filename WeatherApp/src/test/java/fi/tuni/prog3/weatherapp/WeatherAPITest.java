@@ -17,11 +17,8 @@ import static org.junit.Assert.*;
 /**
  * Unit tests for WeatherAPI using Junit4 framework
  * Data from openweather API is mocked using PowerMockito
- *
- *
  * @author Jaakko
  */
-
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({WeatherAPI.class})
 public class WeatherAPITest {
@@ -39,8 +36,6 @@ public class WeatherAPITest {
 
     /**
      * Reads data from mockDat.json and places them in attributes in addition to initializing an instance of WeatherAPI
-     *
-     *
      */
     @Before
     public void setUp() throws Exception{
@@ -62,7 +57,7 @@ public class WeatherAPITest {
     }
 
     /**
-     * mocks the API response by checking if the url is correct and returning corresponding data in json format
+     * Mocks the API response by checking if the url is correct and returning corresponding data in json format
      * @param url1 first url option
      * @param url2 second url option
      * @param data1 first data option
@@ -84,7 +79,7 @@ public class WeatherAPITest {
     }
 
     /**
-     * mocks the API response by checking if the url is correct and returning corresponding data in json format
+     * Mocks the API response by checking if the url is correct and returning corresponding data in json format
      * single url version
      * @param url first url option
      * @param data first data option
@@ -102,7 +97,7 @@ public class WeatherAPITest {
 
 
     /**
-     * replaces getAPIKey() and returns the testing key
+     * Replaces getAPIKey() and returns the testing key
      */
     private void mockGetAPIKey(){
         PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "getAPIKey"))
@@ -183,7 +178,7 @@ public class WeatherAPITest {
 
 
     /**
-     * simulates the API call with mockHTTPCall and tests getCurrentWeather and makeWeatherObject indirectly
+     * Simulates the API call with mockHTTPCall and tests getCurrentWeather and makeWeatherObject indirectly
      */
     @Test
     public void testGetCurrentWeather(){
@@ -205,7 +200,7 @@ public class WeatherAPITest {
     }
 
     /**
-     * makes sure that mockHTTPCall simulates APIerrors correctly and tests said errors in getCurrentWeather
+     * Makes sure that mockHTTPCall simulates APIerrors correctly and tests said errors in getCurrentWeather
      */
     @Test
     public void testAPIError(){
@@ -217,7 +212,7 @@ public class WeatherAPITest {
     }
 
     /**
-     * simulates the API call with mockHTTPCall and tests getCurrentWeather and makeWeatherObject indirectly
+     * Simulates the API call with mockHTTPCall and tests getCurrentWeather and makeWeatherObject indirectly
      */
     @Test
     public void testGetCurrentWeatherCoords(){
@@ -246,7 +241,7 @@ public class WeatherAPITest {
     }
 
     /**
-     * simulates the API call with mockHTTPCall and tests getCurrentWeather and makeWeatherObject indirectly
+     * Simulates the API call with mockHTTPCall and tests getCurrentWeather and makeWeatherObject indirectly
      */
     @Test
     public void testGetCurrentWeatherInvalidCoords(){
@@ -264,7 +259,7 @@ public class WeatherAPITest {
     }
 
     /**
-     * simulates the API call with mockHTTPCall and tests getForecastHourly and makeForecastHourlyObject indirectly
+     * Simulates the API call with mockHTTPCall and tests getForecastHourly and makeForecastHourlyObject indirectly
      */
     @Test
     public void testGetForecastHourlyCoords(){
@@ -292,7 +287,7 @@ public class WeatherAPITest {
     }
 
     /**
-     * simulates the API call with mockHTTPCall and tests getForecastHourly and makeForecastHourlyObject indirectly
+     * Simulates the API call with mockHTTPCall and tests getForecastHourly and makeForecastHourlyObject indirectly
      */
     @Test
     public void testGetForecastHourlyInvalidCoords(){
@@ -310,7 +305,7 @@ public class WeatherAPITest {
     }
 
     /**
-     * indirectly tests private getLocation method
+     * Indirectly tests private getLocation method
      */
     @Test
     public void testGetLocation(){
@@ -334,7 +329,7 @@ public class WeatherAPITest {
     }
 
     /**
-     * test getAirQuality
+     * Test getAirQuality
      */
     @Test
     public void testGetAirQuality(){
@@ -348,9 +343,7 @@ public class WeatherAPITest {
     }
 
     /**
-     *
-     *   simulates the API call with mockHTTPCall and tests getForecastDaily and makeForecastDailyObject indirectly
-     *
+     * Simulates the API call with mockHTTPCall and tests getForecastDaily and makeForecastDailyObject indirectly
      */
     @Test
     public void testGetForecastDaily(){
@@ -426,11 +419,15 @@ public class WeatherAPITest {
 
 
 /**
- * utility class to read json data from mockData.json
+ * Utility class to read json data from mockData.json
  */
 
 class FileUtil {
 
+/**
+ * Reads data from a json file
+ * @param filePath path to mockData file
+ */
     public static List<String> readJsonLines(String filePath) {
         List<String> jsonLines = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
