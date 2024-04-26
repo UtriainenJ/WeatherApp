@@ -16,11 +16,18 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
+/**
+ * Tests StorageSystem by creating a temporary file, writing to it, and reading from it
+ * @author Jaakko
+ */
 
 public class StorageSystemTest {
     private StorageSystem storage;
     private String filename = "testFile.json";
 
+    /**
+     * setup to make tests work
+     */
     @Before
     public void setUp() throws IOException {
         // Set up a test JSON file
@@ -31,13 +38,19 @@ public class StorageSystemTest {
         storage = new StorageSystem(filename);
     }
 
+    /**
+     * deletes the temporary file
+     */
     @After
     public void tearDown() {
         // Clean up the test file
         new File(filename).delete();
     }
-    
 
+
+    /**
+     * Tests readFromFile
+     */
     @Test
     public void testReadFromFile() throws IOException {
         // Execute
@@ -48,6 +61,9 @@ public class StorageSystemTest {
         assertEquals("The location should be 'Raisio'", "Raisio", result.getLocationActive());
     }
 
+    /**
+     * tests WriteToFile
+     */
     @Test
     public void testWriteToFile() throws Exception {
         WeatherAPI api = new WeatherAPI();

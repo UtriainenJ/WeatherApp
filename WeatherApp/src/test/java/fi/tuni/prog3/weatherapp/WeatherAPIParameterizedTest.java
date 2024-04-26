@@ -2,20 +2,18 @@ package fi.tuni.prog3.weatherapp;
 
 import org.junit.Test;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-
-
-
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 
+/**
+ * Junit4 requires parameterized tests to be in a different class, hence the separation
+ * PowerMockito runner does not work simultaniously with parameterizedtests which is why these tests are limited
+ */
 @RunWith(Parameterized.class)
 public class WeatherAPIParameterizedTest {
 
@@ -31,7 +29,9 @@ public class WeatherAPIParameterizedTest {
         this.location = location;
     }
 
-
+    /**
+     * sets parameters for each test
+     */
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
@@ -40,6 +40,9 @@ public class WeatherAPIParameterizedTest {
     }
 
 
+    /**
+     * sets up weather Data without a different file and initializes weatherAPI
+     */
     @Before
     public void setUp() throws Exception{
         wAPI = new WeatherAPI();
@@ -62,20 +65,20 @@ public class WeatherAPIParameterizedTest {
         APIkey = "11";
     }
 
-
-
-
-
+    /**
+     * Tests setLocationActive with set parameters
+     */
     @Test
     public void testSetLocationActive(){
         String result = wAPI.setLocationActive(location).getLocationActive();
         assertEquals("setLocationActive followed by getLocationActive should return '" + location +
                 "' but returned '" + result + "' instead", result, location);
-
     }
 
 
-
+    /**
+     * Tests setLocationActive with set parameters
+     */
     @Test
     public void testAddToFavorites() {
         wAPI.addToFavorites(location);
@@ -86,7 +89,9 @@ public class WeatherAPIParameterizedTest {
                 wAPI.getLocationFavorites().contains(location));
     }
 
-
+    /**
+     * Tests removeFromFavorites with set parameters
+     */
     @Test
     public void testRemoveFromFavorites() {
         wAPI.addToFavorites(location);
@@ -101,6 +106,9 @@ public class WeatherAPIParameterizedTest {
     }
 
 
+    /**
+     * Tests addToHistory
+     */
     @Test
     public void testAddToHistory() {
         wAPI.setLocationActive(location);
@@ -111,10 +119,6 @@ public class WeatherAPIParameterizedTest {
         assertEquals("addToHistory should move '" + location + "' to the front of the history list ",
                 location, wAPI.getLocationHistory().get(0));
     }
-
-
-
-
 }
 
 

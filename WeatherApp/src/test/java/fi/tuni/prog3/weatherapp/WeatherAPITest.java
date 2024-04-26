@@ -14,7 +14,13 @@ import org.junit.runner.RunWith;
 
 import static org.junit.Assert.*;
 
-
+/**
+ * Unit tests for WeatherAPI using Junit4 framework
+ * Data from openweather API is mocked using PowerMockito
+ *
+ *
+ * @author Jaakko
+ */
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({WeatherAPI.class})
@@ -31,7 +37,11 @@ public class WeatherAPITest {
     private String aData;
 
 
-
+    /**
+     * Reads data from mockDat.json and places them in attributes in addition to initializing an instance of WeatherAPI
+     *
+     *
+     */
     @Before
     public void setUp() throws Exception{
         wAPI = new WeatherAPI();
@@ -51,6 +61,13 @@ public class WeatherAPITest {
         mockGetAPIKey();
     }
 
+    /**
+     * mocks the API response by checking if the url is correct and returning corresponding data in json format
+     * @param url1 first url option
+     * @param url2 second url option
+     * @param data1 first data option
+     * @param data2 second data option
+     */
     private void mockHTTPCall(String url1, String url2, String data1, String data2){
         PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "makeHTTPCall", String.class))
                 .with((proxy, method, args) -> {
@@ -65,6 +82,13 @@ public class WeatherAPITest {
                         throw new IllegalArgumentException("Error getting api response.");
                 });
     }
+
+    /**
+     * mocks the API response by checking if the url is correct and returning corresponding data in json format
+     * single url version
+     * @param url first url option
+     * @param data first data option
+     */
     private void mockHTTPCall(String url, String data){
         PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "makeHTTPCall", String.class))
                 .with((proxy, method, args) -> {
@@ -77,13 +101,18 @@ public class WeatherAPITest {
     }
 
 
+    /**
+     * replaces getAPIKey() and returns the testing key
+     */
     private void mockGetAPIKey(){
         PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "getAPIKey"))
                 .with((proxy, method, args) -> APIkey); // only args is actually needed
     }
 
 
-
+    /**
+     * Tests if the weatherAPI gets initialized properly
+     */
     @Test
     public void testWeatherAPIInitialization(){
         assertNull("locationActive should be null", wAPI.getLocationActive());
@@ -95,6 +124,9 @@ public class WeatherAPITest {
         assertTrue("locationHistory should be empty", wAPI.getLocationHistory().isEmpty());
     }
 
+    /**
+     * Tests setLocationActive and getLocationActive
+     */
     @Test
     public void testGetLocationActive(){
         wAPI.setLocationActive("tanpere");
@@ -105,6 +137,9 @@ public class WeatherAPITest {
     }
 
 
+    /**
+     * Tests addToFavorites and getLocationFavorites
+     */
     @Test
     public void testGetLocationFavorites() {
         wAPI.addToFavorites("Helsinki");
@@ -117,6 +152,9 @@ public class WeatherAPITest {
                 result + "' instead", expResult, result);
     }
 
+    /**
+     * Tests addToHistory indirectly via setLocation active and getLocationHistory
+     */
     @Test
     public void testGetLocationHistory() {
         wAPI.setLocationActive("Tampere");
@@ -129,6 +167,9 @@ public class WeatherAPITest {
                 "' instead", expResult, result);
     }
 
+    /**
+     * Tests clearHistory
+     */
     @Test
     public void testClearHistory(){
         wAPI.setLocationActive("Helsinki");
@@ -141,6 +182,9 @@ public class WeatherAPITest {
     }
 
 
+    /**
+     * simulates the API call with mockHTTPCall and tests getCurrentWeather and makeWeatherObject indirectly
+     */
     @Test
     public void testGetCurrentWeather(){
         String url1 = "https://pro.openweathermap.org/data/2.5/weather"
@@ -160,6 +204,9 @@ public class WeatherAPITest {
         assertThrows(IllegalArgumentException.class, () -> wAPI.getCurrentWeather("Kempele"));
     }
 
+    /**
+     * makes sure that mockHTTPCall simulates APIerrors correctly and tests said errors in getCurrentWeather
+     */
     @Test
     public void testAPIError(){
         mockHTTPCall("http://www.yle.fi/~ransu", cData1);
@@ -169,7 +216,9 @@ public class WeatherAPITest {
         assertThrows(IllegalArgumentException.class, () -> wAPI.getCurrentWeather("Zocca"));
     }
 
-
+    /**
+     * simulates the API call with mockHTTPCall and tests getCurrentWeather and makeWeatherObject indirectly
+     */
     @Test
     public void testGetCurrentWeatherCoords(){
         double lon1 = 10.99;
@@ -195,6 +244,10 @@ public class WeatherAPITest {
         assertEquals("Sant'Angelo di Piove di Sacco", wAPI.getCurrentWeather(lat2,lon2).getName());
         assertThrows(IllegalArgumentException.class, () -> wAPI.getCurrentWeather(10,13));
     }
+
+    /**
+     * simulates the API call with mockHTTPCall and tests getCurrentWeather and makeWeatherObject indirectly
+     */
     @Test
     public void testGetCurrentWeatherInvalidCoords(){
         double lat = 91.0; // Invalid latitude
@@ -210,6 +263,9 @@ public class WeatherAPITest {
                 () -> wAPI.getCurrentWeather(lat2, lon2));
     }
 
+    /**
+     * simulates the API call with mockHTTPCall and tests getForecastHourly and makeForecastHourlyObject indirectly
+     */
     @Test
     public void testGetForecastHourlyCoords(){
         double lon1 = 10.99;
@@ -234,6 +290,10 @@ public class WeatherAPITest {
         assertEquals("1011", result1.getMain().getSea_level());
         assertEquals("9", result2.getMain().getTemp());
     }
+
+    /**
+     * simulates the API call with mockHTTPCall and tests getForecastHourly and makeForecastHourlyObject indirectly
+     */
     @Test
     public void testGetForecastHourlyInvalidCoords(){
         double lat1 = 91.0; // Invalid latitude
@@ -249,6 +309,9 @@ public class WeatherAPITest {
                 () -> wAPI.getForecastHourly(lat2, lon2));
     }
 
+    /**
+     * indirectly tests private getLocation method
+     */
     @Test
     public void testGetLocation(){
         String loc = "Zocca";
@@ -270,6 +333,9 @@ public class WeatherAPITest {
         wAPI.getForecastHourly(loc);
     }
 
+    /**
+     * test getAirQuality
+     */
     @Test
     public void testGetAirQuality(){
         double lat = 44.3472;
@@ -281,6 +347,11 @@ public class WeatherAPITest {
         mockHTTPCall(url, aData);
     }
 
+    /**
+     *
+     *   simulates the API call with mockHTTPCall and tests getForecastDaily and makeForecastDailyObject indirectly
+     *
+     */
     @Test
     public void testGetForecastDaily(){
         String loc = "Zocca";
@@ -300,6 +371,10 @@ public class WeatherAPITest {
         assertEquals("3", result.getGust());
     }
 
+    /**
+     * Creates weather and forecast objects and fills them with mock data, then tests getData() and finally makes sure
+     * that unit Methods work correctly as well
+     */
     @Test
     public void testUnits(){
         wAPI.setLocationActive("Zocca");
@@ -350,6 +425,9 @@ public class WeatherAPITest {
 }
 
 
+/**
+ * utility class to read json data from mockData.json
+ */
 
 class FileUtil {
 
