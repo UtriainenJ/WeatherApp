@@ -40,20 +40,21 @@ public class WeatherApp extends Application {
     // Constants
     private final int forecastDays = 5;
     private final int forecastHours = 16;
-    private final int topBarButtonWidth = 150;
-    private final int weatherLabelHeight = 30;
-    private final int weatherTempBarHeight = 80;
-    private final int feelsLikeBarHeight = 30;
-    private final int airQualityBarHeight = 30;
-    private final int moveButtonLength = 40;
-    private final int moveButtonWidth = moveButtonLength;
     private final int maxFavorites = 8;
     private final int maxHistory = 8;
-    private final int searchTextWidth = 200;
+    private final double topBarButtonWidth = 150;
+    private final double weatherLabelHeight = 30;
+    private final double weatherTempBarHeight = 80;
+    private final double feelsLikeBarHeight = 30;
+    private final double airQualityBarHeight = 30;
+    private final double searchTextWidth = 200;
     private final double dailyForecastWidth = 96;
     private final double hourlyForecastWidth = 30;
     private final double rainMeterHeight = 20;
+    private final double asymmetricButtonWidth = 120;
     private final double mapHeight = 240;
+    private final double moveButtonLength = 40;
+    private final double moveButtonWidth = moveButtonLength;
     private final String tempFileName = "temp.json";
     
     // Cell styles
@@ -693,11 +694,13 @@ public class WeatherApp extends Application {
         searchLabel.setPrefWidth(searchTextWidth);
         searchLabel.setAlignment(Pos.CENTER_LEFT);
         searchLabel.setPadding(new Insets(0, 0, 0, 10));
+        searchLayout.add(searchLabel, 0, row);
         var closeButton = new Button("Close"); // Button for closing window
         closeButton.setOnAction((event) -> {searchWindow.close();});
-        closeButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        searchLayout.add(searchLabel, 0, row);
-        searchLayout.add(closeButton, 2, row);
+        closeButton.setPrefSize(asymmetricButtonWidth, 10);
+        var closeButtonContainer = new HBox(closeButton);
+        closeButtonContainer.setAlignment(Pos.CENTER);
+        searchLayout.add(closeButtonContainer, 1, row, 2, 1);
         row++;
         
         // Search status field
@@ -734,6 +737,15 @@ public class WeatherApp extends Application {
         historyLabel.setAlignment(Pos.CENTER_LEFT);
         historyLabel.setPadding(new Insets(0, 0, 0, 10));
         searchLayout.add(historyLabel, 0, row);
+        var clearHistoryButton = new Button("Clear History");
+        clearHistoryButton.setOnAction((event) -> {
+            api.clearBrowsingHistory();
+            updateSearchHistory();
+        });
+        clearHistoryButton.setPrefSize(asymmetricButtonWidth, 10);
+        var clearHistoryContainer = new HBox(clearHistoryButton);
+        clearHistoryContainer.setAlignment(Pos.CENTER);
+        searchLayout.add(clearHistoryContainer, 1, row, 2, 1);
         row++;
         arrayHistoryName = new Label[maxHistory];
         arrayHistorySelect = new Button[maxHistory];
