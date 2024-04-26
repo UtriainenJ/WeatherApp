@@ -1,5 +1,6 @@
 package fi.tuni.prog3.weatherapp;
 
+import javafx.util.Pair;
 import org.junit.Test;
 import org.junit.Before;
 
@@ -26,8 +27,7 @@ public class WeatherAPITest {
     private String hData1;
     private String hData2;
     private String APIkey;
-
-
+    private String locData;
 
 
 
@@ -40,11 +40,35 @@ public class WeatherAPITest {
         cData2 = FileUtil.readJsonLines(mockDataPath).get(1);
         hData1 = FileUtil.readJsonLines(mockDataPath).get(2);
         hData2 = FileUtil.readJsonLines(mockDataPath).get(3);
+        locData = FileUtil.readJsonLines(mockDataPath).get(4);
 
         APIkey = "11";
 
         mockGetAPIKey();
         mockGetAirQuality(); // mock value used for testing other methods, airquality is tested separately
+    }
+
+    private void mockHTTPCall(String url1, String url2, String data1, String data2){
+        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "makeHTTPCall", String.class))
+                .with((proxy, method, args) -> {
+                    String url = (String) args[0];
+
+                    if (url.equals(url1)) {
+                        return data1;
+                    } else if (url.equals(url2)) {
+                        return data2;
+                    }
+                    return "{}";
+                });
+    }
+    private void mockHTTPCall(String url, String data){
+        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "makeHTTPCall", String.class))
+                .with((proxy, method, args) -> {
+                    if (url.equals((String) args[0])) {
+                        return data;
+                    }
+                    return "{}";
+                });
     }
 
 
@@ -141,23 +165,13 @@ public class WeatherAPITest {
 
 
     @Test
-    public void testGetCurrentWeather() throws Exception {
+    public void testGetCurrentWeather(){
         String url1 = "https://pro.openweathermap.org/data/2.5/weather"
                 + "?q=" + "Zocca" + "&appid=" + APIkey + "&units=" + "null";
         String url2 = "https://pro.openweathermap.org/data/2.5/weather"
                 + "?q=" + "Sant'Angelo di Piove di Sacco" + "&appid=" + APIkey + "&units=" + "null";
 
-        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "makeHTTPCall", String.class))
-                .with((proxy, method, args) -> {
-                    String url = (String) args[0];
-
-                    if (url.equals(url1)) {
-                        return cData1;
-                    } else if (url.equals(url2)) {
-                        return cData2;
-                    }
-                    return "{}";
-                });
+        mockHTTPCall(url1, url2, cData1, cData2);
 
         assertEquals("Zocca",wAPI.getCurrentWeather("Zocca").getName());
         assertEquals("Poor",wAPI.getCurrentWeather("Zocca").getAirQuality());
@@ -170,7 +184,7 @@ public class WeatherAPITest {
 
 
     @Test
-    public void testGetCurrentWeatherCoords() throws Exception {
+    public void testGetCurrentWeatherCoords(){
         double lon1 = 10.99;
         double lat1 = 44.34;
         double lon2 = 11.99;
@@ -184,18 +198,7 @@ public class WeatherAPITest {
                 + "?lat=" + String.format(Locale.US,"%.4f",lat2) + "&lon=" +
                 String.format(Locale.US,"%.4f",lon2) + "&appid=" + APIkey + "&units=" + "null";
 
-
-        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "makeHTTPCall", String.class))
-                .with((proxy, method, args) -> {
-                    String url = (String) args[0];
-
-                    if (url.equals(url1)) {
-                        return cData1;
-                    } else if (url.equals(url2)) {
-                        return cData2;
-                    }
-                    return "{}";
-                });
+        mockHTTPCall(url1, url2, cData1, cData2);
 
         assertEquals("Zocca",wAPI.getCurrentWeather(lat1,lon1 ).getName());
         assertEquals("Poor",wAPI.getCurrentWeather(lat1,lon1).getAirQuality());
@@ -203,16 +206,22 @@ public class WeatherAPITest {
 
     }
     @Test
-    public void testGetCurrentWeather_invalidCoords() throws Exception {
+    public void testGetCurrentWeatherInvalidCoords(){
         double lat = 91.0; // Invalid latitude
         double lon = -74.0060; // Valid longitude
 
         assertThrows("Should throw an exception with invalid coords", IllegalStateException.class,
                 () -> wAPI.getCurrentWeather(lat,lon ));
+
+        double lat2 = 90.0; // Edge case
+        double lon2 = -180.0060;
+
+        assertThrows("Should throw an exception with invalid coords", IllegalStateException.class,
+                () -> wAPI.getCurrentWeather(lat2, lon2));
     }
 
     @Test
-    public void testGetForecastHourly() throws Exception {
+    public void testGetForecastHourlyCoords(){
         double lon1 = 10.99;
         double lat1 = 44.34;
         double lon2 = 11.99;
@@ -226,26 +235,57 @@ public class WeatherAPITest {
                 + "?lat=" + String.format(Locale.US,"%.4f",lat2) + "&lon=" +
                 String.format(Locale.US,"%.4f",lon2) + "&appid=" + APIkey + "&units=null";
 
-        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "makeHTTPCall", String.class))
-                .with((proxy, method, args) -> {
-                    String url = (String) args[0];
+        mockHTTPCall(url1, url2, hData1, hData2);
 
-                    if (url.equals(url1)) {
-                        return hData1;
-                    } else if (url.equals(url2)) {
-                        return hData2;
-                    }
-                    return "{}";
-                });
         ForecastDataHourly.WeatherEntry result1 = wAPI.getForecastHourly(lat1, lon1).getList().get(0);
-        ForecastDataHourly.WeatherEntry result2 = wAPI.getForecastHourly(lat1, lon1).getList().get(0);
+        ForecastDataHourly.WeatherEntry result2 = wAPI.getForecastHourly(lat2, lon2).getList().get(0);
 
         assertEquals("3", result1.getMain().getTemp());
-
-
         assertEquals("1011", result1.getMain().getSea_level());
+        assertEquals("9", result2.getMain().getTemp());
+    }
+    @Test
+    public void testGetForecastHourlyInvalidCoords(){
+        double lat1 = 91.0; // Invalid latitude
+        double lon1 = -74.0060; // Valid longitude
+
+        assertThrows("Should throw an exception with invalid coords", IllegalStateException.class,
+                () -> wAPI.getForecastHourly(lat1,lon1));
+
+        double lat2 = 90.0; // Edge case
+        double lon2 = -180.0060;
+
+        assertThrows("Should throw an exception with invalid coords", IllegalStateException.class,
+                () -> wAPI.getForecastHourly(lat2, lon2));
     }
 
+    @Test
+    public void testGetLocation(){
+        String loc = "Zocca";
+
+        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "getLocation"))
+                .with((proxy, method, args) -> (new Pair<>(44.3472,10.9904)));
+
+        PowerMockito.replace(PowerMockito.method(WeatherAPI.class, "getForecastHourly",
+                        double.class, double.class)).with((proxy, method, args) -> {
+                            double lat = (double)args[0];
+                            double lon = (double)args[1];
+
+                            //checks if coordinates fetched correctly
+                            assertEquals(44.3472,lat, 0.001);
+                            assertEquals(10.9904, lon, 0.001);
+                            return new ForecastDataHourly();
+                        });
+
+        ForecastDataHourly result = wAPI.getForecastHourly(loc);
+
+
+    }
+
+    @Test
+    public void testGetForecastDaily(){
+
+    }
 
 
 /*
