@@ -17,7 +17,6 @@ public class ForecastDataDaily {
     
     private City city;
     private String cod;
-    private Double message;
     private Integer cnt;
     private List<WeatherEntry> list;
     
@@ -65,7 +64,6 @@ public class ForecastDataDaily {
      * Contains info on city
      */
     public static class City {
-        private Integer id;
         private String name;
         private Coord coord;
         private String country;
@@ -114,7 +112,7 @@ public class ForecastDataDaily {
     }
 
     /**
-     * Class city containing coordinate data
+     * Class containing coordinate data
      */
     public static class Coord {
         private Double lon;
@@ -137,6 +135,9 @@ public class ForecastDataDaily {
         }
     }
 
+    /**
+     * Class containing weather data
+     */
     public static class WeatherEntry {
         private Long dt;
         private Long sunrise;
